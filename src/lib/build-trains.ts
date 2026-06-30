@@ -89,8 +89,8 @@ export async function discoverTrainSlugsForBuild(): Promise<string[]> {
   }
 
   const numbers = getTrainNumbersFromFile();
-  const concurrency = Number(process.env.TRAIN_BUILD_CONCURRENCY ?? "30");
-  const batchDelayMs = Number(process.env.TRAIN_BUILD_DELAY_MS ?? "20");
+  const concurrency = Number(process.env.TRAIN_BUILD_CONCURRENCY ?? "20");
+  const batchDelayMs = Number(process.env.TRAIN_BUILD_DELAY_MS ?? "100");
 
   console.log(
     `[train-schedule] Discovering slugs for ${numbers.length} trains (concurrency: ${concurrency}, delay: ${batchDelayMs}ms)...`,
