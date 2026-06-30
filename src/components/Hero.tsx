@@ -50,7 +50,7 @@ export default function Hero() {
             <div className="relative w-48 sm:w-56 drop-shadow-2xl rotate-[-4deg] translate-y-4">
               <div className="rounded-[2.5rem] overflow-hidden border-4 border-white/20 bg-gray-900 shadow-2xl">
                 <Image
-                  src="/images/screenshot-home.png"
+                  src="/images/screenshot-route-search.png"
                   alt="Train Dekho home screen – search trains by route or number"
                   width={360}
                   height={720}
@@ -62,7 +62,7 @@ export default function Hero() {
             <div className="relative w-48 sm:w-56 drop-shadow-2xl rotate-[3deg]">
               <div className="rounded-[2.5rem] overflow-hidden border-4 border-white/20 bg-gray-900 shadow-2xl">
                 <Image
-                  src="/images/screenshot-train.png"
+                  src="/images/screenshot-live-tracking.png"
                   alt="Train Dekho live status screen – real-time train position and delay info"
                   width={360}
                   height={720}

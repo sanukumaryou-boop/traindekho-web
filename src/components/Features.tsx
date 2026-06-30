@@ -8,74 +8,48 @@ const features = [
         />
       </svg>
     ),
-    title: "Live Train Position",
+    title: "Live Train Tracking",
     description:
-      "See exactly where your train is right now on the map. Updated every few minutes with GPS-assisted tracking.",
+      "Real-time running status with last crossed station, delay in minutes, and a station-by-station timeline with actual vs. scheduled times.",
   },
   {
     icon: (
       <svg viewBox="0 0 24 24" fill="none" className="w-7 h-7">
         <path
-          d="M12 1L3 5v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V5l-9-4zm-2 16l-4-4 1.41-1.41L10 14.17l6.59-6.59L18 9l-8 8z"
+          d="M15.5 14h-.79l-.28-.27A6.471 6.471 0 0016 9.5 6.5 6.5 0 109.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C8.01 14 6 11.99 6 9.5S8.01 5 10.5 5 15 7.01 15 9.5 12.99 14 10.5 14z"
           fill="currentColor"
         />
       </svg>
     ),
-    title: "Station-by-Station Schedule",
+    title: "Route Search for Stations",
     description:
-      "View scheduled and actual arrival/departure times for every stop — including minor halts most apps skip.",
+      "Search trains between any origin and destination, or find a train by name or number. Recent searches are saved for quick access.",
   },
   {
     icon: (
       <svg viewBox="0 0 24 24" fill="none" className="w-7 h-7">
         <path
-          d="M11.99 2C6.47 2 2 6.48 2 12s4.47 10 9.99 10C17.52 22 22 17.52 22 12S17.52 2 11.99 2zM12 20c-4.42 0-8-3.58-8-8s3.58-8 8-8 8 3.58 8 8-3.58 8-8 8zm.5-13H11v6l5.25 3.15.75-1.23-4.5-2.67V7z"
+          d="M16 6l2.29 2.29-4.88 4.88-4-4L2 16.59 3.41 18l6-6 4 4 6.3-6.29L22 12V6h-6z"
           fill="currentColor"
         />
       </svg>
     ),
-    title: "Real-Time Delay Alerts",
+    title: "Alternative Trains",
     description:
-      "Get instant notifications when your train is delayed — with exact minutes and the reason when available.",
+      "When no direct train is available, discover connecting routes with boarding/alighting stations, duration, running days, and stop count.",
   },
   {
     icon: (
       <svg viewBox="0 0 24 24" fill="none" className="w-7 h-7">
         <path
-          d="M4 6H2v14c0 1.1.9 2 2 2h14v-2H4V6zm16-4H8c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zm-1 9H9V9h10v2zm-4 4H9v-2h6v2zm4-8H9V5h10v2z"
+          d="M11.99 2C6.47 2 2 6.48 2 12s4.47 10 9.99 10C17.52 22 22 17.52 22 12S17.52 2 11.99 2zm6.93 6h-2.95a15.65 15.65 0 00-1.38-3.56A8.03 8.03 0 0117.93 8zM12 4.04c.83 1.2 1.48 2.53 1.91 3.96h-3.82c.43-1.43 1.08-2.76 1.91-3.96zM4.26 14C4.1 13.36 4 12.69 4 12s.1-1.36.26-2h3.38c-.08.66-.14 1.32-.14 2s.06 1.34.14 2H4.26zm.82 2h2.95c.32 1.25.78 2.45 1.38 3.56A7.987 7.987 0 015.08 16zm2.95-8H5.08a7.987 7.987 0 014.33-3.56A15.65 15.65 0 008.03 8zM12 19.96c-.83-1.2-1.48-2.53-1.91-3.96h3.82c-.43 1.43-1.08 2.76-1.91 3.96zM14.34 14H9.66c-.09-.66-.16-1.32-.16-2s.07-1.35.16-2h4.68c.09.65.16 1.32.16 2s-.07 1.34-.16 2zm.25 5.56c.6-1.11 1.06-2.31 1.38-3.56h2.95a8.03 8.03 0 01-4.33 3.56zM16.36 14c.08-.66.14-1.32.14-2s-.06-1.34-.14-2h3.38c.16.64.26 1.31.26 2s-.1 1.36-.26 2h-3.38z"
           fill="currentColor"
         />
       </svg>
     ),
-    title: "Train Search by Name or Number",
+    title: "Multilang Support",
     description:
-      "Instantly find any train by its 5-digit number or partial name. Results show source, destination and key stops.",
-  },
-  {
-    icon: (
-      <svg viewBox="0 0 24 24" fill="none" className="w-7 h-7">
-        <path
-          d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-7 3c1.93 0 3.5 1.57 3.5 3.5S13.93 13 12 13s-3.5-1.57-3.5-3.5S10.07 6 12 6zm7 13H5v-.23c0-.62.28-1.2.76-1.58C7.47 15.82 9.64 15 12 15s4.53.82 6.24 2.19c.48.38.76.97.76 1.58V19z"
-          fill="currentColor"
-        />
-      </svg>
-    ),
-    title: "Recent Searches",
-    description:
-      "Your most recently checked trains are saved locally so you can re-check status with a single tap.",
-  },
-  {
-    icon: (
-      <svg viewBox="0 0 24 24" fill="none" className="w-7 h-7">
-        <path
-          d="M17 12h-5v5h5v-5zM16 1v2H8V1H6v2H5c-1.11 0-1.99.9-1.99 2L3 19c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2h-1V1h-2zm3 18H5V8h14v11z"
-          fill="currentColor"
-        />
-      </svg>
-    ),
-    title: "Running Days & Frequency",
-    description:
-      "Check which days a train runs, so you never show up at the station for a train that doesn't operate today.",
+      "Switch between Hindi and English — station names, status updates, and the full interface in the language you prefer.",
   },
 ];
 
@@ -103,7 +77,7 @@ export default function Features() {
           </p>
         </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
           {features.map((f) => (
             <div
               key={f.title}

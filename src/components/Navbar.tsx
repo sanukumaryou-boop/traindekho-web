@@ -20,8 +20,8 @@ export default function Navbar() {
             </span>
           </Link>
           <nav className="hidden md:flex items-center gap-8 text-sm font-medium text-gray-600">
-            <a href="#features" className="hover:text-blue-600 transition-colors">Features</a>
-            <a href="#screenshots" className="hover:text-blue-600 transition-colors">Screenshots</a>
+            <Link href="/#features" className="hover:text-blue-600 transition-colors">Features</Link>
+            <Link href="/#preview" className="hover:text-blue-600 transition-colors">Preview</Link>
             <Link href="/train-schedule" className="hover:text-blue-600 transition-colors">Train Schedule</Link>
           </nav>
           <a

@@ -26,9 +26,9 @@ export default function Footer() {
 
           {/* Links */}
           <nav className="flex flex-wrap gap-6 text-sm" aria-label="Footer navigation">
-            <a href="#features" className="hover:text-white transition-colors">Features</a>
-            <a href="#screenshots" className="hover:text-white transition-colors">Screenshots</a>
-            <a href="#download" className="hover:text-white transition-colors">Download</a>
+            <Link href="/#features" className="hover:text-white transition-colors">Features</Link>
+            <Link href="/#preview" className="hover:text-white transition-colors">Preview</Link>
+            <Link href="/#download" className="hover:text-white transition-colors">Download</Link>
             <Link href="/privacy" className="hover:text-white transition-colors">Privacy Policy</Link>
             <Link href="/terms" className="hover:text-white transition-colors">Terms of Use</Link>
             <Link href="/contact" className="hover:text-white transition-colors">Contact</Link>

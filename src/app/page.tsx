@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import Navbar from "@/components/Navbar";
 import Hero from "@/components/Hero";
 import Features from "@/components/Features";
-import Screenshots from "@/components/Screenshots";
+import Preview from "@/components/Preview";
 import HowItWorks from "@/components/HowItWorks";
 import DownloadCTA from "@/components/DownloadCTA";
 import Footer from "@/components/Footer";
@@ -44,8 +44,10 @@ const jsonLd = {
         ratingCount: "10000",
       },
       screenshot: [
-        "https://traindekho.live/images/screenshot-home.png",
-        "https://traindekho.live/images/screenshot-train.png",
+        "https://traindekho.live/images/screenshot-live-tracking.png",
+        "https://traindekho.live/images/screenshot-route-search.png",
+        "https://traindekho.live/images/screenshot-alternative-trains.png",
+        "https://traindekho.live/images/screenshot-multilang.png",
       ],
     },
     {
@@ -70,7 +72,7 @@ export default function HomePage() {
       <main>
         <Hero />
         <Features />
-        <Screenshots />
+        <Preview />
         <HowItWorks />
         <DownloadCTA />
       </main>
