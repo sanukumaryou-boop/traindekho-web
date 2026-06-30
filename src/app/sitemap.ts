@@ -1,31 +1,49 @@
 import type { MetadataRoute } from "next";
+import { discoverTrainSlugsForSitemap } from "@/lib/build-trains";
 
-export default function sitemap(): MetadataRoute.Sitemap {
+export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const base = "https://traindekho.live";
-  return [
+  const now = new Date();
+
+  const staticPages: MetadataRoute.Sitemap = [
     {
       url: base,
-      lastModified: new Date(),
+      lastModified: now,
       changeFrequency: "monthly",
       priority: 1,
     },
     {
       url: `${base}/privacy`,
-      lastModified: new Date(),
+      lastModified: now,
       changeFrequency: "yearly",
       priority: 0.3,
     },
     {
       url: `${base}/terms`,
-      lastModified: new Date(),
+      lastModified: now,
       changeFrequency: "yearly",
       priority: 0.3,
     },
     {
       url: `${base}/contact`,
-      lastModified: new Date(),
+      lastModified: now,
       changeFrequency: "yearly",
       priority: 0.3,
     },
   ];
+
+  let trainPages: MetadataRoute.Sitemap = [];
+  try {
+    const slugs = await discoverTrainSlugsForSitemap();
+    trainPages = slugs.map((slug) => ({
+      url: `${base}/train-schedule/${slug}`,
+      lastModified: now,
+      changeFrequency: "weekly" as const,
+      priority: 0.8,
+    }));
+  } catch {
+    // API unavailable during build — static pages still included
+  }
+
+  return [...staticPages, ...trainPages];
 }
