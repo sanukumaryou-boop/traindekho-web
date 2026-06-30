@@ -83,10 +83,10 @@ async function fetchSlugsInBatches(
 
 export async function discoverTrainSlugsForBuild(): Promise<string[]> {
   const cached = readSlugCache();
-  if (cached) {
-    console.log(`[train-schedule] Using cached ${cached.length} slugs`);
-    return cached;
-  }
+  // if (cached) {
+  //   console.log(`[train-schedule] Using cached ${cached.length} slugs`);
+  //   return cached;
+  // }
 
   const numbers = getTrainNumbersFromFile();
   const concurrency = Number(process.env.TRAIN_BUILD_CONCURRENCY ?? "20");
