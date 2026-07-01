@@ -3,6 +3,7 @@ import Link from "next/link";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import TrainSearch from "@/components/TrainSearch";
+import TrainScheduleActions from "@/components/train-schedule/TrainScheduleActions";
 
 export const metadata: Metadata = {
   title: "Train Schedule",
@@ -26,9 +27,9 @@ export default function TrainScheduleSearchPage() {
   return (
     <>
       <Navbar />
-      <main className="pt-24 pb-20">
+      <main className="pt-20 pb-16 min-h-screen bg-gradient-to-b from-blue-50/40 via-white to-white">
         <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
-          <nav className="text-sm text-gray-500 mb-6" aria-label="Breadcrumb">
+          <nav className="text-xs text-gray-500 mb-3" aria-label="Breadcrumb">
             <ol className="flex flex-wrap items-center gap-1.5">
               <li>
                 <Link href="/" className="hover:text-blue-600 transition-colors">
@@ -36,50 +37,39 @@ export default function TrainScheduleSearchPage() {
                 </Link>
               </li>
               <li aria-hidden="true">/</li>
-              <li className="text-gray-900 font-medium">Train Schedule</li>
+              <li className="text-gray-700 font-medium">Train Schedule</li>
             </ol>
           </nav>
 
-          <header className="mb-8 text-center">
-            <div className="inline-flex items-center justify-center w-14 h-14 rounded-2xl bg-blue-50 text-blue-600 mb-5">
-              <ScheduleIcon className="w-7 h-7" />
+          <h1 className="text-2xl sm:text-3xl font-extrabold text-gray-900 tracking-tight mb-5">
+            Train Schedule
+          </h1>
+
+          <section className="bg-white rounded-2xl border border-gray-200/80 shadow-sm overflow-hidden">
+            <div className="p-5 sm:p-6">
+              <TrainSearch variant="page" />
             </div>
-            <h1 className="text-3xl sm:text-4xl font-extrabold text-gray-900 tracking-tight mb-3">
-              Train Schedule
-            </h1>
-            <p className="text-lg text-gray-500 max-w-lg mx-auto">
-              Enter a train number to see its full route, station timings, running
-              days, and distance.
-            </p>
-          </header>
 
-          <section className="bg-white rounded-2xl border border-gray-200 shadow-sm p-6 sm:p-8 mb-8">
-            <TrainSearch variant="page" />
-
-            <div className="mt-8 pt-8 border-t border-gray-100">
-              <h2 className="text-sm font-bold text-gray-900 mb-1">Popular trains</h2>
-              <p className="text-sm text-gray-500 mb-4">
-                Tap a train to view its schedule instantly.
-              </p>
-              <ul className="divide-y divide-gray-100 rounded-xl border border-gray-100 overflow-hidden">
+            <div className="border-t border-gray-100 bg-gray-50/60 px-5 sm:px-6 py-4 sm:py-5">
+              <h2 className="text-xs font-semibold uppercase tracking-wider text-gray-500 mb-3">
+                Popular trains
+              </h2>
+              <ul className="grid grid-cols-1 sm:grid-cols-2 gap-2">
                 {POPULAR_TRAINS.map((train) => (
                   <li key={train.no}>
                     <Link
                       href={`/train-schedule/${train.no}`}
-                      className="flex items-center justify-between gap-4 px-4 py-3.5 bg-white hover:bg-blue-50/60 transition-colors group"
+                      className="flex items-center justify-between gap-3 rounded-xl border border-gray-100 bg-white px-3.5 py-2.5 hover:border-blue-200 hover:bg-blue-50/50 transition-colors group"
                     >
-                      <div className="min-w-0">
-                        <p className="font-mono text-base font-bold text-blue-600 group-hover:text-blue-700">
+                      <div className="min-w-0 flex items-center gap-2.5">
+                        <span className="font-mono text-sm font-bold text-blue-600 shrink-0">
                           {train.no}
-                        </p>
-                        <p className="text-sm font-medium text-gray-900 truncate">
+                        </span>
+                        <span className="text-sm text-gray-700 truncate group-hover:text-gray-900">
                           {train.name}
-                        </p>
+                        </span>
                       </div>
-                      <div className="flex items-center gap-2 shrink-0 text-sm text-gray-500">
-                        <span className="hidden sm:inline">{train.route}</span>
-                        <ChevronIcon className="w-4 h-4 text-gray-400 group-hover:text-blue-600" />
-                      </div>
+                      <ChevronIcon className="w-4 h-4 text-gray-300 group-hover:text-blue-500 shrink-0" />
                     </Link>
                   </li>
                 ))}
@@ -87,51 +77,13 @@ export default function TrainScheduleSearchPage() {
             </div>
           </section>
 
-          <section className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-            {[
-              {
-                step: "1",
-                title: "Enter train number",
-                text: "Type the 4–5 digit number from your ticket or enquiry.",
-              },
-              {
-                step: "2",
-                title: "View full route",
-                text: "See every halt with arrival, departure, and platform info.",
-              },
-              {
-                step: "3",
-                title: "Plan your journey",
-                text: "Check running days, distance, and total travel time.",
-              },
-            ].map((item) => (
-              <div
-                key={item.step}
-                className="rounded-xl border border-gray-100 bg-gray-50 p-4 text-center sm:text-left"
-              >
-                <span className="inline-flex h-8 w-8 items-center justify-center rounded-full bg-blue-600 text-white text-sm font-bold mb-3">
-                  {item.step}
-                </span>
-                <h2 className="text-sm font-bold text-gray-900 mb-1">{item.title}</h2>
-                <p className="text-sm text-gray-500 leading-relaxed">{item.text}</p>
-              </div>
-            ))}
-          </section>
+          <div className="mt-6">
+            <TrainScheduleActions showSearch={false} />
+          </div>
         </div>
       </main>
       <Footer />
     </>
-  );
-}
-
-function ScheduleIcon({ className }: { className?: string }) {
-  return (
-    <svg viewBox="0 0 24 24" fill="none" className={className} aria-hidden="true">
-      <path
-        d="M17 12h-5v5h5v-5zM16 1v2H8V1H6v2H5c-1.11 0-1.99.9-1.99 2L3 19c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2h-1V1h-2zm3 18H5V8h14v11z"
-        fill="currentColor"
-      />
-    </svg>
   );
 }
 

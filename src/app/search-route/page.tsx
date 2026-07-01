@@ -16,11 +16,7 @@ export default function SearchRoutePage() {
   return (
     <>
       <Navbar />
-      <ComingSoon
-        title="Search Route"
-        breadcrumb="Search Route"
-        description="Find trains between any origin and destination, with direct and alternative route options."
-      />
+      <ComingSoon title="Search Route" breadcrumb="Search Route" />
       <Footer />
     </>
   );

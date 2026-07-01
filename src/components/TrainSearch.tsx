@@ -22,19 +22,20 @@ export default function TrainSearch({ variant = "default" }: TrainSearchProps) {
   const [open, setOpen] = useState(false);
   const [activeIndex, setActiveIndex] = useState(-1);
   const [searching, setSearching] = useState(false);
+  const [pendingTrainNo, setPendingTrainNo] = useState<number | null>(null);
 
   const isPage = variant === "page";
 
   const navigateToTrain = useCallback(
     (trainNo: number | string) => {
       const digits = String(trainNo).replace(/\D/g, "");
-      if (!digits) return;
+      if (!digits || loading) return;
       setError("");
       setLoading(true);
-      setOpen(false);
+      setPendingTrainNo(Number(digits));
       router.push(`/train-schedule/${digits}`);
     },
-    [router],
+    [router, loading],
   );
 
   useEffect(() => {
@@ -75,6 +76,7 @@ export default function TrainSearch({ variant = "default" }: TrainSearchProps) {
 
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
+      if (loading) return;
       if (!containerRef.current?.contains(event.target as Node)) {
         setOpen(false);
         setActiveIndex(-1);
@@ -83,7 +85,7 @@ export default function TrainSearch({ variant = "default" }: TrainSearchProps) {
 
     document.addEventListener("mousedown", handleClickOutside);
     return () => document.removeEventListener("mousedown", handleClickOutside);
-  }, []);
+  }, [loading]);
 
   function handleSubmit(e: FormEvent<HTMLFormElement>) {
     e.preventDefault();
@@ -119,7 +121,6 @@ export default function TrainSearch({ variant = "default" }: TrainSearchProps) {
   }
 
   function handleSelect(train: TrainListItem) {
-    setQuery(String(train.train_no));
     navigateToTrain(train.train_no);
   }
 
@@ -148,9 +149,9 @@ export default function TrainSearch({ variant = "default" }: TrainSearchProps) {
     <form onSubmit={handleSubmit} className="w-full">
       <label
         htmlFor="train-search"
-        className="block text-sm font-semibold text-gray-700 mb-2"
+        className={`block font-semibold text-gray-700 mb-2 ${isPage ? "text-xs uppercase tracking-wider text-gray-500" : "text-sm"}`}
       >
-        Train number or name
+        {isPage ? "Search" : "Train number or name"}
       </label>
       <div className={isPage ? "flex flex-col gap-3" : "flex flex-col sm:flex-row gap-3"}>
         <div ref={containerRef} className={isPage ? "relative w-full" : "relative flex-1"}>
@@ -197,37 +198,51 @@ export default function TrainSearch({ variant = "default" }: TrainSearchProps) {
               role="listbox"
               className="absolute z-30 mt-2 w-full max-h-72 overflow-y-auto rounded-xl border border-gray-200 bg-white shadow-lg py-1"
             >
-              {results.map((train, index) => (
-                <li
-                  key={train.id}
-                  id={`${listboxId}-option-${index}`}
-                  role="option"
-                  aria-selected={index === activeIndex}
-                >
-                  <button
-                    type="button"
-                    onMouseDown={(e) => e.preventDefault()}
-                    onClick={() => handleSelect(train)}
-                    className={`w-full px-4 py-3 text-left transition-colors ${
-                      index === activeIndex ? "bg-blue-50" : "hover:bg-gray-50"
-                    }`}
+              {results.map((train, index) => {
+                const isNavigating = loading && pendingTrainNo === train.train_no;
+
+                return (
+                  <li
+                    key={train.id}
+                    id={`${listboxId}-option-${index}`}
+                    role="option"
+                    aria-selected={index === activeIndex}
                   >
-                    <div className="flex items-start justify-between gap-3">
-                      <div className="min-w-0">
-                        <p className="font-mono text-sm font-bold text-blue-600">
-                          {train.train_no}
-                        </p>
-                        <p className="text-sm font-medium text-gray-900 truncate">
-                          {titleCase(train.train_name)}
+                    <button
+                      type="button"
+                      disabled={loading}
+                      onMouseDown={(e) => {
+                        e.preventDefault();
+                        handleSelect(train);
+                      }}
+                      className={`w-full px-4 py-3 text-left transition-colors disabled:cursor-wait ${
+                        isNavigating || index === activeIndex
+                          ? "bg-blue-50"
+                          : "hover:bg-gray-50"
+                      }`}
+                    >
+                      <div className="flex items-start justify-between gap-3">
+                        <div className="min-w-0 flex items-start gap-2">
+                          {isNavigating && (
+                            <Spinner className="w-4 h-4 text-blue-600 mt-0.5 shrink-0" />
+                          )}
+                          <div className="min-w-0">
+                            <p className="font-mono text-sm font-bold text-blue-600">
+                              {train.train_no}
+                            </p>
+                            <p className="text-sm font-medium text-gray-900 truncate">
+                              {titleCase(train.train_name)}
+                            </p>
+                          </div>
+                        </div>
+                        <p className="shrink-0 text-xs text-gray-500 pt-0.5">
+                          {train.source_code ?? "—"} → {train.destination_code ?? "—"}
                         </p>
                       </div>
-                      <p className="shrink-0 text-xs text-gray-500 pt-0.5">
-                        {train.source_code ?? "—"} → {train.destination_code ?? "—"}
-                      </p>
-                    </div>
-                  </button>
-                </li>
-              ))}
+                    </button>
+                  </li>
+                );
+              })}
             </ul>
           )}
         </div>

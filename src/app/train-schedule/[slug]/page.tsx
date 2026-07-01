@@ -8,12 +8,11 @@ import ScheduleTable, {
 } from "@/components/train-schedule/ScheduleTable";
 import RouteOverview from "@/components/train-schedule/RouteOverview";
 import RunningDays from "@/components/train-schedule/RunningDays";
-import TrainSearch from "@/components/TrainSearch";
+import TrainScheduleActions from "@/components/train-schedule/TrainScheduleActions";
 import { fetchTrainByNumber } from "@/lib/api/trains";
 import { discoverTrainSlugsForBuild } from "@/lib/build-trains";
 import {
   formatDuration,
-  formatRunningDays,
   formatScheduleTime,
   titleCase,
 } from "@/lib/format";
@@ -150,9 +149,6 @@ export default async function TrainSchedulePage({ params }: PageProps) {
     permanentRedirect(`/train-schedule/${canonicalSlug}`);
   }
 
-  const firstStop = train.schedule[0];
-  const lastStop = train.schedule[train.schedule.length - 1];
-
   return (
     <>
       <script
@@ -162,9 +158,9 @@ export default async function TrainSchedulePage({ params }: PageProps) {
         }}
       />
       <Navbar />
-      <main className="pt-24 pb-20 bg-gray-50/50">
+      <main className="pt-20 pb-16 bg-gray-50/50">
         <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
-          <nav className="text-sm text-gray-500 mb-6" aria-label="Breadcrumb">
+          <nav className="text-xs text-gray-500 mb-3" aria-label="Breadcrumb">
             <ol className="flex flex-wrap items-center gap-1.5">
               <li>
                 <Link href="/" className="hover:text-blue-600 transition-colors">
@@ -181,30 +177,20 @@ export default async function TrainSchedulePage({ params }: PageProps) {
                 </Link>
               </li>
               <li aria-hidden="true">/</li>
-              <li className="text-gray-900 font-medium">{train.train_no}</li>
+              <li className="text-gray-700 font-medium">{train.train_no}</li>
             </ol>
           </nav>
 
-          <header className="mb-8">
-            <div className="flex flex-wrap items-center gap-2 sm:gap-3 mb-4">
-              <span className="inline-flex items-center rounded-full bg-blue-600 text-white text-xs font-bold px-3 py-1">
-                {train.train_no}
-              </span>
-              <span className="inline-flex items-center rounded-full bg-white border border-gray-200 text-gray-600 text-xs font-medium px-3 py-1">
+          <header className="mb-6">
+            <h1 className="text-2xl sm:text-3xl font-extrabold text-gray-900 tracking-tight leading-tight">
+              <span className="font-mono text-blue-600">{train.train_no}</span>
+              <span className="text-gray-300 mx-2 font-normal">·</span>
+              {titleCase(train.train_name)}
+            </h1>
+            <div className="flex flex-wrap items-center gap-2 mt-3">
+              <span className="inline-flex items-center rounded-md bg-white border border-gray-200 text-gray-600 text-xs font-medium px-2.5 py-1">
                 {train.train_type}
               </span>
-              <span className="inline-flex items-center rounded-full bg-white border border-gray-200 text-gray-600 text-xs font-medium px-3 py-1">
-                {formatRunningDays(train.days_of_run)}
-              </span>
-            </div>
-            <h1 className="text-3xl sm:text-4xl font-extrabold text-gray-900 tracking-tight mb-4">
-              {titleCase(train.train_name)} Schedule
-            </h1>
-            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-              <p className="text-gray-500">
-                {formatDuration(train.total_duration)} · {train.total_distance} ·{" "}
-                {train.total_number_of_stops} stops
-              </p>
               <RunningDays days={train.days_of_run} />
             </div>
           </header>
@@ -217,49 +203,18 @@ export default async function TrainSchedulePage({ params }: PageProps) {
             <TrainSummary train={train} />
           </section>
 
-          <section className="mb-10">
-            <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-3 mb-5">
-              <div>
-                <h2 className="text-xl font-bold text-gray-900">
-                  Station-wise Schedule
-                </h2>
-                <p className="text-sm text-gray-500 mt-1">
-                  {firstStop?.stationName} → {lastStop?.stationName} ·{" "}
-                  {train.schedule.length} stations
-                </p>
-              </div>
+          <section className="mb-8">
+            <div className="flex items-center justify-between gap-3 mb-4">
+              <h2 className="text-lg font-bold text-gray-900">Station-wise Schedule</h2>
+              <span className="text-xs text-gray-500 shrink-0">
+                {train.schedule.length} stations
+              </span>
             </div>
             <ScheduleTable schedule={train.schedule} />
           </section>
 
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            <section className="rounded-2xl border border-gray-200 bg-white p-6 sm:p-8 shadow-sm">
-              <h2 className="text-lg font-bold text-gray-900 mb-1">
-                Search another train
-              </h2>
-              <p className="text-sm text-gray-500 mb-5">
-                Look up a different train number without leaving this page.
-              </p>
-              <TrainSearch />
-            </section>
-
-            <section className="rounded-2xl border border-blue-100 bg-blue-50 p-6 sm:p-8">
-              <h2 className="text-lg font-bold text-gray-900 mb-2">
-                Track {train.train_no} live on Train Dekho
-              </h2>
-              <p className="text-gray-600 text-sm mb-5">
-                Get real-time running status, delay alerts, and platform updates
-                for {train.train_name} on the Train Dekho Android app.
-              </p>
-              <a
-                href="https://play.google.com/store"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="inline-flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-semibold px-5 py-2.5 rounded-full transition-colors shadow-sm"
-              >
-                Download Train Dekho
-              </a>
-            </section>
+          <div className="mt-2">
+            <TrainScheduleActions trainNo={train.train_no} />
           </div>
         </div>
       </main>

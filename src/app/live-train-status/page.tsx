@@ -16,11 +16,7 @@ export default function LiveTrainStatusPage() {
   return (
     <>
       <Navbar />
-      <ComingSoon
-        title="Live Train Status"
-        breadcrumb="Live Train Status"
-        description="Real-time train position, delay updates, and station-by-station tracking — right in your browser."
-      />
+      <ComingSoon title="Live Train Status" breadcrumb="Live Train Status" />
       <Footer />
     </>
   );

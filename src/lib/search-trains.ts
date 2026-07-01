@@ -61,7 +61,7 @@ export function searchTrains(query: string, limit = 8): TrainListItem[] {
     }
   }
 
-  return [...numberPrefix, ...nameStarts, ...nameContains, routeMatch].slice(0, limit);
+  return [...numberPrefix, ...nameStarts, ...nameContains, ...routeMatch].slice(0, limit);
 }
 
 export function findTrainByNumber(trainNo: string): TrainListItem | undefined {

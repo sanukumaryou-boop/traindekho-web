@@ -2,19 +2,14 @@ import Link from "next/link";
 
 type ComingSoonProps = {
   title: string;
-  description: string;
   breadcrumb: string;
 };
 
-export default function ComingSoon({
-  title,
-  description,
-  breadcrumb,
-}: ComingSoonProps) {
+export default function ComingSoon({ title, breadcrumb }: ComingSoonProps) {
   return (
-    <main className="pt-24 pb-20">
-      <div className="max-w-xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-        <nav className="text-sm text-gray-500 mb-6 text-left" aria-label="Breadcrumb">
+    <main className="pt-20 pb-16 min-h-screen bg-gradient-to-b from-blue-50/40 via-white to-white">
+      <div className="max-w-lg mx-auto px-4 sm:px-6 lg:px-8">
+        <nav className="text-xs text-gray-500 mb-3" aria-label="Breadcrumb">
           <ol className="flex flex-wrap items-center gap-1.5">
             <li>
               <Link href="/" className="hover:text-blue-600 transition-colors">
@@ -22,27 +17,25 @@ export default function ComingSoon({
               </Link>
             </li>
             <li aria-hidden="true">/</li>
-            <li className="text-gray-900 font-medium">{breadcrumb}</li>
+            <li className="text-gray-700 font-medium">{breadcrumb}</li>
           </ol>
         </nav>
 
-        <div className="inline-flex items-center gap-2 bg-blue-50 text-blue-600 text-xs font-semibold px-3 py-1.5 rounded-full mb-6">
-          <span className="w-2 h-2 rounded-full bg-blue-600 animate-pulse" />
-          Coming Soon
-        </div>
+        <div className="bg-white rounded-2xl border border-gray-200/80 shadow-sm p-6 sm:p-8 text-center">
+          <div className="inline-flex items-center gap-1.5 bg-blue-50 text-blue-600 text-xs font-semibold px-2.5 py-1 rounded-full mb-4">
+            <span className="w-1.5 h-1.5 rounded-full bg-blue-600 animate-pulse" />
+            Coming Soon
+          </div>
 
-        <h1 className="text-3xl sm:text-4xl font-extrabold text-gray-900 tracking-tight mb-4">
-          {title}
-        </h1>
-        <p className="text-lg text-gray-500 mb-10 leading-relaxed">{description}</p>
+          <h1 className="text-2xl sm:text-3xl font-extrabold text-gray-900 tracking-tight mb-6">
+            {title}
+          </h1>
 
-        <div className="bg-gray-50 rounded-2xl p-6 sm:p-8 border border-gray-100 text-left">
-          <p className="text-gray-600 text-sm leading-relaxed mb-5">
-            We&apos;re building this feature for the website. For now, you can use
-            it in the Train Dekho Android app — or browse train schedules on the
-            web.
+          <p className="text-sm text-gray-500 mb-6">
+            Available now in the Train Dekho Android app.
           </p>
-          <div className="flex flex-col sm:flex-row gap-3">
+
+          <div className="flex flex-col sm:flex-row gap-2.5 justify-center">
             <a
               href="https://play.google.com/store"
               target="_blank"
