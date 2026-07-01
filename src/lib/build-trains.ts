@@ -4,6 +4,7 @@ import { fetchTrainByNumber } from "@/lib/api/trains";
 import { buildTrainSlug } from "@/lib/train-slug";
 import trainRajdhaniNumbers from "@/lib/train_rajdhani.json";
 import trainVandeBharatExpressNumbers from "@/lib/train_vandebharat.json";
+import trainShatabdiNumbers from "@/lib/train_shatabdi.json";
 
 const SLUG_CACHE_PATH = path.join(
   process.cwd(),
@@ -19,6 +20,7 @@ export function getTrainNumbersFromFile(): string[] {
   [
     ...trainRajdhaniNumbers.map((t) => String(t.train_no)),
     ...trainVandeBharatExpressNumbers.map((t) => String(t.train_no)),
+    ...trainShatabdiNumbers.map((t) => String(t.train_no)),
   ];
   const limit = process.env.TRAIN_BUILD_LIMIT;
   if (limit) {
