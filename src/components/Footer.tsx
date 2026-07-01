@@ -26,8 +26,6 @@ export default function Footer() {
 
           {/* Links */}
           <nav className="flex flex-wrap gap-6 text-sm" aria-label="Footer navigation">
-            <Link href="/#features" className="hover:text-white transition-colors">Features</Link>
-            <Link href="/#preview" className="hover:text-white transition-colors">Preview</Link>
             <Link href="/train-schedule" className="hover:text-white transition-colors">Train Schedule</Link>
             <Link href="/live-train-status" className="hover:text-white transition-colors">Live Train Status</Link>
             <Link href="/search-route" className="hover:text-white transition-colors">Search Route</Link>

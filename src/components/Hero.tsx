@@ -33,7 +33,6 @@ export default function Hero() {
             </p>
 
             <a
-              id="download"
               href="https://play.google.com/store"
               target="_blank"
               rel="noopener noreferrer"

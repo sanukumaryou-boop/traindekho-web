@@ -28,7 +28,8 @@ export function formatRunningDays(days: DaysOfRun): string {
   return active.length === 7 ? "Daily" : active.join(", ");
 }
 
-export function titleCase(value: string): string {
+export function titleCase(value: string | null | undefined): string {
+  if (!value) return "";
   return value
     .toLowerCase()
     .split(/[\s-]+/)

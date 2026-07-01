@@ -15,7 +15,7 @@ export default function DownloadCTA() {
   return (
     <section
       id="download"
-      className="py-20 sm:py-28 bg-gray-50"
+      className="py-20 sm:py-28 bg-gray-50 scroll-mt-16"
       aria-labelledby="download-heading"
     >
       <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
