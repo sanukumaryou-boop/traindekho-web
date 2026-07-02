@@ -1,5 +1,4 @@
 import Link from "next/link";
-import RunningDays from "@/components/train-schedule/RunningDays";
 import RouteTrainCardActions from "@/components/route-search/RouteTrainCardActions";
 import { formatRunningDays, titleCase } from "@/lib/format";
 import { getTrainScheduleHref } from "@/lib/train-schedule-href";
@@ -58,10 +57,6 @@ export default function RouteTrainCard({ train, variant }: RouteTrainCardProps) 
               {titleCase(train.train_name)}
             </Link>
           </h3>
-          <p className="mt-1 text-xs text-gray-500">
-            {train.source_code} → {train.destination_code} · {titleCase(train.source)} to{" "}
-            {titleCase(train.destination)}
-          </p>
         </div>
 
         <div className="shrink-0 text-left sm:text-right">
@@ -70,6 +65,22 @@ export default function RouteTrainCard({ train, variant }: RouteTrainCardProps) 
             {Math.round(train.distance_between_stations)} km · {train.stops_between_stations}{" "}
             {train.stops_between_stations === 1 ? "stop" : "stops"}
           </p>
+        </div>
+      </div>
+
+      <div className="mt-1 flex flex-col gap-1.5 sm:flex-row sm:items-start sm:justify-between sm:gap-3 text-xs">
+        <p className="min-w-0 text-gray-500">
+          {titleCase(train.source)} to {titleCase(train.destination)}
+        </p>
+        <div className="flex flex-wrap items-center gap-1.5 sm:shrink-0 sm:justify-end">
+          <span className="inline-flex items-center rounded-full bg-blue-50 px-2.5 py-0.5 font-medium text-blue-700 border border-blue-100">
+            {formatRunningDays(train.days_of_run)}
+          </span>
+          {train.classes.length > 0 && (
+            <span className="inline-flex items-center rounded-full bg-amber-50 px-2.5 py-0.5 font-medium text-amber-800 border border-amber-100">
+              {train.classes.join(", ")}
+            </span>
+          )}
         </div>
       </div>
 
@@ -106,19 +117,6 @@ export default function RouteTrainCard({ train, variant }: RouteTrainCardProps) 
           time={alightStation.scheduled_arrival_time}
           timeLabel="Arrival"
         />
-      </div>
-
-      <div className="mt-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-        <RunningDays days={train.days_of_run} />
-        <div className="flex flex-wrap items-center gap-2 text-xs text-gray-500">
-          <span>{formatRunningDays(train.days_of_run)}</span>
-          {train.classes.length > 0 && (
-            <>
-              <span aria-hidden="true">·</span>
-              <span>{train.classes.join(", ")}</span>
-            </>
-          )}
-        </div>
       </div>
 
       <RouteTrainCardActions trainNo={train.train_no} />
