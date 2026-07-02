@@ -4,7 +4,7 @@ export type NavLink = {
 };
 
 export const mainNavLinks: NavLink[] = [
+  { href: "/search-route", label: "Route Search" },
   { href: "/train-schedule", label: "Train Schedule" },
   { href: "/live-train-status", label: "Live Train Status" },
-  { href: "/search-route", label: "Search Route" },
 ];

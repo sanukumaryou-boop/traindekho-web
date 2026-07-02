@@ -1,5 +1,6 @@
 import Link from "next/link";
 import RunningDays from "@/components/train-schedule/RunningDays";
+import RouteTrainCardActions from "@/components/route-search/RouteTrainCardActions";
 import { formatRunningDays, titleCase } from "@/lib/format";
 import { getTrainScheduleHref } from "@/lib/train-schedule-href";
 import type {
@@ -99,6 +100,8 @@ export default function RouteTrainCard({ train, variant }: RouteTrainCardProps) 
           )}
         </div>
       </div>
+
+      <RouteTrainCardActions trainNo={train.train_no} />
     </article>
   );
 }
@@ -129,4 +132,3 @@ function StationTiming({
     </div>
   );
 }
-

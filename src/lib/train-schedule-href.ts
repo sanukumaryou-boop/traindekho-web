@@ -40,3 +40,10 @@ export function getTrainScheduleHref(
 
   return `/train-schedule/${digits}`;
 }
+
+export function getLiveTrainStatusHref(trainNo: number | string): string {
+  const digits = String(trainNo).replace(/\D/g, "");
+  return digits
+    ? `/live-train-status?no=${encodeURIComponent(digits)}`
+    : "/live-train-status";
+}
