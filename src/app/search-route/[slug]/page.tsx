@@ -7,10 +7,17 @@ import RouteSearchForm from "@/components/route-search/RouteSearchForm";
 import RouteSearchTabs from "@/components/route-search/RouteSearchTabs";
 import TrainScheduleActions from "@/components/train-schedule/TrainScheduleActions";
 import { fetchTrainsBetween } from "@/lib/api/trains-between";
+import { titleCase } from "@/lib/format";
 import {
   buildRouteSearchSlug,
   parseRouteSearchSlug,
 } from "@/lib/route-search-slug";
+import { findStationByCode } from "@/lib/search-stations";
+
+function getStationName(code: string): string {
+  const station = findStationByCode(code);
+  return station ? titleCase(station.station_name) : code;
+}
 
 export const revalidate = 3600;
 
@@ -25,10 +32,12 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
     return { title: "Route Not Found" };
   }
 
-  const { from, to } = route;
-  const title = `Trains from ${from} to ${to}`;
-  const description = `Find direct and connecting trains from ${from} to ${to}. Compare departure times, travel duration, running days, and classes.`;
-  const canonicalSlug = buildRouteSearchSlug(from, to);
+  const { from: fromCode, to: toCode } = route;
+  const fromName = getStationName(fromCode);
+  const toName = getStationName(toCode);
+  const title = `Trains from ${fromName} to ${toName}`;
+  const description = `Find direct and connecting trains from ${fromName} to ${toName}. Compare departure times, travel duration, running days, and classes.`;
+  const canonicalSlug = buildRouteSearchSlug(fromCode, toCode);
 
   return {
     title,
@@ -50,15 +59,17 @@ export default async function SearchRouteResultsPage({ params }: PageProps) {
   if (!route) notFound();
 
   const { from: fromCode, to: toCode } = route;
+  const fromName = getStationName(fromCode);
+  const toName = getStationName(toCode);
   const results = await fetchTrainsBetween(fromCode, toCode);
 
   if (!results) {
     return (
       <>
         <Navbar />
-        <main className="pt-20 pb-16 min-h-screen bg-gradient-to-b from-blue-50/40 via-white to-white">
+        <main className="pt-20 pb-16 min-h-screen bg-gray-50/50">
           <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
-            <RoutePageHeader fromCode={fromCode} toCode={toCode} />
+            <RoutePageHeader fromName={fromName} toName={toName} />
             <section className="bg-white rounded-2xl border border-gray-200/80 shadow-sm">
               <div className="p-5 sm:p-6">
                 <RouteSearchForm initialFrom={fromCode} initialTo={toCode} />
@@ -68,7 +79,7 @@ export default async function SearchRouteResultsPage({ params }: PageProps) {
               className="mt-6 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700"
               role="alert"
             >
-              Could not load trains for {fromCode} → {toCode}. Please try again.
+              Could not load trains for {fromName} → {toName}. Please try again.
             </p>
           </div>
         </main>
@@ -83,9 +94,9 @@ export default async function SearchRouteResultsPage({ params }: PageProps) {
   return (
     <>
       <Navbar />
-      <main className="pt-20 pb-16 min-h-screen bg-gradient-to-b from-blue-50/40 via-white to-white">
+      <main className="pt-20 pb-16 min-h-screen bg-gray-50/50">
         <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
-          <RoutePageHeader fromCode={fromCode} toCode={toCode} />
+          <RoutePageHeader fromName={fromName} toName={toName} />
 
           <section className="bg-white rounded-2xl border border-gray-200/80 shadow-sm">
             <div className="p-5 sm:p-6">
@@ -95,7 +106,7 @@ export default async function SearchRouteResultsPage({ params }: PageProps) {
 
           {totalTrains === 0 ? (
             <p className="mt-6 rounded-xl border border-gray-200 bg-white px-4 py-3 text-sm text-gray-600">
-              No trains found between {fromCode} and {toCode}.
+              No trains found between {fromName} and {toName}.
             </p>
           ) : (
             <>
@@ -106,7 +117,7 @@ export default async function SearchRouteResultsPage({ params }: PageProps) {
               <div className="mt-6">
                 <TrainScheduleActions
                   showSearch={false}
-                  description={`Search trains from ${fromCode} to ${toCode} with live tracking, delay alerts & more on Android.`}
+                  description={`Search trains from ${fromName} to ${toName} with live tracking, delay alerts & more on Android.`}
                 />
               </div>
             </>
@@ -119,11 +130,11 @@ export default async function SearchRouteResultsPage({ params }: PageProps) {
 }
 
 function RoutePageHeader({
-  fromCode,
-  toCode,
+  fromName,
+  toName,
 }: {
-  fromCode: string;
-  toCode: string;
+  fromName: string;
+  toName: string;
 }) {
   return (
     <>
@@ -142,13 +153,13 @@ function RoutePageHeader({
           </li>
           <li aria-hidden="true">/</li>
           <li className="text-gray-700 font-medium">
-            {fromCode} to {toCode}
+            {fromName} to {toName}
           </li>
         </ol>
       </nav>
 
       <h1 className="text-2xl sm:text-3xl font-extrabold text-gray-900 tracking-tight mb-5">
-        {fromCode} → {toCode}
+        {fromName} → {toName}
       </h1>
     </>
   );

@@ -36,7 +36,7 @@ export default function RouteTrainCard({ train, variant }: RouteTrainCardProps) 
       : "Arrives";
 
   return (
-    <article className="rounded-xl border border-gray-100 bg-gray-50/40 p-4 sm:p-5 hover:border-blue-200 hover:bg-blue-50/40 transition-colors">
+    <article className="rounded-xl border border-gray-200 bg-white p-4 sm:p-5 hover:border-blue-200 transition-colors">
       <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
         <div className="min-w-0">
           <div className="flex flex-wrap items-center gap-2 mb-1">
@@ -73,7 +73,27 @@ export default function RouteTrainCard({ train, variant }: RouteTrainCardProps) 
         </div>
       </div>
 
-      <div className="mt-4 grid grid-cols-1 sm:grid-cols-2 gap-3">
+      <div className="mt-4 sm:hidden rounded-lg border border-gray-100 px-3.5 py-3">
+        <div className="grid grid-cols-2 gap-3">
+          <StationTiming
+            compact
+            label={boardLabel}
+            station={boardStation}
+            time={boardStation.scheduled_departure_time}
+            timeLabel="Departure"
+          />
+          <StationTiming
+            compact
+            label={alightLabel}
+            station={alightStation}
+            time={alightStation.scheduled_arrival_time}
+            timeLabel="Arrival"
+            className="border-l border-gray-100 pl-3"
+          />
+        </div>
+      </div>
+
+      <div className="mt-4 hidden sm:grid sm:grid-cols-2 gap-3">
         <StationTiming
           label={boardLabel}
           station={boardStation}
@@ -111,24 +131,38 @@ function StationTiming({
   station,
   time,
   timeLabel,
+  compact = false,
+  className = "",
 }: {
   label: string;
   station: RouteStationInfo;
   time?: string;
   timeLabel: string;
+  compact?: boolean;
+  className?: string;
 }) {
-  return (
-    <div className="rounded-lg bg-white border border-gray-100 px-3.5 py-3">
+  const content = (
+    <>
       <p className="text-[11px] font-semibold uppercase tracking-wider text-gray-400 mb-1">
         {label}
       </p>
-      <p className="text-sm font-semibold text-gray-900">
+      <p className={`text-sm font-semibold text-gray-900 ${compact ? "truncate" : ""}`}>
         {titleCase(station.station_name)}{" "}
         <span className="font-mono text-blue-600">({station.station_code})</span>
       </p>
       <p className="mt-1 text-sm text-gray-700">
         {timeLabel}: <span className="font-semibold">{time ?? "—"}</span>
       </p>
+    </>
+  );
+
+  if (compact) {
+    return <div className={`min-w-0 ${className}`}>{content}</div>;
+  }
+
+  return (
+    <div className={`rounded-lg bg-white border border-gray-100 px-3.5 py-3 ${className}`}>
+      {content}
     </div>
   );
 }

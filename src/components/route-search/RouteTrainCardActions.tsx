@@ -52,9 +52,9 @@ export default function RouteTrainCardActions({ trainNo }: RouteTrainCardActions
         {pendingAction === "schedule" ? (
           <Spinner className="w-4 h-4" />
         ) : (
-          <ScheduleIcon className="w-4 h-4" />
+          <TimetableIcon className="w-4 h-4" />
         )}
-        {pendingAction === "schedule" ? "Loading…" : "Schedule"}
+        {pendingAction === "schedule" ? "Loading…" : "View Schedule"}
       </button>
       <button
         type="button"
@@ -73,11 +73,11 @@ export default function RouteTrainCardActions({ trainNo }: RouteTrainCardActions
   );
 }
 
-function ScheduleIcon({ className }: { className?: string }) {
+function TimetableIcon({ className }: { className?: string }) {
   return (
     <svg viewBox="0 0 24 24" fill="none" className={className} aria-hidden="true">
       <path
-        d="M17 12h-5v5h5v-5zM16 1v2H8V1H6v2H5c-1.11 0-1.99.9-1.99 2L3 19c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2h-1V1h-2zm3 18H5V8h14v11z"
+        d="M3 13h2v-2H3v2zm0 4h2v-2H3v2zm0-8h2V7H3v2zm4 4h14v-2H7v2zm0 4h14v-2H7v2zM7 7v2h14V7H7z"
         fill="currentColor"
       />
     </svg>

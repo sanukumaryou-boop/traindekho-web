@@ -56,14 +56,14 @@ export default function RouteSearchTabs({
               onClick={() => setActiveTab(tab.id)}
               className={`flex-1 rounded-lg px-3 py-2.5 text-sm font-semibold transition-colors ${
                 selected
-                  ? "bg-white text-blue-700 shadow-sm"
+                  ? "bg-white text-gray-900 shadow-sm"
                   : "text-gray-600 hover:text-gray-900"
               }`}
             >
               <span>{tab.label}</span>
               <span
                 className={`ml-1.5 inline-flex min-w-[1.25rem] items-center justify-center rounded-full px-1.5 py-0.5 text-xs font-bold ${
-                  selected ? "bg-blue-100 text-blue-700" : "bg-gray-200 text-gray-600"
+                  selected ? "bg-gray-100 text-gray-700" : "bg-gray-200 text-gray-600"
                 }`}
               >
                 {tab.count}
