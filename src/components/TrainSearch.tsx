@@ -27,12 +27,24 @@ export default function TrainSearch({ variant = "default" }: TrainSearchProps) {
   const isPage = variant === "page";
 
   const navigateToTrain = useCallback(
-    (trainNo: number | string) => {
+    async (trainNo: number | string) => {
       const digits = String(trainNo).replace(/\D/g, "");
       if (!digits || loading) return;
       setError("");
       setLoading(true);
       setPendingTrainNo(Number(digits));
+
+      try {
+        const res = await fetch(`/api/trains/lookup?no=${encodeURIComponent(digits)}`);
+        if (res.ok) {
+          const { href } = (await res.json()) as { href: string };
+          router.push(href);
+          return;
+        }
+      } catch {
+        // fall through to number-only URL
+      }
+
       router.push(`/train-schedule/${digits}`);
     },
     [router, loading],

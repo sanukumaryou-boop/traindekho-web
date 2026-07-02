@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { titleCase } from "@/lib/format";
 import { getRelatedPremiumTrains } from "@/lib/related-trains";
+import { getTrainScheduleHref } from "@/lib/train-schedule-href";
 
 type RelatedTrainsProps = {
   trainNo: number;
@@ -33,7 +34,7 @@ export default function RelatedTrains({
           {trains.map((train) => (
             <li key={train.train_no}>
               <Link
-                href={`/train-schedule/${train.train_no}`}
+                href={getTrainScheduleHref(train)}
                 className="flex items-center justify-between gap-3 rounded-xl border border-gray-100 bg-gray-50/40 px-3.5 py-2.5 hover:border-blue-200 hover:bg-blue-50/50 transition-colors group"
               >
                 <div className="min-w-0 flex items-center gap-2.5">

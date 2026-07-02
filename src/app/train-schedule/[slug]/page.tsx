@@ -17,6 +17,8 @@ import {
   formatScheduleTime,
   titleCase,
 } from "@/lib/format";
+import { getTrainScheduleHref } from "@/lib/train-schedule-href";
+import { findTrainByNumber } from "@/lib/search-trains";
 import { buildTrainSlug, parseTrainNumberFromSlug } from "@/lib/train-slug";
 import type { Train } from "@/lib/types/train";
 
@@ -141,6 +143,14 @@ function buildJsonLd(train: Train, slug: string) {
 
 export default async function TrainSchedulePage({ params }: PageProps) {
   const { slug } = await params;
+
+  if (/^\d+$/.test(slug)) {
+    const local = findTrainByNumber(slug);
+    if (local) {
+      permanentRedirect(getTrainScheduleHref(local));
+    }
+  }
+
   const train = await getTrain(slug);
 
   if (!train) notFound();
