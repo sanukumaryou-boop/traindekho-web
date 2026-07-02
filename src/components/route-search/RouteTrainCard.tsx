@@ -129,50 +129,20 @@ export default function RouteTrainCard({
         </div>
       </div>
 
-      <div className="mt-4 sm:hidden rounded-lg border border-gray-100 px-3.5 py-3">
-        <div className="grid grid-cols-2 gap-3">
-          <StationTiming
-            compact
-            label={boardLabel}
-            station={boardStation}
-            time={boardStation.scheduled_departure_time}
-            timeLabel="Departure"
-            approxDistance={boardApproxDistance}
-            approxDistanceFrom={searchFromName}
-            mapsHref={boardMapsHref}
-          />
-          <StationTiming
-            compact
-            label={alightLabel}
-            station={alightStation}
-            time={alightStation.scheduled_arrival_time}
-            timeLabel="Arrival"
-            approxDistance={alightApproxDistance}
-            approxDistanceFrom={searchToName}
-            mapsHref={alightMapsHref}
-            className="border-l border-gray-100 pl-3"
-          />
-        </div>
-      </div>
-
-      <div className="mt-4 hidden sm:grid sm:grid-cols-2 gap-3">
-        <StationTiming
-          label={boardLabel}
-          station={boardStation}
-          time={boardStation.scheduled_departure_time}
-          timeLabel="Departure"
-          approxDistance={boardApproxDistance}
-          approxDistanceFrom={searchFromName}
-          mapsHref={boardMapsHref}
-        />
-        <StationTiming
-          label={alightLabel}
-          station={alightStation}
-          time={alightStation.scheduled_arrival_time}
-          timeLabel="Arrival"
-          approxDistance={alightApproxDistance}
-          approxDistanceFrom={searchToName}
-          mapsHref={alightMapsHref}
+      <div className="mt-4 rounded-lg border border-gray-100 px-3.5 py-3 sm:px-4 sm:py-3.5">
+        <JourneyTimeline
+          boardLabel={boardLabel}
+          boardStation={boardStation}
+          boardTime={boardStation.scheduled_departure_time}
+          boardApproxDistance={boardApproxDistance}
+          boardApproxDistanceFrom={searchFromName}
+          boardMapsHref={boardMapsHref}
+          alightLabel={alightLabel}
+          alightStation={alightStation}
+          alightTime={alightStation.scheduled_arrival_time}
+          alightApproxDistance={alightApproxDistance}
+          alightApproxDistanceFrom={searchToName}
+          alightMapsHref={alightMapsHref}
         />
       </div>
 
@@ -181,41 +151,142 @@ export default function RouteTrainCard({
   );
 }
 
-function StationTiming({
+function JourneyTimeline({
+  boardLabel,
+  boardStation,
+  boardTime,
+  boardApproxDistance,
+  boardApproxDistanceFrom,
+  boardMapsHref,
+  alightLabel,
+  alightStation,
+  alightTime,
+  alightApproxDistance,
+  alightApproxDistanceFrom,
+  alightMapsHref,
+}: {
+  boardLabel: string;
+  boardStation: RouteStationInfo;
+  boardTime?: string;
+  boardApproxDistance?: number;
+  boardApproxDistanceFrom?: string;
+  boardMapsHref?: string | null;
+  alightLabel: string;
+  alightStation: RouteStationInfo;
+  alightTime?: string;
+  alightApproxDistance?: number;
+  alightApproxDistanceFrom?: string;
+  alightMapsHref?: string | null;
+}) {
+  const boardLeg = (
+    <JourneyLeg
+      label={boardLabel}
+      station={boardStation}
+      time={boardTime}
+      approxDistance={boardApproxDistance}
+      approxDistanceFrom={boardApproxDistanceFrom}
+      mapsHref={boardMapsHref}
+    />
+  );
+  const alightLeg = (
+    <JourneyLeg
+      label={alightLabel}
+      station={alightStation}
+      time={alightTime}
+      approxDistance={alightApproxDistance}
+      approxDistanceFrom={alightApproxDistanceFrom}
+      mapsHref={alightMapsHref}
+    />
+  );
+
+  return (
+    <>
+      <div className="flex gap-3 sm:hidden">
+        <JourneyRail orientation="vertical" />
+        <div className="min-w-0 flex-1 space-y-5">
+          {boardLeg}
+          {alightLeg}
+        </div>
+      </div>
+
+      <div className="hidden sm:grid sm:grid-cols-[1fr_auto_1fr] sm:items-start sm:gap-x-6">
+        {boardLeg}
+        <div className="flex w-28 items-center self-center md:w-36 lg:w-44">
+          <JourneyRail orientation="horizontal" />
+        </div>
+        {alightLeg}
+      </div>
+    </>
+  );
+}
+
+function JourneyRail({ orientation }: { orientation: "vertical" | "horizontal" }) {
+  const originDot = (
+    <div
+      className="h-2.5 w-2.5 shrink-0 rounded-full border-2 border-blue-500 bg-white"
+      aria-hidden="true"
+    />
+  );
+  const destinationDot = (
+    <div
+      className="h-2.5 w-2.5 shrink-0 rounded-full bg-blue-500"
+      aria-hidden="true"
+    />
+  );
+
+  if (orientation === "horizontal") {
+    return (
+      <div className="flex w-full items-center" aria-hidden="true">
+        {originDot}
+        <div className="mx-1 h-px min-w-0 flex-1 bg-gray-200" />
+        {destinationDot}
+      </div>
+    );
+  }
+
+  return (
+    <div className="flex w-3 shrink-0 flex-col items-center pt-1.5" aria-hidden="true">
+      {originDot}
+      <div className="my-1 w-px flex-1 bg-gray-200" />
+      {destinationDot}
+    </div>
+  );
+}
+
+function JourneyLeg({
   label,
   station,
   time,
-  timeLabel,
   approxDistance,
   approxDistanceFrom,
   mapsHref = null,
-  compact = false,
-  className = "",
 }: {
   label: string;
   station: RouteStationInfo;
   time?: string;
-  timeLabel: string;
   approxDistance?: number;
   approxDistanceFrom?: string;
   mapsHref?: string | null;
-  compact?: boolean;
-  className?: string;
 }) {
   const showApproxDistance =
     approxDistance !== undefined && approxDistance > 0 && approxDistanceFrom;
 
-  const content = (
-    <>
-      <p className="text-[11px] font-semibold uppercase tracking-wider text-gray-400 mb-1">
-        {label}
-      </p>
-      <p className={`text-sm font-semibold text-gray-900 ${compact ? "truncate" : ""}`}>
+  return (
+    <div className="min-w-0">
+      <div className="mb-1 flex items-baseline justify-between gap-3">
+        <p className="text-[11px] font-semibold uppercase tracking-wider text-gray-400">
+          {label}
+        </p>
+        <p className="shrink-0 text-base sm:text-lg font-bold tabular-nums text-gray-900">
+          {time ?? "—"}
+        </p>
+      </div>
+      <p className="text-sm sm:text-base font-semibold leading-snug text-gray-900">
         {titleCase(station.station_name)}{" "}
         <span className="font-mono text-blue-600">({station.station_code})</span>
       </p>
       {showApproxDistance && (
-        <p className="mt-0.5 text-xs leading-snug">
+        <p className="mt-1 text-xs leading-snug">
           <span className="text-amber-700">
             ~{Math.round(approxDistance)} km away from {approxDistanceFrom}
           </span>
@@ -231,19 +302,6 @@ function StationTiming({
           )}
         </p>
       )}
-      <p className="mt-1 text-sm text-gray-700">
-        {timeLabel}: <span className="font-semibold">{time ?? "—"}</span>
-      </p>
-    </>
-  );
-
-  if (compact) {
-    return <div className={`min-w-0 ${className}`}>{content}</div>;
-  }
-
-  return (
-    <div className={`rounded-lg bg-white border border-gray-100 px-3.5 py-3 ${className}`}>
-      {content}
     </div>
   );
 }
