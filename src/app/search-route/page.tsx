@@ -3,6 +3,7 @@ import Link from "next/link";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import RouteSearchForm from "@/components/route-search/RouteSearchForm";
+import TrainScheduleActions from "@/components/train-schedule/TrainScheduleActions";
 
 export const metadata: Metadata = {
   title: "Search Route",
@@ -40,6 +41,10 @@ export default function SearchRoutePage() {
               <RouteSearchForm />
             </div>
           </section>
+
+          <div className="mt-6">
+            <TrainScheduleActions showSearch={false} />
+          </div>
         </div>
       </main>
       <Footer />

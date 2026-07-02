@@ -3,11 +3,13 @@ import TrainSearch from "@/components/TrainSearch";
 type TrainScheduleActionsProps = {
   showSearch?: boolean;
   trainNo?: number;
+  description?: string;
 };
 
 export default function TrainScheduleActions({
   showSearch = true,
   trainNo,
+  description,
 }: TrainScheduleActionsProps) {
   return (
     <div
@@ -30,9 +32,10 @@ export default function TrainScheduleActions({
           Download the app
         </h2>
         <p className="text-sm text-gray-600 mb-4">
-          {trainNo
-            ? `Live tracking, delay alerts & more for train ${trainNo}.`
-            : "Live train tracking, route search & delay alerts on Android."}
+          {description ??
+            (trainNo
+              ? `Live tracking, delay alerts & more for train ${trainNo}.`
+              : "Live train tracking, route search & delay alerts on Android.")}
         </p>
         <a
           href="https://play.google.com/store"

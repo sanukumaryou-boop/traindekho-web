@@ -5,6 +5,7 @@ import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import RouteSearchForm from "@/components/route-search/RouteSearchForm";
 import RouteSearchTabs from "@/components/route-search/RouteSearchTabs";
+import TrainScheduleActions from "@/components/train-schedule/TrainScheduleActions";
 import { fetchTrainsBetween } from "@/lib/api/trains-between";
 import {
   buildRouteSearchSlug,
@@ -97,10 +98,18 @@ export default async function SearchRouteResultsPage({ params }: PageProps) {
               No trains found between {fromCode} and {toCode}.
             </p>
           ) : (
-            <RouteSearchTabs
-              directTrains={results.direct_trains}
-              alternativeTrains={results.alternative_trains}
-            />
+            <>
+              <RouteSearchTabs
+                directTrains={results.direct_trains}
+                alternativeTrains={results.alternative_trains}
+              />
+              <div className="mt-6">
+                <TrainScheduleActions
+                  showSearch={false}
+                  description={`Search trains from ${fromCode} to ${toCode} with live tracking, delay alerts & more on Android.`}
+                />
+              </div>
+            </>
           )}
         </div>
       </main>
