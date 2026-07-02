@@ -10,6 +10,8 @@ export interface RouteStationInfo {
   distance: number;
   day_count: number;
   approx_distance?: number;
+  lat?: number;
+  lon?: number;
 }
 
 export interface RouteTrainShared {
@@ -140,4 +142,32 @@ export function getRouteDisplayNames(
       : train.destination;
 
   return { from, to };
+}
+
+export function resolveSearchStationInTrain(
+  code: string,
+  name: string,
+  train: DirectRouteTrain | AlternativeRouteTrain,
+): RouteStationInfo {
+  const normalized = code.trim().toUpperCase();
+  const stations: (RouteStationInfo | undefined)[] = [
+    (train as AlternativeRouteTrain).from_station,
+    (train as AlternativeRouteTrain).alternative_from_station,
+    (train as AlternativeRouteTrain).to_station,
+    (train as AlternativeRouteTrain).alternative_to_station,
+    (train as DirectRouteTrain).from_station,
+    (train as DirectRouteTrain).to_station,
+  ];
+
+  const match = stations.find(
+    (station) => station?.station_code?.trim().toUpperCase() === normalized,
+  );
+  if (match) return match;
+
+  return {
+    station_code: normalized,
+    station_name: name,
+    distance: 0,
+    day_count: 0,
+  };
 }

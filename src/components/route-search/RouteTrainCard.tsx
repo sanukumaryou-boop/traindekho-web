@@ -1,6 +1,7 @@
 import Link from "next/link";
 import RouteTrainCardActions from "@/components/route-search/RouteTrainCardActions";
 import { formatRunningDays, titleCase } from "@/lib/format";
+import { getGoogleMapsRouteHref } from "@/lib/google-maps-href";
 import { getTrainScheduleHref } from "@/lib/train-schedule-href";
 import type {
   AlternativeRouteTrain,
@@ -11,6 +12,7 @@ import {
   getAlightStation,
   getBoardStation,
   getRouteDisplayNames,
+  resolveSearchStationInTrain,
   usesAlternativeBoarding,
   usesAlternativeDestination,
 } from "@/lib/types/route-search";
@@ -18,9 +20,20 @@ import {
 type RouteTrainCardProps = {
   train: DirectRouteTrain | AlternativeRouteTrain;
   variant: "direct" | "alternative";
+  searchFromName: string;
+  searchToName: string;
+  searchFromCode: string;
+  searchToCode: string;
 };
 
-export default function RouteTrainCard({ train, variant }: RouteTrainCardProps) {
+export default function RouteTrainCard({
+  train,
+  variant,
+  searchFromName,
+  searchToName,
+  searchFromCode,
+  searchToCode,
+}: RouteTrainCardProps) {
   const boardStation = getBoardStation(train, variant);
   const alightStation = getAlightStation(train, variant);
   const routeDisplay = getRouteDisplayNames(train, boardStation, alightStation);
@@ -44,6 +57,25 @@ export default function RouteTrainCard({ train, variant }: RouteTrainCardProps) 
     isAlternative && altTrain && usesAlternativeDestination(altTrain)
       ? altTrain.alternative_to_station?.approx_distance
       : undefined;
+
+  const searchOriginStation = resolveSearchStationInTrain(
+    searchFromCode,
+    searchFromName,
+    train,
+  );
+  const searchDestinationStation = resolveSearchStationInTrain(
+    searchToCode,
+    searchToName,
+    train,
+  );
+  const boardMapsHref =
+    boardApproxDistance && boardApproxDistance > 0
+      ? getGoogleMapsRouteHref(searchOriginStation, boardStation)
+      : null;
+  const alightMapsHref =
+    alightApproxDistance && alightApproxDistance > 0
+      ? getGoogleMapsRouteHref(searchDestinationStation, alightStation)
+      : null;
 
   return (
     <article className="rounded-xl border border-gray-200 bg-white p-4 sm:p-5 hover:border-blue-200 transition-colors">
@@ -106,6 +138,8 @@ export default function RouteTrainCard({ train, variant }: RouteTrainCardProps) 
             time={boardStation.scheduled_departure_time}
             timeLabel="Departure"
             approxDistance={boardApproxDistance}
+            approxDistanceFrom={searchFromName}
+            mapsHref={boardMapsHref}
           />
           <StationTiming
             compact
@@ -114,6 +148,8 @@ export default function RouteTrainCard({ train, variant }: RouteTrainCardProps) 
             time={alightStation.scheduled_arrival_time}
             timeLabel="Arrival"
             approxDistance={alightApproxDistance}
+            approxDistanceFrom={searchToName}
+            mapsHref={alightMapsHref}
             className="border-l border-gray-100 pl-3"
           />
         </div>
@@ -126,6 +162,8 @@ export default function RouteTrainCard({ train, variant }: RouteTrainCardProps) 
           time={boardStation.scheduled_departure_time}
           timeLabel="Departure"
           approxDistance={boardApproxDistance}
+          approxDistanceFrom={searchFromName}
+          mapsHref={boardMapsHref}
         />
         <StationTiming
           label={alightLabel}
@@ -133,6 +171,8 @@ export default function RouteTrainCard({ train, variant }: RouteTrainCardProps) 
           time={alightStation.scheduled_arrival_time}
           timeLabel="Arrival"
           approxDistance={alightApproxDistance}
+          approxDistanceFrom={searchToName}
+          mapsHref={alightMapsHref}
         />
       </div>
 
@@ -147,6 +187,8 @@ function StationTiming({
   time,
   timeLabel,
   approxDistance,
+  approxDistanceFrom,
+  mapsHref = null,
   compact = false,
   className = "",
 }: {
@@ -155,11 +197,13 @@ function StationTiming({
   time?: string;
   timeLabel: string;
   approxDistance?: number;
+  approxDistanceFrom?: string;
+  mapsHref?: string | null;
   compact?: boolean;
   className?: string;
 }) {
   const showApproxDistance =
-    approxDistance !== undefined && approxDistance > 0;
+    approxDistance !== undefined && approxDistance > 0 && approxDistanceFrom;
 
   const content = (
     <>
@@ -171,8 +215,20 @@ function StationTiming({
         <span className="font-mono text-blue-600">({station.station_code})</span>
       </p>
       {showApproxDistance && (
-        <p className="mt-0.5 text-xs text-amber-700">
-          ~{Math.round(approxDistance)} km away
+        <p className="mt-0.5 text-xs leading-snug">
+          <span className="text-amber-700">
+            ~{Math.round(approxDistance)} km away from {approxDistanceFrom}
+          </span>
+          {mapsHref && (
+            <a
+              href={mapsHref}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-blue-600 hover:text-blue-700 hover:underline"
+            >
+              {" · See in Map"}
+            </a>
+          )}
         </p>
       )}
       <p className="mt-1 text-sm text-gray-700">

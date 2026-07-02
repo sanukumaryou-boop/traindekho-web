@@ -12,6 +12,10 @@ import {
 type RouteSearchTabsProps = {
   directTrains: DirectRouteTrain[];
   alternativeTrains: AlternativeRouteTrain[];
+  searchFromName: string;
+  searchToName: string;
+  searchFromCode: string;
+  searchToCode: string;
 };
 
 type Tab = "direct" | "alternative";
@@ -19,6 +23,10 @@ type Tab = "direct" | "alternative";
 export default function RouteSearchTabs({
   directTrains,
   alternativeTrains,
+  searchFromName,
+  searchToName,
+  searchFromCode,
+  searchToCode,
 }: RouteSearchTabsProps) {
   const [activeTab, setActiveTab] = useState<Tab>(
     directTrains.length > 0 ? "direct" : "alternative",
@@ -106,7 +114,14 @@ export default function RouteSearchTabs({
               <li
                 key={`${activeTab}-${train.train_no}-${board.station_code}-${alight.station_code}`}
               >
-                <RouteTrainCard train={train} variant={activeTab} />
+                <RouteTrainCard
+                  train={train}
+                  variant={activeTab}
+                  searchFromName={searchFromName}
+                  searchToName={searchToName}
+                  searchFromCode={searchFromCode}
+                  searchToCode={searchToCode}
+                />
               </li>
               );
             })}

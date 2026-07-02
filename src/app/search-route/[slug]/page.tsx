@@ -113,6 +113,10 @@ export default async function SearchRouteResultsPage({ params }: PageProps) {
               <RouteSearchTabs
                 directTrains={results.direct_trains}
                 alternativeTrains={results.alternative_trains}
+                searchFromName={fromName}
+                searchToName={toName}
+                searchFromCode={fromCode}
+                searchToCode={toCode}
               />
               <div className="mt-6">
                 <TrainScheduleActions
