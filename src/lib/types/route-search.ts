@@ -9,6 +9,7 @@ export interface RouteStationInfo {
   platform?: string;
   distance: number;
   day_count: number;
+  approx_distance?: number;
 }
 
 export interface RouteTrainShared {
@@ -117,4 +118,26 @@ export function usesAlternativeBoarding(train: AlternativeRouteTrain): boolean {
 
 export function usesAlternativeDestination(train: AlternativeRouteTrain): boolean {
   return Boolean(train.alternative_to_station);
+}
+
+export function getRouteDisplayNames(
+  train: DirectRouteTrain | AlternativeRouteTrain,
+  boardStation: RouteStationInfo,
+  alightStation: RouteStationInfo,
+): { from: string; to: string } {
+  const boardCode = boardStation.station_code.trim().toUpperCase();
+  const sourceCode = train.source_code.trim().toUpperCase();
+  const from =
+    boardCode && sourceCode && boardCode !== sourceCode
+      ? boardStation.station_name
+      : train.source;
+
+  const alightCode = alightStation.station_code.trim().toUpperCase();
+  const destinationCode = train.destination_code.trim().toUpperCase();
+  const to =
+    alightCode && destinationCode && alightCode !== destinationCode
+      ? alightStation.station_name
+      : train.destination;
+
+  return { from, to };
 }

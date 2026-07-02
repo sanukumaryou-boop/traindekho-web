@@ -10,6 +10,7 @@ import type {
 import {
   getAlightStation,
   getBoardStation,
+  getRouteDisplayNames,
   usesAlternativeBoarding,
   usesAlternativeDestination,
 } from "@/lib/types/route-search";
@@ -22,6 +23,7 @@ type RouteTrainCardProps = {
 export default function RouteTrainCard({ train, variant }: RouteTrainCardProps) {
   const boardStation = getBoardStation(train, variant);
   const alightStation = getAlightStation(train, variant);
+  const routeDisplay = getRouteDisplayNames(train, boardStation, alightStation);
   const isAlternative = variant === "alternative";
   const altTrain = isAlternative ? (train as AlternativeRouteTrain) : null;
 
@@ -34,10 +36,19 @@ export default function RouteTrainCard({ train, variant }: RouteTrainCardProps) 
       ? "Alight at"
       : "Arrives";
 
+  const boardApproxDistance =
+    isAlternative && altTrain && usesAlternativeBoarding(altTrain)
+      ? altTrain.alternative_from_station?.approx_distance
+      : undefined;
+  const alightApproxDistance =
+    isAlternative && altTrain && usesAlternativeDestination(altTrain)
+      ? altTrain.alternative_to_station?.approx_distance
+      : undefined;
+
   return (
     <article className="rounded-xl border border-gray-200 bg-white p-4 sm:p-5 hover:border-blue-200 transition-colors">
-      <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
-        <div className="min-w-0">
+      <div className="flex items-start justify-between gap-3">
+        <div className="min-w-0 flex-1">
           <div className="flex flex-wrap items-center gap-2 mb-1">
             <Link
               href={getTrainScheduleHref(train.train_no)}
@@ -49,7 +60,7 @@ export default function RouteTrainCard({ train, variant }: RouteTrainCardProps) 
               {train.train_type}
             </span>
           </div>
-          <h3 className="text-sm sm:text-base font-semibold text-gray-900">
+          <h3 className="text-sm sm:text-base font-semibold text-gray-900 line-clamp-2 leading-snug">
             <Link
               href={getTrainScheduleHref(train.train_no)}
               className="hover:text-blue-700"
@@ -59,9 +70,11 @@ export default function RouteTrainCard({ train, variant }: RouteTrainCardProps) 
           </h3>
         </div>
 
-        <div className="shrink-0 text-left sm:text-right">
-          <p className="text-lg font-bold text-gray-900">{train.scheduled_travel_time}</p>
-          <p className="text-xs text-gray-500">
+        <div className="shrink-0 text-right">
+          <p className="text-lg font-bold text-gray-900 leading-tight">
+            {train.scheduled_travel_time}
+          </p>
+          <p className="mt-0.5 text-xs text-gray-500 whitespace-nowrap">
             {Math.round(train.distance_between_stations)} km · {train.stops_between_stations}{" "}
             {train.stops_between_stations === 1 ? "stop" : "stops"}
           </p>
@@ -70,7 +83,7 @@ export default function RouteTrainCard({ train, variant }: RouteTrainCardProps) 
 
       <div className="mt-1 flex flex-col gap-1.5 sm:flex-row sm:items-start sm:justify-between sm:gap-3 text-xs">
         <p className="min-w-0 text-gray-500">
-          {titleCase(train.source)} to {titleCase(train.destination)}
+          {titleCase(routeDisplay.from)} to {titleCase(routeDisplay.to)}
         </p>
         <div className="flex flex-wrap items-center gap-1.5 sm:shrink-0 sm:justify-end">
           <span className="inline-flex items-center rounded-full bg-blue-50 px-2.5 py-0.5 font-medium text-blue-700 border border-blue-100">
@@ -92,6 +105,7 @@ export default function RouteTrainCard({ train, variant }: RouteTrainCardProps) 
             station={boardStation}
             time={boardStation.scheduled_departure_time}
             timeLabel="Departure"
+            approxDistance={boardApproxDistance}
           />
           <StationTiming
             compact
@@ -99,6 +113,7 @@ export default function RouteTrainCard({ train, variant }: RouteTrainCardProps) 
             station={alightStation}
             time={alightStation.scheduled_arrival_time}
             timeLabel="Arrival"
+            approxDistance={alightApproxDistance}
             className="border-l border-gray-100 pl-3"
           />
         </div>
@@ -110,12 +125,14 @@ export default function RouteTrainCard({ train, variant }: RouteTrainCardProps) 
           station={boardStation}
           time={boardStation.scheduled_departure_time}
           timeLabel="Departure"
+          approxDistance={boardApproxDistance}
         />
         <StationTiming
           label={alightLabel}
           station={alightStation}
           time={alightStation.scheduled_arrival_time}
           timeLabel="Arrival"
+          approxDistance={alightApproxDistance}
         />
       </div>
 
@@ -129,6 +146,7 @@ function StationTiming({
   station,
   time,
   timeLabel,
+  approxDistance,
   compact = false,
   className = "",
 }: {
@@ -136,9 +154,13 @@ function StationTiming({
   station: RouteStationInfo;
   time?: string;
   timeLabel: string;
+  approxDistance?: number;
   compact?: boolean;
   className?: string;
 }) {
+  const showApproxDistance =
+    approxDistance !== undefined && approxDistance > 0;
+
   const content = (
     <>
       <p className="text-[11px] font-semibold uppercase tracking-wider text-gray-400 mb-1">
@@ -148,6 +170,11 @@ function StationTiming({
         {titleCase(station.station_name)}{" "}
         <span className="font-mono text-blue-600">({station.station_code})</span>
       </p>
+      {showApproxDistance && (
+        <p className="mt-0.5 text-xs text-amber-700">
+          ~{Math.round(approxDistance)} km away
+        </p>
+      )}
       <p className="mt-1 text-sm text-gray-700">
         {timeLabel}: <span className="font-semibold">{time ?? "—"}</span>
       </p>
