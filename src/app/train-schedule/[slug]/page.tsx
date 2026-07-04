@@ -8,7 +8,7 @@ import ScheduleTable, {
 } from "@/components/train-schedule/ScheduleTable";
 import RouteOverview from "@/components/train-schedule/RouteOverview";
 import RunningDays from "@/components/train-schedule/RunningDays";
-import RelatedTrains from "@/components/train-schedule/RelatedTrains";
+import OtherTrainsOnRoute from "@/components/train-schedule/OtherTrainsOnRoute";
 import TrainScheduleActions from "@/components/train-schedule/TrainScheduleActions";
 import { fetchTrainByNumber } from "@/lib/api/trains";
 import { discoverTrainSlugsForBuild } from "@/lib/build-trains";
@@ -224,7 +224,12 @@ export default async function TrainSchedulePage({ params }: PageProps) {
             <ScheduleTable schedule={train.schedule} />
           </section>
 
-          <RelatedTrains trainNo={train.train_no} trainType={train.train_type} />
+          <OtherTrainsOnRoute
+            sourceCode={train.source_code}
+            destinationCode={train.destination_code}
+            sourceName={train.source}
+            destinationName={train.destination}
+          />
 
           <div className="mt-2">
             <TrainScheduleActions trainNo={train.train_no} />

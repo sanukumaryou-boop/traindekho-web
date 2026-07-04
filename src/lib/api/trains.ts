@@ -1,6 +1,6 @@
 import type { Train, TrainApiRecord } from "@/lib/types/train";
 
-const DEFAULT_API_URL = "https://rails-orpin.vercel.app";
+const DEFAULT_API_URL = "http://127.0.0.1:8000";
 const DEFAULT_MAX_RETRIES = 4;
 const RETRYABLE_STATUS = new Set([429, 500, 502, 503, 504]);
 
