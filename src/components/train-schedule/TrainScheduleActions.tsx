@@ -1,4 +1,5 @@
 import TrainSearch from "@/components/TrainSearch";
+import { GOOGLE_PLAY_APP_URL } from "@/lib/google-play-href";
 
 type TrainScheduleActionsProps = {
   showSearch?: boolean;
@@ -38,7 +39,7 @@ export default function TrainScheduleActions({
               : "Live train tracking, route search & delay alerts on Android.")}
         </p>
         <a
-          href="https://play.google.com/store"
+          href={GOOGLE_PLAY_APP_URL}
           target="_blank"
           rel="noopener noreferrer"
           className="inline-flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-semibold px-5 py-2.5 rounded-full transition-colors shadow-sm"

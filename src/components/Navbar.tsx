@@ -2,6 +2,7 @@ import Image from "next/image";
 import Link from "next/link";
 import MobileNav from "@/components/MobileNav";
 import { mainNavLinks } from "@/components/nav-links";
+import { GOOGLE_PLAY_APP_URL } from "@/lib/google-play-href";
 
 export default function Navbar() {
   return (
@@ -38,7 +39,7 @@ export default function Navbar() {
           </nav>
 
           <a
-            href="https://play.google.com/store"
+            href={GOOGLE_PLAY_APP_URL}
             target="_blank"
             rel="noopener noreferrer"
             className="inline-flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-semibold px-3 sm:px-4 py-2 rounded-full transition-colors shadow-sm shrink-0"

@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useEffect, useState } from "react";
 import { createPortal } from "react-dom";
 import { mainNavLinks } from "@/components/nav-links";
+import { GOOGLE_PLAY_APP_URL } from "@/lib/google-play-href";
 
 export default function MobileNav() {
   const [open, setOpen] = useState(false);
@@ -69,7 +70,7 @@ export default function MobileNav() {
 
             <div className="p-4 border-t border-gray-100 shrink-0">
               <a
-                href="https://play.google.com/store"
+                href={GOOGLE_PLAY_APP_URL}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="flex items-center justify-center w-full bg-blue-600 hover:bg-blue-700 text-white text-sm font-semibold px-4 py-3 rounded-xl transition-colors shadow-sm"

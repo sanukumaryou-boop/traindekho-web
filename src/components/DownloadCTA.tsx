@@ -1,4 +1,5 @@
 import Image from "next/image";
+import { GOOGLE_PLAY_APP_URL } from "@/lib/google-play-href";
 
 function GooglePlayIcon({ className }: { className?: string }) {
   return (
@@ -39,7 +40,7 @@ export default function DownloadCTA() {
         </p>
 
         <a
-          href="https://play.google.com/store"
+          href={GOOGLE_PLAY_APP_URL}
           target="_blank"
           rel="noopener noreferrer"
           aria-label="Download Train Dekho on Google Play"

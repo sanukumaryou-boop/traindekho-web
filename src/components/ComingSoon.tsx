@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { GOOGLE_PLAY_APP_URL } from "@/lib/google-play-href";
 
 type ComingSoonProps = {
   title: string;
@@ -37,7 +38,7 @@ export default function ComingSoon({ title, breadcrumb }: ComingSoonProps) {
 
           <div className="flex flex-col sm:flex-row gap-2.5 justify-center">
             <a
-              href="https://play.google.com/store"
+              href={GOOGLE_PLAY_APP_URL}
               target="_blank"
               rel="noopener noreferrer"
               className="inline-flex items-center justify-center bg-blue-600 hover:bg-blue-700 text-white text-sm font-semibold px-5 py-2.5 rounded-xl transition-colors shadow-sm"
