@@ -1,8 +1,12 @@
 import fs from "fs";
 import path from "path";
-import { fetchTrainsByNumbers } from "@/lib/api/trains";
+import {
+  fetchTrainOriginDestinations,
+  getCachedTrainOriginDestinations,
+} from "@/lib/api/trains";
 import { getTrainNumbersFromFile } from "@/lib/build-trains";
 import { buildRouteSearchSlug } from "@/lib/route-search-slug";
+import type { TrainOriginDestination } from "@/lib/types/train";
 
 const ROUTE_SLUG_CACHE_PATH = path.join(
   process.cwd(),
@@ -38,7 +42,23 @@ function writeRouteSlugCache(slugs: string[]): void {
   fs.writeFileSync(ROUTE_SLUG_CACHE_PATH, JSON.stringify(slugs));
 }
 
-async function fetchRouteSlugsInBatches(
+function routeSlugsFromOriginDestinations(
+  routes: TrainOriginDestination[],
+): string[] {
+  const routeKeys = new Set<string>();
+
+  for (const route of routes) {
+    const from = route.source_code.trim().toUpperCase();
+    const to = route.destination_code.trim().toUpperCase();
+    if (!from || !to || from === to) continue;
+    if (!isValidStationCode(from) || !isValidStationCode(to)) continue;
+    routeKeys.add(buildRouteSearchSlug(from, to));
+  }
+
+  return Array.from(routeKeys).sort();
+}
+
+async function fetchRouteSlugsFromApi(
   numbers: string[],
   batchSize: number,
   batchDelayMs: number,
@@ -48,11 +68,11 @@ async function fetchRouteSlugsInBatches(
 
   for (let i = 0; i < numbers.length; i += batchSize) {
     const batch = numbers.slice(i, i + batchSize);
-    const trains = await fetchTrainsByNumbers(batch);
+    const routes = await fetchTrainOriginDestinations(batch);
 
-    for (const train of trains) {
-      const from = (train.source_code ?? "").trim().toUpperCase();
-      const to = (train.destination_code ?? "").trim().toUpperCase();
+    for (const route of routes) {
+      const from = route.source_code.trim().toUpperCase();
+      const to = route.destination_code.trim().toUpperCase();
       if (!from || !to || from === to) continue;
       if (!isValidStationCode(from) || !isValidStationCode(to)) continue;
 
@@ -76,23 +96,55 @@ async function fetchRouteSlugsInBatches(
 }
 
 export async function discoverRouteSlugsForBuild(): Promise<string[]> {
+  // Prefer trains already fetched for schedule pages — avoids a second API pass.
+  const cachedRoutes = getCachedTrainOriginDestinations();
+  if (cachedRoutes.length > 0) {
+    const slugs = routeSlugsFromOriginDestinations(cachedRoutes);
+    writeRouteSlugCache(slugs);
+    console.log(
+      `[search-route] Built ${slugs.length} routes from ${cachedRoutes.length} cached trains`,
+    );
+    return slugs;
+  }
+
   const numbers = getTrainNumbersFromFile();
-  const batchSize = Number(process.env.TRAIN_BUILD_CONCURRENCY ?? "100");
-  const batchDelayMs = Number(process.env.TRAIN_BUILD_DELAY_MS ?? "0");
+  // Smaller batches + delay: rails-core cold starts fail large concurrent POSTs.
+  const batchSize = Number(process.env.TRAIN_BUILD_CONCURRENCY ?? "25");
+  const batchDelayMs = Number(process.env.TRAIN_BUILD_DELAY_MS ?? "200");
 
   console.log(
     `[search-route] Discovering origin→destination routes for ${numbers.length} trains (batch size: ${batchSize}, delay: ${batchDelayMs}ms)...`,
   );
 
-  const slugs = await fetchRouteSlugsInBatches(numbers, batchSize, batchDelayMs);
+  const slugs = await fetchRouteSlugsFromApi(numbers, batchSize, batchDelayMs);
   writeRouteSlugCache(slugs);
 
-  console.log(`[search-route] Pre-rendering ${slugs.length} route search pages`);
+  console.log(`[search-route] Found ${slugs.length} unique route search pages`);
   return slugs;
 }
 
 export async function discoverRouteSlugsForSitemap(): Promise<string[]> {
   const cached = readRouteSlugCache();
   if (cached) return cached;
+
+  // Train schedule discovery may still be writing caches in parallel.
+  for (let attempt = 0; attempt < 180; attempt++) {
+    await sleep(1000);
+
+    const fromDisk = readRouteSlugCache();
+    if (fromDisk) return fromDisk;
+
+    const fromTrains = getCachedTrainOriginDestinations();
+    if (fromTrains.length > 0) {
+      const slugs = routeSlugsFromOriginDestinations(fromTrains);
+      writeRouteSlugCache(slugs);
+      console.log(
+        `[search-route] Built ${slugs.length} routes from train cache for sitemap`,
+      );
+      return slugs;
+    }
+  }
+
+  // Last resort only — avoids hammering OD API during the train batch phase.
   return discoverRouteSlugsForBuild();
 }

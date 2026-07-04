@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound, permanentRedirect } from "next/navigation";
+import { cache } from "react";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import ScheduleTable, {
@@ -34,10 +35,10 @@ export async function generateStaticParams() {
   return slugs.map((slug) => ({ slug }));
 }
 
-async function getTrain(slug: string): Promise<Train | null> {
+const getTrain = cache(async (slug: string): Promise<Train | null> => {
   const trainNo = parseTrainNumberFromSlug(slug);
   return fetchTrainByNumber(trainNo);
-}
+});
 
 function buildMetadata(train: Train): Metadata {
   const title = `${train.train_no} ${titleCase(train.train_name)} Schedule`;

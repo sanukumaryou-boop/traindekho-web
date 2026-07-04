@@ -1,6 +1,11 @@
 import fs from "fs";
 import path from "path";
-import { fetchTrainsByNumbers } from "@/lib/api/trains";
+import {
+  fetchTrainsByNumbers,
+  getCachedTrainOriginDestinations,
+  persistTrainCacheToDisk,
+} from "@/lib/api/trains";
+import { buildRouteSearchSlug } from "@/lib/route-search-slug";
 import { buildTrainSlug } from "@/lib/train-slug";
 import trainRajdhaniNumbers from "@/lib/train_rajdhani.json";
 import trainVandeBharatExpressNumbers from "@/lib/train_vandebharat.json";
@@ -14,6 +19,13 @@ const SLUG_CACHE_PATH = path.join(
   process.cwd(),
   ".next/cache/train-slugs.json",
 );
+
+const ROUTE_SLUG_CACHE_PATH = path.join(
+  process.cwd(),
+  ".next/cache/route-slugs.json",
+);
+
+const STATION_CODE_PATTERN = /^[A-Z0-9]{2,6}$/;
 
 function sleep(ms: number): Promise<void> {
   return new Promise((resolve) => setTimeout(resolve, ms));
@@ -106,11 +118,36 @@ export async function discoverTrainSlugsForBuild(): Promise<string[]> {
 
   const slugs = await fetchSlugsInBatches(numbers, batchSize, batchDelayMs);
   writeSlugCache(slugs);
+  persistTrainCacheToDisk();
+  writeRouteSlugCacheFromTrains();
 
   console.log(
     `[train-schedule] Pre-rendering ${slugs.length} train schedule pages`,
   );
   return slugs;
+}
+
+/** Derive route-search slugs from trains we already fetched (no OD API). */
+function writeRouteSlugCacheFromTrains(): void {
+  const routes = getCachedTrainOriginDestinations();
+  const routeKeys = new Set<string>();
+
+  for (const route of routes) {
+    const from = route.source_code.trim().toUpperCase();
+    const to = route.destination_code.trim().toUpperCase();
+    if (!from || !to || from === to) continue;
+    if (!STATION_CODE_PATTERN.test(from) || !STATION_CODE_PATTERN.test(to)) {
+      continue;
+    }
+    routeKeys.add(buildRouteSearchSlug(from, to));
+  }
+
+  const routeSlugs = Array.from(routeKeys).sort();
+  fs.mkdirSync(path.dirname(ROUTE_SLUG_CACHE_PATH), { recursive: true });
+  fs.writeFileSync(ROUTE_SLUG_CACHE_PATH, JSON.stringify(routeSlugs));
+  console.log(
+    `[search-route] Cached ${routeSlugs.length} origin→destination routes from train data`,
+  );
 }
 
 export async function discoverTrainSlugsForSitemap(): Promise<string[]> {

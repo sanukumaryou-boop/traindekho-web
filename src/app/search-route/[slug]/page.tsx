@@ -7,7 +7,6 @@ import RouteSearchForm from "@/components/route-search/RouteSearchForm";
 import RouteSearchTabs from "@/components/route-search/RouteSearchTabs";
 import TrainScheduleActions from "@/components/train-schedule/TrainScheduleActions";
 import { fetchTrainsBetween } from "@/lib/api/trains-between";
-import { discoverRouteSlugsForBuild } from "@/lib/build-routes";
 import { titleCase } from "@/lib/format";
 import {
   buildRouteSearchSlug,
@@ -27,9 +26,9 @@ interface PageProps {
   params: Promise<{ slug: string }>;
 }
 
+// Routes stay in sitemap.xml; generate on first request (ISR) to keep builds fast.
 export async function generateStaticParams() {
-  const slugs = await discoverRouteSlugsForBuild();
-  return slugs.map((slug) => ({ slug }));
+  return [];
 }
 
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {

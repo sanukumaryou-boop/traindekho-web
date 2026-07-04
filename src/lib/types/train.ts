@@ -65,3 +65,12 @@ export interface TrainApiRecord {
   total_distance: string;
   total_number_of_stops: number;
 }
+
+/** Lightweight record from POST /trains/origin-destination/batch */
+export interface TrainOriginDestination {
+  train_no: string;
+  source_code: string;
+  destination_code: string;
+  source?: string;
+  destination?: string;
+}
