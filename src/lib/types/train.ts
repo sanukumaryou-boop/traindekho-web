@@ -57,9 +57,10 @@ export interface TrainApiRecord {
   destination: string;
   source_code: string;
   destination_code: string;
-  days_of_run: string;
-  classes: string;
-  schedule: string;
+  /** JSON string from search API, or already-parsed object from batch API. */
+  days_of_run: string | DaysOfRun;
+  classes: string | string[];
+  schedule: string | ScheduleStop[];
   total_duration: number;
   total_distance: string;
   total_number_of_stops: number;

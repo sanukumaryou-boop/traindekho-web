@@ -1,4 +1,5 @@
 import type { MetadataRoute } from "next";
+import { discoverRouteSlugsForSitemap } from "@/lib/build-routes";
 import { discoverTrainSlugsForSitemap } from "@/lib/build-trains";
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
@@ -63,5 +64,18 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     // API unavailable during build — static pages still included
   }
 
-  return [...staticPages, ...trainPages];
+  let routePages: MetadataRoute.Sitemap = [];
+  try {
+    const routeSlugs = await discoverRouteSlugsForSitemap();
+    routePages = routeSlugs.map((slug) => ({
+      url: `${base}/search-route/${slug}`,
+      lastModified: now,
+      changeFrequency: "weekly" as const,
+      priority: 0.7,
+    }));
+  } catch {
+    // API unavailable during build — static pages still included
+  }
+
+  return [...staticPages, ...trainPages, ...routePages];
 }

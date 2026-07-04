@@ -7,6 +7,7 @@ import RouteSearchForm from "@/components/route-search/RouteSearchForm";
 import RouteSearchTabs from "@/components/route-search/RouteSearchTabs";
 import TrainScheduleActions from "@/components/train-schedule/TrainScheduleActions";
 import { fetchTrainsBetween } from "@/lib/api/trains-between";
+import { discoverRouteSlugsForBuild } from "@/lib/build-routes";
 import { titleCase } from "@/lib/format";
 import {
   buildRouteSearchSlug,
@@ -19,10 +20,16 @@ function getStationName(code: string): string {
   return station ? titleCase(station.station_name) : code;
 }
 
+export const dynamicParams = true;
 export const revalidate = 3600;
 
 interface PageProps {
   params: Promise<{ slug: string }>;
+}
+
+export async function generateStaticParams() {
+  const slugs = await discoverRouteSlugsForBuild();
+  return slugs.map((slug) => ({ slug }));
 }
 
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {

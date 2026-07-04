@@ -1,10 +1,14 @@
 import fs from "fs";
 import path from "path";
-import { fetchTrainByNumber } from "@/lib/api/trains";
+import { fetchTrainsByNumbers } from "@/lib/api/trains";
 import { buildTrainSlug } from "@/lib/train-slug";
 import trainRajdhaniNumbers from "@/lib/train_rajdhani.json";
 import trainVandeBharatExpressNumbers from "@/lib/train_vandebharat.json";
 import trainShatabdiNumbers from "@/lib/train_shatabdi.json";
+import trainDurontoNumbers from "@/lib/train_duronto.json";
+import trainMailExpressNumbers from "@/lib/train_mailexpress.json";
+import trainTejasExpressNumbers from "@/lib/train_tejas.json";
+import trainGareebrathNumbers from "@/lib/train_gareebrath.json";
 
 const SLUG_CACHE_PATH = path.join(
   process.cwd(),
@@ -21,6 +25,10 @@ export function getTrainNumbersFromFile(): string[] {
     ...trainRajdhaniNumbers.map((t) => String(t.train_no)),
     ...trainVandeBharatExpressNumbers.map((t) => String(t.train_no)),
     ...trainShatabdiNumbers.map((t) => String(t.train_no)),
+    ...trainDurontoNumbers.map((t) => String(t.train_no)),
+    ...trainMailExpressNumbers.map((t) => String(t.train_no)),
+    ...trainTejasExpressNumbers.map((t) => String(t.train_no)),
+    ...trainGareebrathNumbers.map((t) => String(t.train_no)),
   ];
   const limit = process.env.TRAIN_BUILD_LIMIT;
   if (limit) {
@@ -51,24 +59,22 @@ function writeSlugCache(slugs: string[]): void {
 
 async function fetchSlugsInBatches(
   numbers: string[],
-  concurrency: number,
+  batchSize: number,
   batchDelayMs: number,
 ): Promise<string[]> {
   const slugs: string[] = [];
   let found = 0;
 
-  for (let i = 0; i < numbers.length; i += concurrency) {
-    const batch = numbers.slice(i, i + concurrency);
+  for (let i = 0; i < numbers.length; i += batchSize) {
+    const batch = numbers.slice(i, i + batchSize);
+    const trains = await fetchTrainsByNumbers(batch);
 
-    for (const trainNo of batch) {
-      const train = await fetchTrainByNumber(trainNo);
-      if (train) {
-        slugs.push(buildTrainSlug(train));
-        found++;
-      }
+    for (const train of trains) {
+      slugs.push(buildTrainSlug(train));
+      found++;
     }
 
-    const processed = Math.min(i + concurrency, numbers.length);
+    const processed = Math.min(i + batchSize, numbers.length);
     if (processed % 500 === 0 || processed === numbers.length) {
       console.log(
         `[train-schedule] Fetched ${processed}/${numbers.length}, found ${found} trains`,
@@ -91,14 +97,14 @@ export async function discoverTrainSlugsForBuild(): Promise<string[]> {
   // }
 
   const numbers = getTrainNumbersFromFile();
-  const concurrency = Number(process.env.TRAIN_BUILD_CONCURRENCY ?? "20");
-  const batchDelayMs = Number(process.env.TRAIN_BUILD_DELAY_MS ?? "100");
+  const batchSize = Number(process.env.TRAIN_BUILD_CONCURRENCY ?? "100");
+  const batchDelayMs = Number(process.env.TRAIN_BUILD_DELAY_MS ?? "0");
 
   console.log(
-    `[train-schedule] Discovering slugs for ${numbers.length} trains (concurrency: ${concurrency}, delay: ${batchDelayMs}ms)...`,
+    `[train-schedule] Discovering slugs for ${numbers.length} trains (batch size: ${batchSize}, delay: ${batchDelayMs}ms)...`,
   );
 
-  const slugs = await fetchSlugsInBatches(numbers, concurrency, batchDelayMs);
+  const slugs = await fetchSlugsInBatches(numbers, batchSize, batchDelayMs);
   writeSlugCache(slugs);
 
   console.log(
