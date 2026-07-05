@@ -44,8 +44,8 @@ export default function Navbar() {
             rel="noopener noreferrer"
             className="inline-flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-semibold px-3 sm:px-4 py-2 rounded-full transition-colors shadow-sm shrink-0"
           >
-            <span className="hidden sm:inline">Get the App</span>
-            <span className="sm:hidden">App</span>
+            <span className="hidden sm:inline">Download the App</span>
+            <span className="sm:hidden">Download</span>
           </a>
         </div>
       </div>

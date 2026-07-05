@@ -75,7 +75,7 @@ export default function MobileNav() {
                 rel="noopener noreferrer"
                 className="flex items-center justify-center w-full bg-blue-600 hover:bg-blue-700 text-white text-sm font-semibold px-4 py-3 rounded-xl transition-colors shadow-sm"
               >
-                Get the App
+                Download the App
               </a>
             </div>
           </aside>

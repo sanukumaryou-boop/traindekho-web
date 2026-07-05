@@ -43,7 +43,7 @@ export default function ComingSoon({ title, breadcrumb }: ComingSoonProps) {
               rel="noopener noreferrer"
               className="inline-flex items-center justify-center bg-blue-600 hover:bg-blue-700 text-white text-sm font-semibold px-5 py-2.5 rounded-xl transition-colors shadow-sm"
             >
-              Get the App
+              Download the App
             </a>
             <Link
               href="/train-schedule"
