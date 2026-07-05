@@ -1,5 +1,6 @@
 import fs from "fs";
 import path from "path";
+import { getTrainApiUrl } from "@/lib/train-api-url";
 import type {
   DaysOfRun,
   ScheduleStop,
@@ -8,7 +9,6 @@ import type {
   TrainOriginDestination,
 } from "@/lib/types/train";
 
-const DEFAULT_API_URL = "https://rails-core.vercel.app";
 const DEFAULT_MAX_RETRIES = 4;
 const RETRYABLE_STATUS = new Set([429, 500, 502, 503, 504]);
 
@@ -29,10 +29,6 @@ const EMPTY_DAYS: DaysOfRun = {
 
 const trainCache = new Map<string, Train | null>();
 let diskCacheLoaded = false;
-
-export function getTrainApiUrl(): string {
-  return process.env.TRAIN_API_URL ?? DEFAULT_API_URL;
-}
 
 /** Load trains written during batch discovery so SSG pages skip per-page API calls. */
 function ensureDiskCacheLoaded(): void {

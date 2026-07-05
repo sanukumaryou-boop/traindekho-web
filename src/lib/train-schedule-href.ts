@@ -41,9 +41,46 @@ export function getTrainScheduleHref(
   return `/train-schedule/${digits}`;
 }
 
-export function getLiveTrainStatusHref(trainNo: number | string): string {
-  const digits = String(trainNo).replace(/\D/g, "");
-  return digits
-    ? `/live-train-status?no=${encodeURIComponent(digits)}`
-    : "/live-train-status";
+function liveStatusPathFromTrain(train: TrainSlugFields): string {
+  return `/live-train-status/${buildTrainSlug(toSlugInput(train))}`;
+}
+
+export function getLiveTrainStatusHref(train: TrainSlugFields): string;
+export function getLiveTrainStatusHref(trainNo: number | string): string;
+export function getLiveTrainStatusHref(
+  trainOrNo: TrainSlugFields | number | string,
+): string {
+  if (typeof trainOrNo === "object") {
+    return liveStatusPathFromTrain(trainOrNo);
+  }
+
+  const digits = String(trainOrNo).replace(/\D/g, "");
+  if (!digits) return "/live-train-status";
+
+  const train = findTrainByNumber(digits);
+  if (train) {
+    return liveStatusPathFromTrain(train);
+  }
+
+  return `/live-train-status/${digits}`;
+}
+
+export function getLiveTrainStatusHrefWithDate(
+  train: TrainSlugFields,
+  date?: string,
+): string;
+export function getLiveTrainStatusHrefWithDate(
+  trainNo: number | string,
+  date?: string,
+): string;
+export function getLiveTrainStatusHrefWithDate(
+  trainOrNo: TrainSlugFields | number | string,
+  date?: string,
+): string {
+  const href =
+    typeof trainOrNo === "object"
+      ? getLiveTrainStatusHref(trainOrNo)
+      : getLiveTrainStatusHref(trainOrNo);
+  if (!date || href === "/live-train-status") return href;
+  return `${href}?date=${encodeURIComponent(date)}`;
 }

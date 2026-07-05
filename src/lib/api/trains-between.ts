@@ -1,4 +1,4 @@
-import { getTrainApiUrl } from "@/lib/api/trains";
+import { getTrainApiUrl } from "@/lib/train-api-url";
 import type {
   AlternativeRouteTrain,
   DirectRouteTrain,

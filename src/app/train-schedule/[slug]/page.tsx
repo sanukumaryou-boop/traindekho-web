@@ -11,6 +11,7 @@ import RouteOverview from "@/components/train-schedule/RouteOverview";
 import RunningDays from "@/components/train-schedule/RunningDays";
 import OtherTrainsOnRoute from "@/components/train-schedule/OtherTrainsOnRoute";
 import TrainScheduleActions from "@/components/train-schedule/TrainScheduleActions";
+import TrainScheduleLiveStatusLink from "@/components/train-schedule/TrainScheduleLiveStatusLink";
 import TrainScheduleFAQ from "@/components/train-schedule/TrainScheduleFAQ";
 import { fetchTrainByNumber } from "@/lib/api/trains";
 import { discoverTrainSlugsForBuild } from "@/lib/build-trains";
@@ -211,6 +212,7 @@ export default async function TrainSchedulePage({ params }: PageProps) {
                 {train.train_type}
               </span>
               <RunningDays days={train.days_of_run} />
+              <TrainScheduleLiveStatusLink trainNo={train.train_no} />
             </div>
           </header>
 
