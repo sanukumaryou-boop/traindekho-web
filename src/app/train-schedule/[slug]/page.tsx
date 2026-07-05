@@ -11,6 +11,7 @@ import RouteOverview from "@/components/train-schedule/RouteOverview";
 import RunningDays from "@/components/train-schedule/RunningDays";
 import OtherTrainsOnRoute from "@/components/train-schedule/OtherTrainsOnRoute";
 import TrainScheduleActions from "@/components/train-schedule/TrainScheduleActions";
+import TrainScheduleFAQ from "@/components/train-schedule/TrainScheduleFAQ";
 import { fetchTrainByNumber } from "@/lib/api/trains";
 import { discoverTrainSlugsForBuild } from "@/lib/build-trains";
 import {
@@ -21,6 +22,10 @@ import {
 import { getTrainScheduleHref } from "@/lib/train-schedule-href";
 import { findTrainByNumber } from "@/lib/search-trains";
 import { buildTrainSlug, parseTrainNumberFromSlug } from "@/lib/train-slug";
+import {
+  buildFaqPageJsonLd,
+  buildTrainScheduleFaq,
+} from "@/lib/train-schedule-faq";
 import type { Train } from "@/lib/types/train";
 
 export const dynamicParams = true;
@@ -81,6 +86,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
 function buildJsonLd(train: Train, slug: string) {
   const firstStop = train.schedule[0];
   const lastStop = train.schedule[train.schedule.length - 1];
+  const faqItems = buildTrainScheduleFaq(train);
 
   return {
     "@context": "https://schema.org",
@@ -138,6 +144,7 @@ function buildJsonLd(train: Train, slug: string) {
           identifier: stop.stationCode,
         })),
       },
+      buildFaqPageJsonLd(faqItems),
     ],
   };
 }
@@ -231,6 +238,10 @@ export default async function TrainSchedulePage({ params }: PageProps) {
             sourceName={train.source}
             destinationName={train.destination}
           />
+
+          <section className="mt-8 mb-8">
+            <TrainScheduleFAQ items={buildTrainScheduleFaq(train)} />
+          </section>
 
           <div className="mt-2">
             <TrainScheduleActions trainNo={train.train_no} />

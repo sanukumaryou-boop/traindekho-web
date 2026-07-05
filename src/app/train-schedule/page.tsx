@@ -4,7 +4,12 @@ import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import TrainSearch from "@/components/TrainSearch";
 import TrainScheduleActions from "@/components/train-schedule/TrainScheduleActions";
+import TrainScheduleFAQ from "@/components/train-schedule/TrainScheduleFAQ";
 import { getTrainScheduleHref } from "@/lib/train-schedule-href";
+import {
+  buildFaqPageJsonLd,
+  TRAIN_SCHEDULE_INDEX_FAQ,
+} from "@/lib/train-schedule-faq";
 
 export const metadata: Metadata = {
   title: "Train Schedule",
@@ -24,9 +29,18 @@ const POPULAR_TRAINS = [
   { no: "12952", name: "Rajdhani Express", route: "MMCT → NDLS" },
 ];
 
+const jsonLd = {
+  "@context": "https://schema.org",
+  "@graph": [buildFaqPageJsonLd(TRAIN_SCHEDULE_INDEX_FAQ)],
+};
+
 export default function TrainScheduleSearchPage() {
   return (
     <>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+      />
       <Navbar />
       <main className="pt-20 pb-16 min-h-screen bg-gradient-to-b from-blue-50/40 via-white to-white">
         <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -76,6 +90,10 @@ export default function TrainScheduleSearchPage() {
                 ))}
               </ul>
             </div>
+          </section>
+
+          <section className="mt-8">
+            <TrainScheduleFAQ items={TRAIN_SCHEDULE_INDEX_FAQ} />
           </section>
 
           <div className="mt-6">
