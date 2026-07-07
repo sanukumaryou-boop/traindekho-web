@@ -1,5 +1,8 @@
 import type { Metadata } from "next";
 import { Plus_Jakarta_Sans } from "next/font/google";
+
+import { FirebaseAnalytics } from "@/components/FirebaseAnalytics";
+
 import "./globals.css";
 
 const plusJakartaSans = Plus_Jakarta_Sans({
@@ -81,7 +84,10 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en-IN" className={`${plusJakartaSans.variable} h-full`}>
-      <body className="min-h-full flex flex-col antialiased">{children}</body>
+      <body className="min-h-full flex flex-col antialiased">
+        <FirebaseAnalytics />
+        {children}
+      </body>
     </html>
   );
 }
