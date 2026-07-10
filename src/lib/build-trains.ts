@@ -14,7 +14,13 @@ import {
   TRAIN_SLUG_CACHE_PATH,
 } from "@/lib/train-build-cache";
 import { buildTrainSlug } from "@/lib/train-slug";
-import trainsData from "@/lib/trains.json";
+import trainRajdhaniNumbers from "@/lib/train_rajdhani.json";
+import trainVandeBharatExpressNumbers from "@/lib/train_vandebharat.json";
+import trainShatabdiNumbers from "@/lib/train_shatabdi.json";
+import trainDurontoNumbers from "@/lib/train_duronto.json";
+import trainMailExpressNumbers from "@/lib/train_mailexpress.json";
+import trainTejasExpressNumbers from "@/lib/train_tejas.json";
+import trainGareebrathNumbers from "@/lib/train_gareebrath.json";
 
 const STATION_CODE_PATTERN = /^[A-Z0-9]{2,6}$/;
 
@@ -23,16 +29,15 @@ function sleep(ms: number): Promise<void> {
 }
 
 export function getTrainNumbersFromFile(): string[] {
-  const seen = new Set<string>();
-  const numbers: string[] = [];
-
-  for (const train of trainsData) {
-    const no = String(train.train_no ?? "").trim();
-    if (!no || seen.has(no)) continue;
-    seen.add(no);
-    numbers.push(no);
-  }
-
+  const numbers = [
+    ...trainRajdhaniNumbers.map((t) => String(t.train_no)),
+    ...trainVandeBharatExpressNumbers.map((t) => String(t.train_no)),
+    ...trainShatabdiNumbers.map((t) => String(t.train_no)),
+    ...trainDurontoNumbers.map((t) => String(t.train_no)),
+    ...trainMailExpressNumbers.map((t) => String(t.train_no)),
+    ...trainTejasExpressNumbers.map((t) => String(t.train_no)),
+    ...trainGareebrathNumbers.map((t) => String(t.train_no)),
+  ];
   const limit = process.env.TRAIN_BUILD_LIMIT;
   if (limit) {
     const n = Number(limit);
