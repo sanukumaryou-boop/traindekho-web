@@ -1,14 +1,8 @@
 import type { NextConfig } from "next";
-const isProd = process.env.NODE_ENV === 'production';
 
 const nextConfig: NextConfig = {
-  basePath: isProd ? '/web' : '',
-  trailingSlash: true,
   compress: true,
   poweredByHeader: false,
-  images: {
-    unoptimized: true,
-  },
   async headers() {
     return [
       {
