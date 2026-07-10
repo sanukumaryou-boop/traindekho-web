@@ -29,7 +29,7 @@ export default function TermsPage() {
           <p>
             Train Dekho shall not be held liable for any loss or inconvenience arising from inaccurate or
             delayed train data. Always verify critical travel information with official Indian Railways
-            sources.
+            sources
           </p>
           <h2 className="text-xl font-bold text-gray-900 mt-6">Contact</h2>
           <p>
