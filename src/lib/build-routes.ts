@@ -1,17 +1,17 @@
 import fs from "fs";
-import path from "path";
 import {
   fetchTrainOriginDestinations,
   getCachedTrainOriginDestinations,
 } from "@/lib/api/trains";
 import { getTrainNumbersFromFile } from "@/lib/build-trains";
 import { buildRouteSearchSlug } from "@/lib/route-search-slug";
+import {
+  ensureTrainBuildCacheDir,
+  resolveCacheFile,
+  ROUTE_SLUG_CACHE_PATH,
+  shouldRefreshTrainCache,
+} from "@/lib/train-build-cache";
 import type { TrainOriginDestination } from "@/lib/types/train";
-
-const ROUTE_SLUG_CACHE_PATH = path.join(
-  process.cwd(),
-  ".next/cache/route-slugs.json",
-);
 
 const STATION_CODE_PATTERN = /^[A-Z0-9]{2,6}$/;
 
@@ -25,10 +25,9 @@ function isValidStationCode(code: string): boolean {
 
 function readRouteSlugCache(): string[] | null {
   try {
-    if (fs.existsSync(ROUTE_SLUG_CACHE_PATH)) {
-      const data = JSON.parse(
-        fs.readFileSync(ROUTE_SLUG_CACHE_PATH, "utf-8"),
-      ) as string[];
+    const cachePath = resolveCacheFile("route-slugs.json");
+    if (fs.existsSync(cachePath)) {
+      const data = JSON.parse(fs.readFileSync(cachePath, "utf-8")) as string[];
       if (data.length > 0) return data;
     }
   } catch {
@@ -38,7 +37,7 @@ function readRouteSlugCache(): string[] | null {
 }
 
 function writeRouteSlugCache(slugs: string[]): void {
-  fs.mkdirSync(path.dirname(ROUTE_SLUG_CACHE_PATH), { recursive: true });
+  ensureTrainBuildCacheDir();
   fs.writeFileSync(ROUTE_SLUG_CACHE_PATH, JSON.stringify(slugs));
 }
 
@@ -96,6 +95,16 @@ async function fetchRouteSlugsFromApi(
 }
 
 export async function discoverRouteSlugsForBuild(): Promise<string[]> {
+  if (!shouldRefreshTrainCache()) {
+    const cached = readRouteSlugCache();
+    if (cached) {
+      console.log(
+        `[search-route] Using disk cache (${cached.length} routes, 0 API calls)`,
+      );
+      return cached;
+    }
+  }
+
   // Prefer trains already fetched for schedule pages — avoids a second API pass.
   const cachedRoutes = getCachedTrainOriginDestinations();
   if (cachedRoutes.length > 0) {
@@ -125,7 +134,7 @@ export async function discoverRouteSlugsForBuild(): Promise<string[]> {
 
 export async function discoverRouteSlugsForSitemap(): Promise<string[]> {
   const cached = readRouteSlugCache();
-  if (cached) return cached;
+  if (cached && !shouldRefreshTrainCache()) return cached;
 
   // Train schedule discovery may still be writing caches in parallel.
   for (let attempt = 0; attempt < 180; attempt++) {

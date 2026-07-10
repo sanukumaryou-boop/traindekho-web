@@ -1,6 +1,11 @@
 import fs from "fs";
-import path from "path";
 import { getTrainApiUrl } from "@/lib/train-api-url";
+import {
+  ensureTrainBuildCacheDir,
+  resolveCacheFile,
+  shouldRefreshTrainCache,
+  TRAIN_DATA_CACHE_PATH,
+} from "@/lib/train-build-cache";
 import type {
   DaysOfRun,
   ScheduleStop,
@@ -11,11 +16,6 @@ import type {
 
 const DEFAULT_MAX_RETRIES = 4;
 const RETRYABLE_STATUS = new Set([429, 500, 502, 503, 504]);
-
-const TRAIN_DISK_CACHE_PATH = path.join(
-  process.cwd(),
-  ".next/cache/trains-data.json",
-);
 
 const EMPTY_DAYS: DaysOfRun = {
   mon: false,
@@ -31,14 +31,17 @@ const trainCache = new Map<string, Train | null>();
 let diskCacheLoaded = false;
 
 /** Load trains written during batch discovery so SSG pages skip per-page API calls. */
-function ensureDiskCacheLoaded(): void {
+export function ensureDiskCacheLoaded(): void {
   if (diskCacheLoaded) return;
   diskCacheLoaded = true;
 
+  if (shouldRefreshTrainCache()) return;
+
   try {
-    if (!fs.existsSync(TRAIN_DISK_CACHE_PATH)) return;
+    const cachePath = resolveCacheFile("trains-data.json");
+    if (!fs.existsSync(cachePath)) return;
     const data = JSON.parse(
-      fs.readFileSync(TRAIN_DISK_CACHE_PATH, "utf-8"),
+      fs.readFileSync(cachePath, "utf-8"),
     ) as Record<string, Train>;
 
     for (const [key, train] of Object.entries(data)) {
@@ -46,9 +49,19 @@ function ensureDiskCacheLoaded(): void {
         trainCache.set(key, train);
       }
     }
+
+    console.log(
+      `[train-api] Loaded ${Object.keys(data).length} trains from disk cache`,
+    );
   } catch {
     // cache miss
   }
+}
+
+/** True when we already have a resolved entry (train or confirmed miss). */
+export function hasTrainCacheEntry(trainNo: string): boolean {
+  ensureDiskCacheLoaded();
+  return trainCache.has(trainNo);
 }
 
 /** Persist in-memory train cache for the static generation phase. */
@@ -60,8 +73,8 @@ export function persistTrainCacheToDisk(): void {
 
   if (Object.keys(data).length === 0) return;
 
-  fs.mkdirSync(path.dirname(TRAIN_DISK_CACHE_PATH), { recursive: true });
-  fs.writeFileSync(TRAIN_DISK_CACHE_PATH, JSON.stringify(data));
+  ensureTrainBuildCacheDir();
+  fs.writeFileSync(TRAIN_DATA_CACHE_PATH, JSON.stringify(data));
   diskCacheLoaded = true;
 }
 
@@ -205,6 +218,8 @@ export async function fetchTrainsByNumbers(
   trainNos: string[],
 ): Promise<Train[]> {
   if (trainNos.length === 0) return [];
+
+  ensureDiskCacheLoaded();
 
   const uncached = trainNos.filter((no) => !trainCache.has(no));
   if (uncached.length === 0) {

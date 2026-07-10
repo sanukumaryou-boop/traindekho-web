@@ -1,11 +1,18 @@
 import fs from "fs";
-import path from "path";
 import {
   fetchTrainsByNumbers,
   getCachedTrainOriginDestinations,
+  hasTrainCacheEntry,
   persistTrainCacheToDisk,
 } from "@/lib/api/trains";
 import { buildRouteSearchSlug } from "@/lib/route-search-slug";
+import {
+  ensureTrainBuildCacheDir,
+  resolveCacheFile,
+  ROUTE_SLUG_CACHE_PATH,
+  shouldRefreshTrainCache,
+  TRAIN_SLUG_CACHE_PATH,
+} from "@/lib/train-build-cache";
 import { buildTrainSlug } from "@/lib/train-slug";
 import trainRajdhaniNumbers from "@/lib/train_rajdhani.json";
 import trainVandeBharatExpressNumbers from "@/lib/train_vandebharat.json";
@@ -15,16 +22,6 @@ import trainMailExpressNumbers from "@/lib/train_mailexpress.json";
 import trainTejasExpressNumbers from "@/lib/train_tejas.json";
 import trainGareebrathNumbers from "@/lib/train_gareebrath.json";
 
-const SLUG_CACHE_PATH = path.join(
-  process.cwd(),
-  ".next/cache/train-slugs.json",
-);
-
-const ROUTE_SLUG_CACHE_PATH = path.join(
-  process.cwd(),
-  ".next/cache/route-slugs.json",
-);
-
 const STATION_CODE_PATTERN = /^[A-Z0-9]{2,6}$/;
 
 function sleep(ms: number): Promise<void> {
@@ -32,8 +29,7 @@ function sleep(ms: number): Promise<void> {
 }
 
 export function getTrainNumbersFromFile(): string[] {
-  const numbers = 
-  [
+  const numbers = [
     ...trainRajdhaniNumbers.map((t) => String(t.train_no)),
     ...trainVandeBharatExpressNumbers.map((t) => String(t.train_no)),
     ...trainShatabdiNumbers.map((t) => String(t.train_no)),
@@ -52,10 +48,9 @@ export function getTrainNumbersFromFile(): string[] {
 
 function readSlugCache(): string[] | null {
   try {
-    if (fs.existsSync(SLUG_CACHE_PATH)) {
-      const data = JSON.parse(
-        fs.readFileSync(SLUG_CACHE_PATH, "utf-8"),
-      ) as string[];
+    const cachePath = resolveCacheFile("train-slugs.json");
+    if (fs.existsSync(cachePath)) {
+      const data = JSON.parse(fs.readFileSync(cachePath, "utf-8")) as string[];
       if (data.length > 0) return data;
     }
   } catch {
@@ -65,8 +60,8 @@ function readSlugCache(): string[] | null {
 }
 
 function writeSlugCache(slugs: string[]): void {
-  fs.mkdirSync(path.dirname(SLUG_CACHE_PATH), { recursive: true });
-  fs.writeFileSync(SLUG_CACHE_PATH, JSON.stringify(slugs));
+  ensureTrainBuildCacheDir();
+  fs.writeFileSync(TRAIN_SLUG_CACHE_PATH, JSON.stringify(slugs));
 }
 
 async function fetchSlugsInBatches(
@@ -101,14 +96,51 @@ async function fetchSlugsInBatches(
   return slugs;
 }
 
+/**
+ * Discover train schedule slugs for SSG.
+ * Reuses `.cache/train-build/` when present so rebuilds skip the train API.
+ * Force a refresh with TRAIN_CACHE_REFRESH=1.
+ */
 export async function discoverTrainSlugsForBuild(): Promise<string[]> {
-  const cached = readSlugCache();
-  // if (cached) {
-  //   console.log(`[train-schedule] Using cached ${cached.length} slugs`);
-  //   return cached;
-  // }
-
   const numbers = getTrainNumbersFromFile();
+  const forceRefresh = shouldRefreshTrainCache();
+
+  if (!forceRefresh) {
+    const cached = readSlugCache();
+    const missing = numbers.filter((no) => !hasTrainCacheEntry(no));
+
+    if (cached && missing.length === 0) {
+      console.log(
+        `[train-schedule] Using disk cache (${cached.length} slugs, 0 API calls)`,
+      );
+      writeRouteSlugCacheFromTrains();
+      return cached;
+    }
+
+    if (missing.length > 0 && missing.length < numbers.length) {
+      console.log(
+        `[train-schedule] Disk cache partial — fetching ${missing.length}/${numbers.length} missing trains`,
+      );
+      const batchSize = Number(process.env.TRAIN_BUILD_CONCURRENCY ?? "100");
+      const batchDelayMs = Number(process.env.TRAIN_BUILD_DELAY_MS ?? "0");
+      await fetchSlugsInBatches(missing, batchSize, batchDelayMs);
+
+      // Rebuild full slug list from cache (no further API calls).
+      const slugs = await fetchSlugsInBatches(numbers, numbers.length, 0);
+      writeSlugCache(slugs);
+      persistTrainCacheToDisk();
+      writeRouteSlugCacheFromTrains();
+      console.log(
+        `[train-schedule] Pre-rendering ${slugs.length} train schedule pages`,
+      );
+      return slugs;
+    }
+  } else {
+    console.log(
+      "[train-schedule] TRAIN_CACHE_REFRESH set — ignoring disk cache",
+    );
+  }
+
   const batchSize = Number(process.env.TRAIN_BUILD_CONCURRENCY ?? "100");
   const batchDelayMs = Number(process.env.TRAIN_BUILD_DELAY_MS ?? "0");
 
@@ -143,7 +175,7 @@ function writeRouteSlugCacheFromTrains(): void {
   }
 
   const routeSlugs = Array.from(routeKeys).sort();
-  fs.mkdirSync(path.dirname(ROUTE_SLUG_CACHE_PATH), { recursive: true });
+  ensureTrainBuildCacheDir();
   fs.writeFileSync(ROUTE_SLUG_CACHE_PATH, JSON.stringify(routeSlugs));
   console.log(
     `[search-route] Cached ${routeSlugs.length} origin→destination routes from train data`,
@@ -152,6 +184,6 @@ function writeRouteSlugCacheFromTrains(): void {
 
 export async function discoverTrainSlugsForSitemap(): Promise<string[]> {
   const cached = readSlugCache();
-  if (cached) return cached;
+  if (cached && !shouldRefreshTrainCache()) return cached;
   return discoverTrainSlugsForBuild();
 }

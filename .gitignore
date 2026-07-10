@@ -17,6 +17,9 @@
 /.next/
 /out/
 
+# persistent SSG train/route API cache (survives next build)
+.cache/
+
 # production
 /build
 
