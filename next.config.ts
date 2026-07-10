@@ -4,6 +4,7 @@ const isProd = process.env.NODE_ENV === 'production';
 const nextConfig: NextConfig = {
   basePath: isProd ? '/web' : '',
   assetPrefix: isProd ? '/web' : '',
+  trailingSlash: true,
   compress: true,
   poweredByHeader: false,
   async headers() {
