@@ -14,7 +14,7 @@ export default function Navbar() {
             <Link href="/" className="flex items-center gap-2.5 min-w-0">
               <Image
                 src="/images/logo.png"
-                alt="Train Dekho Logo"
+                alt="Train Dekho logo"
                 width={40}
                 height={40}
                 className="rounded-lg shrink-0"
