@@ -1,3 +1,4 @@
+import { getTrainApiUrl } from "@/lib/train-api-url";
 import type { Station } from "@/lib/types/route-search";
 import stationsData from "@/lib/stations.json";
 
@@ -14,79 +15,55 @@ function getStations(): StationListItem[] {
   return cachedStations;
 }
 
-function byWeightDesc(a: StationListItem, b: StationListItem): number {
-  return (b.weight ?? 0) - (a.weight ?? 0);
-}
+function toStation(station: {
+  id?: number;
+  station_name?: string;
+  station_code?: string;
+}): Station | null {
+  const station_code = String(station.station_code ?? "").trim();
+  const station_name = String(station.station_name ?? "").trim();
+  if (!station_code || !station_name) return null;
 
-function toStation(station: StationListItem): Station {
   return {
-    id: station.id,
-    station_name: station.station_name,
-    station_code: station.station_code,
+    id: Number(station.id ?? 0),
+    station_name,
+    station_code,
   };
 }
 
-export function searchStations(query: string, limit = 8): Station[] {
-  const q = query.trim().toLowerCase();
+/** Search stations via the train API (`GET /stations?q=`). */
+export async function searchStations(
+  query: string,
+  limit = 8,
+): Promise<Station[]> {
+  const q = query.trim();
   if (q.length < 2) return [];
 
-  const stations = getStations();
-  const codeExact: StationListItem[] = [];
-  const codePrefix: StationListItem[] = [];
-  const nameStarts: StationListItem[] = [];
-  const codeContains: StationListItem[] = [];
-  const nameContains: StationListItem[] = [];
+  try {
+    const url = `${getTrainApiUrl()}/stations?q=${encodeURIComponent(q)}`;
+    const response = await fetch(url, {
+      next: { revalidate: 3600 },
+    });
+    if (!response.ok) return [];
 
-  for (const station of stations) {
-    if (
-      codeExact.length +
-        codePrefix.length +
-        nameStarts.length +
-        codeContains.length +
-        nameContains.length >=
-      limit * 6
-    ) {
-      break;
-    }
+    const data = (await response.json()) as unknown;
+    const records = Array.isArray(data)
+      ? data
+      : data &&
+          typeof data === "object" &&
+          Array.isArray((data as { stations?: unknown }).stations)
+        ? (data as { stations: unknown[] }).stations
+        : [];
 
-    const code = (station.station_code ?? "").toLowerCase();
-    const name = (station.station_name ?? "").toLowerCase();
-    if (!code || !name) continue;
-
-    if (code === q) {
-      if ((station.weight ?? 0) >= 50) {
-        codeExact.push(station);
-      } else {
-        codeContains.push(station);
-      }
-      continue;
-    }
-    if (code.startsWith(q)) {
-      codePrefix.push(station);
-      continue;
-    }
-    if (name.startsWith(q)) {
-      nameStarts.push(station);
-      continue;
-    }
-    if (code.includes(q)) {
-      codeContains.push(station);
-      continue;
-    }
-    if (name.includes(q)) {
-      nameContains.push(station);
-    }
+    return records
+      .map((record) =>
+        toStation(record as { id?: number; station_name?: string; station_code?: string }),
+      )
+      .filter((station): station is Station => station !== null)
+      .slice(0, limit);
+  } catch {
+    return [];
   }
-
-  return [
-    ...codeExact.sort(byWeightDesc),
-    ...codePrefix.sort(byWeightDesc),
-    ...nameStarts.sort(byWeightDesc),
-    ...codeContains.sort(byWeightDesc),
-    ...nameContains.sort(byWeightDesc),
-  ]
-    .slice(0, limit)
-    .map(toStation);
 }
 
 export function findStationByCode(code: string): Station | undefined {
@@ -96,5 +73,11 @@ export function findStationByCode(code: string): Station | undefined {
   const station = getStations().find(
     (item) => item.station_code.toUpperCase() === normalized,
   );
-  return station ? toStation(station) : undefined;
+  return station
+    ? {
+        id: station.id,
+        station_name: station.station_name,
+        station_code: station.station_code,
+      }
+    : undefined;
 }

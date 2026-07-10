@@ -24,7 +24,6 @@ export interface LiveStatusScheduleStop extends ScheduleStop {
 export interface TrainLiveStatusResponse {
   train_no: number | string;
   train_name: string;
-  train_number_string: string;
   train_type: string;
   source: string;
   destination: string;

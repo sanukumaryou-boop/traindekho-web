@@ -16,7 +16,6 @@ export interface RouteStationInfo {
 
 export interface RouteTrainShared {
   train_no: number;
-  train_number_string: string;
   train_name: string;
   train_type: string;
   source: string;
@@ -52,15 +51,14 @@ export interface TrainsBetweenResult {
 
 export interface RouteTrainApiRecord {
   train_no: number;
-  train_number_string: string;
   train_name: string;
   train_type: string;
   source: string;
   destination: string;
   source_code: string;
   destination_code: string;
-  days_of_run: string;
-  classes: string;
+  days_of_run: string | DaysOfRun;
+  classes: string | string[];
   total_duration: number;
   total_distance: string;
   total_number_of_stops: number | string;

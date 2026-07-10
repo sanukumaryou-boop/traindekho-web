@@ -25,43 +25,37 @@ function getMaxRetries(): number {
   return Number.isFinite(n) && n >= 0 ? n : DEFAULT_MAX_RETRIES;
 }
 
-function parseDaysOfRun(value: string): DaysOfRun {
-  try {
-    return JSON.parse(value) as DaysOfRun;
-  } catch {
-    return {
-      mon: false,
-      tue: false,
-      wed: false,
-      thu: false,
-      fri: false,
-      sat: false,
-      sun: false,
-    };
-  }
-}
+const EMPTY_DAYS: DaysOfRun = {
+  mon: false,
+  tue: false,
+  wed: false,
+  thu: false,
+  fri: false,
+  sat: false,
+  sun: false,
+};
 
-function parseClasses(value: string): string[] {
+function parseJsonField<T>(value: unknown, fallback: T): T {
+  if (value == null) return fallback;
+  if (typeof value !== "string") return value as T;
   try {
-    const parsed = JSON.parse(value) as string[];
-    return Array.isArray(parsed) ? parsed : [];
+    return JSON.parse(value) as T;
   } catch {
-    return [];
+    return fallback;
   }
 }
 
 function parseRouteTrainBase(record: RouteTrainApiRecord) {
   return {
     train_no: record.train_no,
-    train_number_string: record.train_number_string,
     train_name: record.train_name,
     train_type: record.train_type,
     source: record.source,
     destination: record.destination,
     source_code: record.source_code,
     destination_code: record.destination_code,
-    days_of_run: parseDaysOfRun(record.days_of_run),
-    classes: parseClasses(record.classes),
+    days_of_run: parseJsonField<DaysOfRun>(record.days_of_run, EMPTY_DAYS),
+    classes: parseJsonField<string[]>(record.classes, []),
     total_duration: record.total_duration,
     total_distance: record.total_distance,
     total_number_of_stops: record.total_number_of_stops,
@@ -104,7 +98,7 @@ async function fetchTrainsBetweenOnce(
   from: string,
   to: string,
 ): Promise<TrainsBetweenResult | null | "retry"> {
-  const url = `${getTrainApiUrl()}/trains/between/v2?from=${encodeURIComponent(from)}&to=${encodeURIComponent(to)}`;
+  const url = `${getTrainApiUrl()}/trains/between?from=${encodeURIComponent(from)}&to=${encodeURIComponent(to)}`;
 
   try {
     const response = await fetch(url, {

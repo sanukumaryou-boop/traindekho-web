@@ -149,11 +149,7 @@ async function fetchTrainFromApi(trainNo: string): Promise<Train | null | "retry
       return null;
     }
 
-    const exact = data.find(
-      (t) =>
-        String(t.train_no) === trainNo ||
-        t.train_number_string === trainNo,
-    );
+    const exact = data.find((t) => String(t.train_no) === trainNo);
 
     return parseTrainRecord(exact ?? data[0]);
   } catch {
@@ -163,9 +159,6 @@ async function fetchTrainFromApi(trainNo: string): Promise<Train | null | "retry
 
 function cacheTrain(train: Train): void {
   trainCache.set(String(train.train_no), train);
-  if (train.train_number_string) {
-    trainCache.set(train.train_number_string, train);
-  }
 }
 
 function parseBatchResponse(data: unknown): TrainApiRecord[] {
@@ -251,7 +244,6 @@ export async function fetchTrainsByNumbers(
     const train = parseTrainRecord(record);
     cacheTrain(train);
     foundKeys.add(String(train.train_no));
-    if (train.train_number_string) foundKeys.add(train.train_number_string);
   }
 
   for (const no of uncached) {
@@ -353,7 +345,6 @@ function parseOriginDestinationRecord(
 ): TrainOriginDestination | null {
   const trainNo = pickString(record, [
     "train_no",
-    "train_number_string",
     "train_number",
   ]);
   const sourceCode = pickString(record, [

@@ -33,7 +33,6 @@ export interface Train {
   id: number;
   train_no: number;
   train_name: string;
-  train_number_string: string;
   train_type: string;
   source: string;
   destination: string;
@@ -51,7 +50,6 @@ export interface TrainApiRecord {
   id: number;
   train_no: number;
   train_name: string;
-  train_number_string: string;
   train_type: string;
   source: string;
   destination: string;

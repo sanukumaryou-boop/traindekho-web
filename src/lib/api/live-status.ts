@@ -36,7 +36,6 @@ function parseLiveStatusResponse(raw: Record<string, unknown>): TrainLiveStatusR
   return {
     train_no: raw.train_no as number | string,
     train_name: String(raw.train_name ?? ""),
-    train_number_string: String(raw.train_number_string ?? raw.train_no ?? ""),
     train_type: String(raw.train_type ?? ""),
     source: String(raw.source ?? raw.source_station ?? ""),
     destination: String(raw.destination ?? ""),
@@ -87,7 +86,7 @@ export async function fetchTrainLiveStatus(
     params.set("date", date.trim());
   }
 
-  const url = `${getTrainApiUrl()}/v2/status?${params.toString()}`;
+  const url = `${getTrainApiUrl()}/trains/live-status?${params.toString()}`;
 
   try {
     const response = await fetch(url, { cache: "no-store" });
