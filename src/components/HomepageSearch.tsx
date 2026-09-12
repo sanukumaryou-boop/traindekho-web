@@ -9,6 +9,7 @@ import RouteSearchForm from "@/components/route-search/RouteSearchForm";
 import AppInstallGate, {
   type AppInstallGateProps,
 } from "@/components/AppInstallGate";
+import HeroActionButton from "@/components/HeroActionButton";
 
 type Tab = "live" | "schedule" | "route" | "pnr";
 
@@ -46,11 +47,11 @@ export default function HomepageSearch() {
   }
 
   return (
-    <div className="w-full text-left">
+    <div className="w-full min-w-0 text-left bg-white rounded-2xl sm:rounded-3xl shadow-[0_24px_80px_rgba(0,0,0,0.28)] ring-1 ring-black/5 overflow-hidden">
       <div
         role="tablist"
         aria-label="Search type"
-        className="grid grid-cols-4 gap-1.5 sm:gap-2 mb-3"
+        className="grid grid-cols-4 border-b border-gray-100"
       >
         {TABS.map((item) => {
           const selected = tab === item.id;
@@ -62,10 +63,10 @@ export default function HomepageSearch() {
               aria-selected={selected}
               scroll={false}
               onClick={() => setGate(null)}
-              className={`flex flex-col sm:flex-row items-center justify-center gap-1 sm:gap-2 rounded-2xl px-2 py-2.5 sm:px-4 sm:py-3 text-[11px] sm:text-sm font-medium transition-colors ${
+              className={`flex min-w-0 flex-col sm:flex-row items-center justify-center gap-1 sm:gap-2 px-1 py-3 sm:px-4 sm:py-3.5 text-[11px] sm:text-sm font-medium transition-colors ${
                 selected
-                  ? "bg-white text-gray-900 shadow-sm"
-                  : "bg-white/10 text-white/85 hover:bg-white/20 hover:text-white backdrop-blur-md"
+                  ? "bg-blue-50 text-blue-700 shadow-[inset_0_-2px_0_0_#2563eb]"
+                  : "text-gray-500 hover:bg-gray-50 hover:text-gray-800"
               }`}
             >
               {item.icon}
@@ -75,7 +76,7 @@ export default function HomepageSearch() {
         })}
       </div>
 
-      <div className="w-full bg-white rounded-2xl sm:rounded-3xl shadow-[0_24px_80px_rgba(0,0,0,0.28)] ring-1 ring-black/5 p-4 sm:p-6 lg:p-7">
+      <div className="p-4 sm:p-6 lg:p-7">
         {gate ? (
           <AppInstallGate {...gate} onBack={() => setGate(null)} />
         ) : (
@@ -84,7 +85,7 @@ export default function HomepageSearch() {
               <TrainSearch
                 variant="hero"
                 inputId="hero-live-search"
-                submitLabel="Track Live"
+                submitLabel="Track"
                 hrefKind="live"
                 onSearch={() =>
                   logEvent("homepage_search", { tab: "live", has_query: true })
@@ -150,15 +151,9 @@ function PnrSearch({ onSubmit }: { onSubmit: (pnr: string) => void }) {
             setValue(next);
             if (error) setError("");
           }}
-          className="flex-1 w-full rounded-full border border-gray-200 bg-gray-50 px-5 py-[0.95rem] text-[0.95rem] text-gray-900 placeholder:text-gray-400 outline-none focus:border-blue-400 focus:bg-white focus:ring-2 focus:ring-blue-600/20 transition-colors"
+          className="flex-1 w-full rounded-full border border-gray-200 bg-gray-50 px-5 py-[0.95rem] text-base text-gray-900 placeholder:text-gray-400 outline-none focus:border-blue-400 focus:bg-white focus:ring-2 focus:ring-blue-600/20 transition-colors"
         />
-        <button
-          type="submit"
-          className="inline-flex items-center justify-center gap-2 rounded-full bg-blue-600 hover:bg-blue-700 text-white font-medium px-6 py-[0.95rem] text-[0.95rem] transition-colors whitespace-nowrap"
-        >
-          Check PNR
-          <ArrowIcon className="w-4 h-4" />
-        </button>
+        <HeroActionButton>Check PNR</HeroActionButton>
       </div>
       {error && (
         <p className="mt-2 text-sm text-red-600" role="alert">
@@ -208,20 +203,6 @@ function CalendarIcon({ className }: { className?: string }) {
       <path
         d="M19 4h-1V2h-2v2H8V2H6v2H5c-1.11 0-1.99.9-1.99 2L3 20c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 16H5V10h14v10zm0-12H5V6h14v2z"
         fill="currentColor"
-      />
-    </svg>
-  );
-}
-
-function ArrowIcon({ className }: { className?: string }) {
-  return (
-    <svg viewBox="0 0 24 24" fill="none" className={className} aria-hidden="true">
-      <path
-        d="M5 12h14M13 6l6 6-6 6"
-        stroke="currentColor"
-        strokeWidth="2"
-        strokeLinecap="round"
-        strokeLinejoin="round"
       />
     </svg>
   );

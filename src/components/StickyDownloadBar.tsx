@@ -3,21 +3,27 @@
 import { useEffect, useState } from "react";
 import { logEvent } from "@/lib/analytics";
 import { playStoreUrl } from "@/lib/google-play-href";
+import { useKeyboardOpen } from "@/hooks/useKeyboardOpen";
 
 const STORAGE_KEY = "traindekho-sticky-download-dismissed";
 
 export default function StickyDownloadBar() {
-  const [visible, setVisible] = useState(false);
+  const [downloadOffscreen, setDownloadOffscreen] = useState(false);
+  const [dismissed, setDismissed] = useState(false);
+  const keyboardOpen = useKeyboardOpen();
 
   useEffect(() => {
-    if (sessionStorage.getItem(STORAGE_KEY) === "1") return;
+    if (sessionStorage.getItem(STORAGE_KEY) === "1") {
+      setDismissed(true);
+      return;
+    }
 
     const download = document.getElementById("download");
     if (!download) return;
 
     const observer = new IntersectionObserver(
       ([entry]) => {
-        setVisible(!entry.isIntersecting);
+        setDownloadOffscreen(!entry.isIntersecting);
       },
       { threshold: 0.2 },
     );
@@ -25,18 +31,20 @@ export default function StickyDownloadBar() {
     return () => observer.disconnect();
   }, []);
 
-  if (!visible) return null;
+  const visible = downloadOffscreen && !keyboardOpen && !dismissed;
 
   function dismiss() {
     sessionStorage.setItem(STORAGE_KEY, "1");
-    setVisible(false);
+    setDismissed(true);
   }
+
+  if (!visible) return null;
 
   return (
     <div className="md:hidden fixed bottom-0 inset-x-0 z-40 pb-[env(safe-area-inset-bottom)]">
       <div className="mx-3 mb-3 flex items-center gap-3 rounded-2xl bg-gray-900 text-white shadow-2xl px-3 py-3">
         <p className="flex-1 text-sm font-semibold leading-snug">
-          Live tracking is in the app — free on Android
+          Live tracking is in the app — status, PNR, alerts & booking
         </p>
         <a
           href={playStoreUrl({ campaign: "sticky" })}

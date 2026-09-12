@@ -7,6 +7,7 @@ import { usePathname } from "next/navigation";
 import MobileNav from "@/components/MobileNav";
 import PlayStoreButton from "@/components/PlayStoreButton";
 import { mainNavLinks } from "@/components/nav-links";
+import { useKeyboardOpen } from "@/hooks/useKeyboardOpen";
 
 export default function Navbar() {
   const pathname = usePathname();
@@ -16,6 +17,7 @@ export default function Navbar() {
     pathname === "/pnr" ||
     pathname === "/schedule";
   const [scrolled, setScrolled] = useState(false);
+  const keyboardOpen = useKeyboardOpen();
 
   useEffect(() => {
     if (!isHome) return;
@@ -30,6 +32,8 @@ export default function Navbar() {
   }, [isHome]);
 
   const solid = !isHome || scrolled;
+
+  if (keyboardOpen) return null;
 
   return (
     <header

@@ -9,6 +9,7 @@ import {
   getLiveTrainStatusHref,
   getTrainScheduleHref,
 } from "@/lib/train-schedule-href";
+import HeroActionButton from "@/components/HeroActionButton";
 
 type TrainSearchProps = {
   variant?: "default" | "page" | "hero";
@@ -281,7 +282,7 @@ export default function TrainSearch({
             onKeyDown={handleKeyDown}
             className={
               isHero
-                ? "w-full rounded-full border border-gray-200 bg-gray-50 px-5 py-[0.95rem] text-[0.95rem] text-gray-900 placeholder:text-gray-400 outline-none focus:border-blue-400 focus:bg-white focus:ring-2 focus:ring-blue-600/20 transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
+                ? "w-full rounded-full border border-gray-200 bg-gray-50 px-5 py-[0.95rem] text-base text-gray-900 placeholder:text-gray-400 outline-none focus:border-blue-400 focus:bg-white focus:ring-2 focus:ring-blue-600/20 transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
                 : isPage
                 ? "w-full rounded-xl border border-gray-200 bg-white px-5 py-4 text-lg text-gray-900 placeholder:text-gray-400 outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
                 : "w-full rounded-xl border border-gray-200 bg-white px-4 py-3 text-gray-900 placeholder:text-gray-400 outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
@@ -316,38 +317,35 @@ export default function TrainSearch({
             )}
         </div>
 
-        <button
-          type="submit"
-          disabled={loading}
-          className={
-            isHero
-              ? "inline-flex w-full sm:w-auto items-center justify-center gap-2 rounded-full bg-blue-600 hover:bg-blue-700 disabled:bg-blue-600 disabled:opacity-50 text-white font-medium px-6 py-[0.95rem] text-[0.95rem] transition-colors whitespace-nowrap disabled:cursor-not-allowed"
-              : isPage
+        {isHero ? (
+          <HeroActionButton loading={loading}>{resolvedSubmitLabel}</HeroActionButton>
+        ) : (
+          <button
+            type="submit"
+            disabled={loading}
+            className={
+              isPage
                 ? "inline-flex w-full items-center justify-center gap-2 rounded-full bg-blue-600 hover:bg-blue-700 disabled:bg-blue-600 disabled:opacity-50 text-white font-medium px-6 py-3.5 transition-colors disabled:cursor-not-allowed"
                 : "inline-flex items-center justify-center gap-2 rounded-full bg-blue-600 hover:bg-blue-700 disabled:bg-blue-600 disabled:opacity-50 text-white font-medium px-6 py-3 whitespace-nowrap min-w-[9.5rem] transition-colors disabled:cursor-not-allowed"
-          }
-        >
-          {loading ? (
-            <>
-              <Spinner className="w-4 h-4" />
-              Loading…
-            </>
-          ) : isHero ? (
-            <>
-              {resolvedSubmitLabel}
-              <ArrowIcon className="w-4 h-4" />
-            </>
-          ) : (
-            <>
-              {submitLabel ? (
-                <LiveIcon className="w-4 h-4" />
-              ) : (
-                <ScheduleIcon className="w-4 h-4" />
-              )}
-              {resolvedSubmitLabel}
-            </>
-          )}
-        </button>
+            }
+          >
+            {loading ? (
+              <>
+                <Spinner className="w-4 h-4" />
+                Loading…
+              </>
+            ) : (
+              <>
+                {submitLabel ? (
+                  <LiveIcon className="w-4 h-4" />
+                ) : (
+                  <ScheduleIcon className="w-4 h-4" />
+                )}
+                {resolvedSubmitLabel}
+              </>
+            )}
+          </button>
+        )}
       </div>
       {error && (
         <p className="mt-2 text-sm text-red-600" role="alert">
@@ -355,20 +353,6 @@ export default function TrainSearch({
         </p>
       )}
     </form>
-  );
-}
-
-function ArrowIcon({ className }: { className?: string }) {
-  return (
-    <svg viewBox="0 0 24 24" fill="none" className={className} aria-hidden="true">
-      <path
-        d="M5 12h14M13 6l6 6-6 6"
-        stroke="currentColor"
-        strokeWidth="2"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      />
-    </svg>
   );
 }
 

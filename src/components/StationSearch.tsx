@@ -219,7 +219,7 @@ export default function StationSearch({
         onKeyDown={handleKeyDown}
         className={
           variant === "hero"
-            ? "w-full rounded-full border border-gray-200 bg-gray-50 px-5 py-[0.95rem] text-[0.95rem] text-gray-900 placeholder:text-gray-400 outline-none focus:border-blue-400 focus:bg-white focus:ring-2 focus:ring-blue-600/20 transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
+            ? "w-full rounded-full border border-gray-200 bg-gray-50 px-5 py-[0.95rem] text-base text-gray-900 placeholder:text-gray-400 outline-none focus:border-blue-400 focus:bg-white focus:ring-2 focus:ring-blue-600/20 transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
             : "w-full rounded-xl border border-gray-200 bg-white px-5 py-4 text-lg text-gray-900 placeholder:text-gray-400 outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
         }
       />

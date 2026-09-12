@@ -3,6 +3,7 @@
 import { FormEvent, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import StationSearch from "@/components/StationSearch";
+import HeroActionButton from "@/components/HeroActionButton";
 import { getRouteSearchHref } from "@/lib/route-search-slug";
 import type { Station } from "@/lib/types/route-search";
 
@@ -88,7 +89,7 @@ export default function RouteSearchForm({
     <StationSearch
       id={variant === "hero" ? "hero-route-from" : "route-from"}
       label="From"
-      placeholder={variant === "hero" ? "From" : "Station name or code"}
+      placeholder={variant === "hero" ? "From Station" : "Station name or code"}
       variant={variant === "hero" ? "hero" : "default"}
       value={from}
       onChange={(station) => {
@@ -103,7 +104,7 @@ export default function RouteSearchForm({
     <StationSearch
       id={variant === "hero" ? "hero-route-to" : "route-to"}
       label="To"
-      placeholder={variant === "hero" ? "To" : "Station name or code"}
+      placeholder={variant === "hero" ? "To Station" : "Station name or code"}
       variant={variant === "hero" ? "hero" : "default"}
       value={to}
       onChange={(station) => {
@@ -114,58 +115,66 @@ export default function RouteSearchForm({
     />
   );
 
-  const submitButton = (
-    <button
-      type="submit"
-      disabled={loading}
-      className={
-        variant === "hero"
-          ? "inline-flex shrink-0 items-center justify-center gap-2 rounded-full bg-blue-600 hover:bg-blue-700 disabled:bg-blue-600 disabled:opacity-50 text-white font-medium px-6 py-[0.95rem] text-[0.95rem] transition-colors whitespace-nowrap disabled:cursor-not-allowed"
-          : "mt-4 inline-flex w-full items-center justify-center gap-2 rounded-full bg-blue-600 hover:bg-blue-700 disabled:bg-blue-600 disabled:opacity-50 text-white font-medium px-6 py-3.5 transition-colors disabled:cursor-not-allowed"
-      }
-    >
-      {loading ? (
-        <>
-          <Spinner className="w-4 h-4" />
-          Searching…
-        </>
-      ) : (
-        <>
-          {variant === "hero" ? "Search trains" : "Search Trains"}
-          <ArrowIcon className="w-4 h-4" />
-        </>
-      )}
-    </button>
-  );
+  const submitButton =
+    variant === "hero" ? (
+      <HeroActionButton loading={loading} loadingLabel="Searching…">
+        Search Trains
+      </HeroActionButton>
+    ) : (
+      <button
+        type="submit"
+        disabled={loading}
+        className="mt-4 inline-flex w-full items-center justify-center gap-2 rounded-full bg-blue-600 hover:bg-blue-700 disabled:bg-blue-600 disabled:opacity-50 text-white font-medium px-6 py-3.5 transition-colors disabled:cursor-not-allowed"
+      >
+        {loading ? (
+          <>
+            <Spinner className="w-4 h-4" />
+            Searching…
+          </>
+        ) : (
+          <>
+            Search Trains
+            <ArrowIcon className="w-4 h-4" />
+          </>
+        )}
+      </button>
+    );
 
   const swapButton = (
+    extraClassName = "",
+  ) => (
     <button
       type="button"
       onClick={swapStations}
       disabled={loading || (!from && !to)}
       aria-label="Swap origin and destination"
-      className="inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-full border border-gray-200 bg-white text-gray-600 hover:bg-gray-50 hover:text-gray-900 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+      className={`inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-full border border-gray-300 bg-white text-gray-700 shadow-md hover:bg-gray-50 hover:text-gray-900 transition-colors disabled:bg-white disabled:text-gray-400 disabled:cursor-not-allowed ${extraClassName}`}
     >
       <SwapIcon className="w-5 h-5 rotate-90 sm:rotate-0" />
     </button>
   );
 
   return (
-    <form onSubmit={handleSubmit} className="w-full">
+    <form onSubmit={handleSubmit} className="w-full min-w-0">
       {variant === "hero" ? (
         <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
-          <div className="min-w-0 sm:flex-1">{fromField}</div>
-          <div className="flex justify-center">{swapButton}</div>
-          <div className="flex items-center gap-2 min-w-0 sm:flex-[1.6]">
-            <div className="min-w-0 flex-1">{toField}</div>
-            {submitButton}
+          <div className="relative min-w-0 sm:flex-1 [&_input]:pr-14 sm:[&_input]:pr-5">
+            {fromField}
+            {swapButton(
+              "absolute right-3 bottom-0 z-10 translate-y-1/2 sm:hidden",
+            )}
           </div>
+          <div className="hidden sm:block">{swapButton()}</div>
+          <div className="min-w-0 sm:flex-1 [&_input]:pr-14 sm:[&_input]:pr-5">
+            {toField}
+          </div>
+          {submitButton}
         </div>
       ) : (
         <>
           <div className="flex flex-col sm:flex-row sm:items-end gap-4">
             <div className="min-w-0 sm:flex-1">{fromField}</div>
-            <div className="flex justify-center sm:self-end">{swapButton}</div>
+            <div className="flex justify-center sm:self-end">{swapButton()}</div>
             <div className="min-w-0 sm:flex-1">{toField}</div>
           </div>
           {submitButton}

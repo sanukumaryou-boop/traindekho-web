@@ -6,7 +6,7 @@ const screens = [
     alt: "Train Dekho live tracking screen – real-time train location with delay info and station timeline",
     title: "Live train tracking",
     description:
-      "Last crossed station, delay in minutes, and a station timeline with actual vs scheduled times.",
+      "Last crossed station, delay in minutes, and a station timeline with actual vs scheduled times. Share it in one tap.",
   },
   {
     src: "/images/screenshot-home.png",
@@ -36,8 +36,8 @@ export default function Preview() {
             Clean, fast, and easy to use
           </h2>
           <p className="mt-4 text-gray-500 text-lg leading-relaxed">
-            Designed for real travellers — the information that matters, with
-            zero clutter.
+            Designed for real travellers — live status, PNR, alerts, and
+            booking, without the clutter.
           </p>
         </div>
 

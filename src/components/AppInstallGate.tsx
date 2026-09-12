@@ -58,8 +58,8 @@ export default function AppInstallGate({
 
   const description =
     kind === "pnr"
-      ? "PNR status, chart-prepare alerts, and journey updates are available on Android."
-      : "See current location, delay in minutes, and station-by-station progress on Android.";
+      ? "PNR status and PNR alerts are available on Android."
+      : "See live status, turn on live status alerts, and share tracking with anyone on Android.";
 
   return (
     <div className="text-left">

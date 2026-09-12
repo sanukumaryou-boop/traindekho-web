@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { Plus_Jakarta_Sans } from "next/font/google";
 
 import { FirebaseAnalytics } from "@/components/FirebaseAnalytics";
@@ -12,21 +12,30 @@ const plusJakartaSans = Plus_Jakarta_Sans({
   weight: ["400", "500", "600", "700", "800"],
 });
 
+export const viewport: Viewport = {
+  width: "device-width",
+  initialScale: 1,
+  maximumScale: 1,
+};
+
 export const metadata: Metadata = {
   metadataBase: new URL("https://traindekho.live"),
   title: {
-    default: "Train Dekho – Live Train Running Status & Schedule",
+    default: "Train Dekho – Live Train Status, PNR & Ticket Booking",
     template: "%s | Train Dekho",
   },
   description:
-    "Train Dekho lets you track live train running status, check schedules, find PNR status, and get real-time delay updates for every Indian Railways train — free on Android.",
+    "Train Dekho lets you track live train status, get live status and PNR alerts, check PNR, book tickets, and share live running status for Indian Railways — free on Android.",
   keywords: [
     "train running status",
     "live train status",
     "Indian Railways",
     "PNR status",
     "train schedule",
-    "train delay",
+    "pnr alerts",
+    "ticket booking",
+    "share live status",
+    "live status alerts",
     "where is my train",
     "train tracker India",
     "IRCTC train status",
@@ -40,9 +49,9 @@ export const metadata: Metadata = {
     locale: "en_IN",
     url: "https://traindekho.live",
     siteName: "Train Dekho",
-    title: "Train Dekho – Live Train Running Status & Schedule",
+    title: "Train Dekho – Live Train Status, PNR & Ticket Booking",
     description:
-      "Track any Indian Railways train in real time. Check live running status, departure & arrival times, and delay updates — all in one app.",
+      "Live status, PNR alerts, ticket booking, and share live running status for Indian Railways — all in one app.",
     images: [
       {
         url: "/images/og-image.png",
@@ -54,9 +63,9 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: "summary_large_image",
-    title: "Train Dekho – Live Train Running Status & Schedule",
+    title: "Train Dekho – Live Train Status, PNR & Ticket Booking",
     description:
-      "Track any Indian Railways train in real time. Live status, schedule, and delay updates.",
+      "Live status, PNR, alerts, ticket booking, and share live status for Indian Railways.",
     images: ["/images/og-image.png"],
   },
   robots: {

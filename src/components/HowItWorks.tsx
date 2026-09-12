@@ -1,21 +1,21 @@
 const steps = [
   {
     step: "01",
-    title: "Search your train",
+    title: "Search your train or PNR",
     description:
       "Enter a train number or name, a station-to-station route, or a 10-digit PNR.",
   },
   {
     step: "02",
-    title: "Pick your train",
+    title: "Track, check, or book",
     description:
-      "See departure times, duration, and the full schedule on the web — instantly.",
+      "See live status and delays, check PNR and berth details, or book tickets with seat availability.",
   },
   {
     step: "03",
-    title: "Track in the app",
+    title: "Turn on alerts and share",
     description:
-      "Open Train Dekho on Android for live location, delays, PNR, and station alarms.",
+      "Get live status and PNR alerts, and share live tracking with anyone in one tap.",
   },
 ];
 
@@ -34,7 +34,7 @@ export default function HowItWorks() {
             id="how-it-works-heading"
             className="text-3xl sm:text-4xl font-semibold text-gray-900 tracking-tight"
           >
-            Track any train in 3 steps
+            From search to alerts in 3 steps
           </h2>
         </div>
 

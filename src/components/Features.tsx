@@ -8,22 +8,9 @@ const features = [
         />
       </svg>
     ),
-    title: "Live running status",
+    title: "Live status",
     description:
       "See where your train is right now — last station, delay in minutes, and actual vs scheduled times at every stop.",
-  },
-  {
-    icon: (
-      <svg viewBox="0 0 24 24" fill="none" className="w-5 h-5">
-        <path
-          d="M20 4H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 4l-8 5-8-5V6l8 5 8-5v2z"
-          fill="currentColor"
-        />
-      </svg>
-    ),
-    title: "PNR status",
-    description:
-      "Check confirmation, coach and berth, and get chart-prepare alerts for your journey — no login required.",
   },
   {
     icon: (
@@ -34,22 +21,61 @@ const features = [
         />
       </svg>
     ),
-    title: "Station arrival alarms",
+    title: "Live status alerts",
     description:
-      "Get a push alert before your station so you can pack up and get off without staring at the timeline.",
+      "Get a push alert when the train is delayed, running late, or approaching your station — so you don’t have to keep checking.",
   },
   {
     icon: (
       <svg viewBox="0 0 24 24" fill="none" className="w-5 h-5">
         <path
-          d="M11.99 2C6.47 2 2 6.48 2 12s4.47 10 9.99 10C17.52 22 22 17.52 22 12S17.52 2 11.99 2zm6.93 6h-2.95a15.65 15.65 0 00-1.38-3.56A8.03 8.03 0 0117.93 8zM12 4.04c.83 1.2 1.48 2.53 1.91 3.96h-3.82c.43-1.43 1.08-2.76 1.91-3.96zM4.26 14C4.1 13.36 4 12.69 4 12s.1-1.36.26-2h3.38c-.08.66-.14 1.32-.14 2s.06 1.34.14 2H4.26zm.82 2h2.95c.32 1.25.78 2.45 1.38 3.56A7.987 7.987 0 015.08 16zm2.95-8H5.08a7.987 7.987 0 014.33-3.56A15.65 15.65 0 008.03 8zM12 19.96c-.83-1.2-1.48-2.53-1.91-3.96h3.82c-.43 1.43-1.08 2.76-1.91 3.96zM14.34 14H9.66c-.09-.66-.16-1.32-.16-2s.07-1.35.16-2h4.68c.09.65.16 1.32.16 2s-.07 1.34-.16 2zm.25 5.56c.6-1.11 1.06-2.31 1.38-3.56h2.95a8.03 8.03 0 01-4.33 3.56zM16.36 14c.08-.66.14-1.32.14-2s-.06-1.34-.14-2h3.38c.16.64.26 1.31.26 2s-.1 1.36-.26 2h-3.38z"
+          d="M22 10V6c0-1.11-.9-2-2-2H4c-1.1 0-1.99.89-1.99 2v4c1.1 0 1.99.9 1.99 2s-.89 2-2 2v4c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2v-4c-1.1 0-2-.9-2-2s.9-2 2-2zm-9 7.5h-2v-2h2v2zm0-4.5h-2v-2h2v2zm0-4.5h-2v-2h2v2z"
           fill="currentColor"
         />
       </svg>
     ),
-    title: "Hindi + English",
+    title: "PNR status",
     description:
-      "Station names, status updates, and the full interface in the language you prefer.",
+      "Enter a 10-digit PNR to see confirmation, coach, berth, and chart status — no login required.",
+  },
+  {
+    icon: (
+      <svg viewBox="0 0 24 24" fill="none" className="w-5 h-5">
+        <path
+          d="M20 4H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 4l-8 5-8-5V6l8 5 8-5v2z"
+          fill="currentColor"
+        />
+      </svg>
+    ),
+    title: "PNR alerts",
+    description:
+      "Turn on alerts for a waitlisted or RAC ticket and get notified when the status changes or the chart is prepared.",
+  },
+  {
+    icon: (
+      <svg viewBox="0 0 24 24" fill="none" className="w-5 h-5">
+        <path
+          d="M17 3H7c-1.1 0-1.99.9-1.99 2L5 21l7-3 7 3V5c0-1.1-.9-2-2-2z"
+          fill="currentColor"
+        />
+      </svg>
+    ),
+    title: "Ticket booking",
+    description:
+      "Search trains between stations, check class-wise seat availability, and book tickets from the app.",
+  },
+  {
+    icon: (
+      <svg viewBox="0 0 24 24" fill="none" className="w-5 h-5">
+        <path
+          d="M18 16.08c-.76 0-1.44.3-1.96.77L8.91 12.7c.05-.23.09-.46.09-.7s-.04-.47-.09-.7l7.05-4.11c.54.5 1.25.81 2.04.81 1.66 0 3-1.34 3-3s-1.34-3-3-3-3 1.34-3 3c0 .24.04.47.09.7L8.04 9.81C7.5 9.31 6.79 9 6 9c-1.66 0-3 1.34-3 3s1.34 3 3 3c.79 0 1.5-.31 2.04-.81l7.12 4.16c-.05.21-.08.43-.08.65 0 1.61 1.31 2.92 2.92 2.92s2.92-1.31 2.92-2.92-1.31-2.92-2.92-2.92z"
+          fill="currentColor"
+        />
+      </svg>
+    ),
+    title: "Share live status",
+    description:
+      "Send the live running status to family or friends in one tap, so they can follow the same train without the app setup.",
   },
 ];
 
@@ -63,21 +89,22 @@ export default function Features() {
       <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="max-w-2xl mb-12">
           <p className="text-[11px] font-medium uppercase tracking-[0.18em] text-gray-400 mb-3">
-            Why the app
+            App features
           </p>
           <h2
             id="features-heading"
             className="text-3xl sm:text-4xl font-semibold text-gray-900 tracking-tight"
           >
-            Built for the journey, not just the timetable
+            Everything you need for the journey
           </h2>
           <p className="mt-4 text-gray-500 text-lg leading-relaxed">
-            Schedules and route search work here on the web. Live tracking, PNR,
-            and alarms live in Train Dekho on Android.
+            Live status, PNR, alerts, ticket booking, and sharing — all in
+            Train Dekho on Android. Schedules and route search also work here
+            on the web.
           </p>
         </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-px rounded-3xl overflow-hidden ring-1 ring-gray-200 bg-gray-200">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-px rounded-3xl overflow-hidden ring-1 ring-gray-200 bg-gray-200">
           {features.map((f) => (
             <div key={f.title} className="bg-white p-7 sm:p-8">
               <div className="flex items-center justify-between mb-5">

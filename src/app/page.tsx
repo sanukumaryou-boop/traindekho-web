@@ -4,9 +4,9 @@ import { HOMEPAGE_FAQ } from "@/lib/homepage-faq";
 import { buildFaqPageJsonLd } from "@/lib/train-schedule-faq";
 
 export const metadata: Metadata = {
-  title: "Train Dekho – Live Train Running Status & Schedule",
+  title: "Train Dekho – Live Train Status, PNR & Ticket Booking",
   description:
-    "Track any Indian Railways train in real time. Check live running status in the app, and look up station-by-station schedules and trains between stations on the web — free on Android.",
+    "Track live train status, get live status and PNR alerts, check PNR, book tickets, and share live running status for Indian Railways — free on Android.",
 };
 
 const jsonLd = {
@@ -18,7 +18,7 @@ const jsonLd = {
       url: "https://traindekho.live",
       name: "Train Dekho",
       description:
-        "Live train running status and schedule for Indian Railways",
+        "Live train status, PNR, alerts, ticket booking, and sharing for Indian Railways",
       inLanguage: "en-IN",
       potentialAction: {
         "@type": "SearchAction",
@@ -35,7 +35,7 @@ const jsonLd = {
       "@id": "https://traindekho.live/#app",
       name: "Train Dekho",
       description:
-        "Track any Indian Railways train in real time. Check live running status, station schedules, PNR status, and delay alerts.",
+        "Track any Indian Railways train in real time. Live status, live status alerts, PNR status, PNR alerts, ticket booking, and share live status.",
       applicationCategory: "TravelApplication",
       operatingSystem: "Android",
       offers: {
