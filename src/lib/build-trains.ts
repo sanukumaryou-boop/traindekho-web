@@ -21,6 +21,7 @@ import trainDurontoNumbers from "@/lib/train_duronto.json";
 import trainMailExpressNumbers from "@/lib/train_mailexpress.json";
 import trainTejasExpressNumbers from "@/lib/train_tejas.json";
 import trainGareebrathNumbers from "@/lib/train_gareebrath.json";
+import { listTrains } from "@/lib/search-trains";
 
 const STATION_CODE_PATTERN = /^[A-Z0-9]{2,6}$/;
 
@@ -182,8 +183,27 @@ function writeRouteSlugCacheFromTrains(): void {
   );
 }
 
-export async function discoverTrainSlugsForSitemap(): Promise<string[]> {
+/** Sitemap slugs from bundled trains.json — never hits the train API at build. */
+export function discoverTrainSlugsForSitemap(): string[] {
   const cached = readSlugCache();
-  if (cached && !shouldRefreshTrainCache()) return cached;
-  return discoverTrainSlugsForBuild();
+  if (cached && cached.length > 0) return cached;
+
+  const slugs: string[] = [];
+  for (const train of listTrains()) {
+    const name = train.train_name?.trim();
+    const sourceCode = train.source_code?.trim();
+    const destCode = train.destination_code?.trim();
+    if (!name || !sourceCode || !destCode) continue;
+    slugs.push(
+      buildTrainSlug({
+        train_no: train.train_no,
+        train_name: name,
+        source_code: sourceCode,
+        destination_code: destCode,
+        source: train.source ?? "",
+        destination: train.destination ?? "",
+      }),
+    );
+  }
+  return slugs;
 }

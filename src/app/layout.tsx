@@ -19,7 +19,7 @@ export const metadata: Metadata = {
     template: "%s | Train Dekho",
   },
   description:
-    "Train Dekho lets you track live train running status, check schedules, find PNR status, and get real-time delay updates for every Indian Railways train — right from your phone.",
+    "Train Dekho lets you track live train running status, check schedules, find PNR status, and get real-time delay updates for every Indian Railways train — free on Android.",
   keywords: [
     "train running status",
     "live train status",
@@ -48,7 +48,7 @@ export const metadata: Metadata = {
         url: "/images/og-image.png",
         width: 1200,
         height: 630,
-        alt: "Train Dekho App",
+        alt: "Train Dekho – live train status for Indian Railways",
       },
     ],
   },

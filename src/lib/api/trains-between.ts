@@ -1,4 +1,4 @@
-import { getTrainApiUrl } from "@/lib/train-api-url";
+import { getTrainApiUrl, trainApiTimeout } from "@/lib/train-api-url";
 import type {
   AlternativeRouteTrain,
   DirectRouteTrain,
@@ -9,7 +9,7 @@ import type {
 import type { DaysOfRun } from "@/lib/types/train";
 
 const RETRYABLE_STATUS = new Set([429, 500, 502, 503, 504]);
-const DEFAULT_MAX_RETRIES = 4;
+const DEFAULT_MAX_RETRIES = 1;
 
 function sleep(ms: number): Promise<void> {
   return new Promise((resolve) => setTimeout(resolve, ms));
@@ -103,6 +103,7 @@ async function fetchTrainsBetweenOnce(
   try {
     const response = await fetch(url, {
       next: { revalidate: 3600 },
+      signal: trainApiTimeout(),
     });
 
     if (RETRYABLE_STATUS.has(response.status)) {

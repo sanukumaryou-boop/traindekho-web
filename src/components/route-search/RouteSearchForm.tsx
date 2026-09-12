@@ -9,11 +9,15 @@ import type { Station } from "@/lib/types/route-search";
 type RouteSearchFormProps = {
   initialFrom?: string;
   initialTo?: string;
+  variant?: "default" | "hero";
+  onSearch?: () => void;
 };
 
 export default function RouteSearchForm({
   initialFrom = "",
   initialTo = "",
+  variant = "default",
+  onSearch,
 }: RouteSearchFormProps) {
   const router = useRouter();
   const [from, setFrom] = useState<Station | null>(
@@ -70,51 +74,103 @@ export default function RouteSearchForm({
 
     setError("");
     setLoading(true);
+    onSearch?.();
     router.push(getRouteSearchHref(from.station_code, to.station_code));
   }
 
+  function swapStations() {
+    setFrom(to);
+    setTo(from);
+    if (error) setError("");
+  }
+
+  const fromField = (
+    <StationSearch
+      id={variant === "hero" ? "hero-route-from" : "route-from"}
+      label="From"
+      placeholder={variant === "hero" ? "From" : "Station name or code"}
+      variant={variant === "hero" ? "hero" : "default"}
+      value={from}
+      onChange={(station) => {
+        setFrom(station);
+        if (error) setError("");
+      }}
+      disabled={loading}
+    />
+  );
+
+  const toField = (
+    <StationSearch
+      id={variant === "hero" ? "hero-route-to" : "route-to"}
+      label="To"
+      placeholder={variant === "hero" ? "To" : "Station name or code"}
+      variant={variant === "hero" ? "hero" : "default"}
+      value={to}
+      onChange={(station) => {
+        setTo(station);
+        if (error) setError("");
+      }}
+      disabled={loading}
+    />
+  );
+
+  const submitButton = (
+    <button
+      type="submit"
+      disabled={loading}
+      className={
+        variant === "hero"
+          ? "inline-flex shrink-0 items-center justify-center gap-2 rounded-full bg-blue-600 hover:bg-blue-700 disabled:bg-blue-600 disabled:opacity-50 text-white font-medium px-6 py-[0.95rem] text-[0.95rem] transition-colors whitespace-nowrap disabled:cursor-not-allowed"
+          : "mt-4 inline-flex w-full items-center justify-center gap-2 rounded-full bg-blue-600 hover:bg-blue-700 disabled:bg-blue-600 disabled:opacity-50 text-white font-medium px-6 py-3.5 transition-colors disabled:cursor-not-allowed"
+      }
+    >
+      {loading ? (
+        <>
+          <Spinner className="w-4 h-4" />
+          Searching…
+        </>
+      ) : (
+        <>
+          {variant === "hero" ? "Search trains" : "Search Trains"}
+          <ArrowIcon className="w-4 h-4" />
+        </>
+      )}
+    </button>
+  );
+
+  const swapButton = (
+    <button
+      type="button"
+      onClick={swapStations}
+      disabled={loading || (!from && !to)}
+      aria-label="Swap origin and destination"
+      className="inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-full border border-gray-200 bg-white text-gray-600 hover:bg-gray-50 hover:text-gray-900 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+    >
+      <SwapIcon className="w-5 h-5 rotate-90 sm:rotate-0" />
+    </button>
+  );
+
   return (
     <form onSubmit={handleSubmit} className="w-full">
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-        <StationSearch
-          id="route-from"
-          label="From"
-          value={from}
-          onChange={(station) => {
-            setFrom(station);
-            if (error) setError("");
-          }}
-          disabled={loading}
-        />
-        <StationSearch
-          id="route-to"
-          label="To"
-          value={to}
-          onChange={(station) => {
-            setTo(station);
-            if (error) setError("");
-          }}
-          disabled={loading}
-        />
-      </div>
-
-      <button
-        type="submit"
-        disabled={loading}
-        className="mt-4 inline-flex w-full items-center justify-center gap-2 rounded-xl bg-blue-600 hover:bg-blue-700 disabled:bg-blue-600 disabled:opacity-80 text-white font-semibold px-6 py-3.5 shadow-sm transition-colors disabled:cursor-not-allowed"
-      >
-        {loading ? (
-          <>
-            <Spinner className="w-4 h-4" />
-            Searching…
-          </>
-        ) : (
-          <>
-            <SearchIcon className="w-4 h-4" />
-            Search Trains
-          </>
-        )}
-      </button>
+      {variant === "hero" ? (
+        <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
+          <div className="min-w-0 sm:flex-1">{fromField}</div>
+          <div className="flex justify-center">{swapButton}</div>
+          <div className="flex items-center gap-2 min-w-0 sm:flex-[1.6]">
+            <div className="min-w-0 flex-1">{toField}</div>
+            {submitButton}
+          </div>
+        </div>
+      ) : (
+        <>
+          <div className="flex flex-col sm:flex-row sm:items-end gap-4">
+            <div className="min-w-0 sm:flex-1">{fromField}</div>
+            <div className="flex justify-center sm:self-end">{swapButton}</div>
+            <div className="min-w-0 sm:flex-1">{toField}</div>
+          </div>
+          {submitButton}
+        </>
+      )}
 
       {error && (
         <p className="mt-2 text-sm text-red-600" role="alert">
@@ -125,12 +181,29 @@ export default function RouteSearchForm({
   );
 }
 
-function SearchIcon({ className }: { className?: string }) {
+function SwapIcon({ className }: { className?: string }) {
   return (
     <svg viewBox="0 0 24 24" fill="none" className={className} aria-hidden="true">
       <path
-        d="M15.5 14h-.79l-.28-.27A6.471 6.471 0 0016 9.5 6.5 6.5 0 109.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"
-        fill="currentColor"
+        d="M7 10h11M15 6l4 4-4 4M17 14H6M9 18l-4-4 4-4"
+        stroke="currentColor"
+        strokeWidth="1.8"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+    </svg>
+  );
+}
+
+function ArrowIcon({ className }: { className?: string }) {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" className={className} aria-hidden="true">
+      <path
+        d="M5 12h14M13 6l6 6-6 6"
+        stroke="currentColor"
+        strokeWidth="2"
+        strokeLinecap="round"
+        strokeLinejoin="round"
       />
     </svg>
   );

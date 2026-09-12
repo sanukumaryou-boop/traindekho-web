@@ -1,4 +1,4 @@
-import { getTrainApiUrl } from "@/lib/train-api-url";
+import { getTrainApiUrl, trainApiTimeout } from "@/lib/train-api-url";
 import type { Station } from "@/lib/types/route-search";
 import stationsData from "@/lib/stations.json";
 
@@ -31,7 +31,48 @@ function toStation(station: {
   };
 }
 
-/** Search stations via the train API (`GET /stations?q=`). */
+function searchStationsLocal(query: string, limit: number): Station[] {
+  const q = query.trim().toLowerCase();
+  if (q.length < 2) return [];
+
+  const codeQuery = q.replace(/[^a-z0-9]/g, "").toUpperCase();
+  const stations = getStations();
+  const exactCode: Station[] = [];
+  const codePrefix: Station[] = [];
+  const nameStarts: Station[] = [];
+  const nameContains: Station[] = [];
+
+  for (const station of stations) {
+    const parsed = toStation(station);
+    if (!parsed) continue;
+
+    const code = parsed.station_code.toUpperCase();
+    const name = parsed.station_name.toLowerCase();
+
+    if (code === codeQuery) {
+      exactCode.push(parsed);
+      continue;
+    }
+    if (codeQuery.length >= 2 && code.startsWith(codeQuery)) {
+      codePrefix.push(parsed);
+      continue;
+    }
+    if (name.startsWith(q)) {
+      nameStarts.push(parsed);
+      continue;
+    }
+    if (name.includes(q)) {
+      nameContains.push(parsed);
+    }
+  }
+
+  return [...exactCode, ...codePrefix, ...nameStarts, ...nameContains].slice(
+    0,
+    limit,
+  );
+}
+
+/** Search stations via the train API (`GET /stations?q=`), then local JSON. */
 export async function searchStations(
   query: string,
   limit = 8,
@@ -43,27 +84,34 @@ export async function searchStations(
     const url = `${getTrainApiUrl()}/stations?q=${encodeURIComponent(q)}`;
     const response = await fetch(url, {
       next: { revalidate: 3600 },
+      signal: trainApiTimeout(),
     });
-    if (!response.ok) return [];
+    if (response.ok) {
+      const data = (await response.json()) as unknown;
+      const records = Array.isArray(data)
+        ? data
+        : data &&
+            typeof data === "object" &&
+            Array.isArray((data as { stations?: unknown }).stations)
+          ? (data as { stations: unknown[] }).stations
+          : [];
 
-    const data = (await response.json()) as unknown;
-    const records = Array.isArray(data)
-      ? data
-      : data &&
-          typeof data === "object" &&
-          Array.isArray((data as { stations?: unknown }).stations)
-        ? (data as { stations: unknown[] }).stations
-        : [];
+      const parsed = records
+        .map((record) =>
+          toStation(
+            record as { id?: number; station_name?: string; station_code?: string },
+          ),
+        )
+        .filter((station): station is Station => station !== null)
+        .slice(0, limit);
 
-    return records
-      .map((record) =>
-        toStation(record as { id?: number; station_name?: string; station_code?: string }),
-      )
-      .filter((station): station is Station => station !== null)
-      .slice(0, limit);
+      if (parsed.length > 0) return parsed;
+    }
   } catch {
-    return [];
+    // Fall through to the bundled station list.
   }
+
+  return searchStationsLocal(q, limit);
 }
 
 export function findStationByCode(code: string): Station | undefined {

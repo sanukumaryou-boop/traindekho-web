@@ -1,6 +1,6 @@
 import TrainSearch from "@/components/TrainSearch";
 import TrainScheduleLiveStatusLink from "@/components/train-schedule/TrainScheduleLiveStatusLink";
-import { GOOGLE_PLAY_APP_URL } from "@/lib/google-play-href";
+import PlayStoreButton from "@/components/PlayStoreButton";
 
 type TrainScheduleActionsProps = {
   showSearch?: boolean;
@@ -56,27 +56,15 @@ export default function TrainScheduleActions({
               ? `Live tracking, delay alerts & more for train ${trainNo}.`
               : "Live train tracking, route search & delay alerts on Android.")}
         </p>
-        <a
-          href={GOOGLE_PLAY_APP_URL}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="inline-flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-semibold px-5 py-2.5 rounded-full transition-colors shadow-sm"
-        >
-          <PlayStoreIcon className="w-4 h-4" />
-          Get it on Google Play
-        </a>
+        <PlayStoreButton
+          placement="schedule"
+          medium="web"
+          variant="primary"
+          label="Get it on Google Play"
+          className="!px-5 !py-2.5 !text-sm !rounded-full"
+        />
       </section>
     </div>
   );
 }
 
-function PlayStoreIcon({ className }: { className?: string }) {
-  return (
-    <svg viewBox="0 0 512 512" className={className} aria-hidden="true">
-      <path fill="#EA4335" d="M325.3 234.3L104.6 13l280.8 161.2-60.1 60.1z" />
-      <path fill="#4285F4" d="M47 0C34 6.8 25.3 19.2 25.3 35.3v441.3c0 16.1 8.7 28.5 21.7 35.3l256.6-256L47 0z" />
-      <path fill="#FBBC04" d="M425.2 225.6l-58.9-34.1-65.7 64.5 65.7 64.5 60.1-34.1c17.1-9.8 17.1-35.1-.1-44.9z" />
-      <path fill="#34A853" d="M104.6 499l280.8-161.2-60.1-60.1L104.6 499z" />
-    </svg>
-  );
-}

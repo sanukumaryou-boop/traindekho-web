@@ -2,18 +2,39 @@
 
 import { useRouter } from "next/navigation";
 import { FormEvent, useCallback, useEffect, useId, useRef, useState } from "react";
-import { titleCase } from "@/lib/format";
+import { createPortal } from "react-dom";
 import type { TrainListItem } from "@/lib/types/train-list";
+import TrainSuggestions from "@/components/TrainSuggestions";
+import {
+  getLiveTrainStatusHref,
+  getTrainScheduleHref,
+} from "@/lib/train-schedule-href";
 
 type TrainSearchProps = {
-  variant?: "default" | "page";
+  variant?: "default" | "page" | "hero";
+  inputId?: string;
+  submitLabel?: string;
+  hrefKind?: "schedule" | "live";
+  onSearch?: () => void;
+  onSelectTrain?: (
+    trainNo: number,
+    train?: TrainListItem,
+  ) => void | Promise<void>;
 };
 
-export default function TrainSearch({ variant = "default" }: TrainSearchProps) {
+export default function TrainSearch({
+  variant = "default",
+  inputId = "train-search",
+  submitLabel,
+  hrefKind = "schedule",
+  onSearch,
+  onSelectTrain,
+}: TrainSearchProps) {
   const router = useRouter();
   const listboxId = useId();
   const containerRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
+  const dropdownRef = useRef<HTMLDivElement>(null);
 
   const [query, setQuery] = useState("");
   const [error, setError] = useState("");
@@ -23,38 +44,69 @@ export default function TrainSearch({ variant = "default" }: TrainSearchProps) {
   const [activeIndex, setActiveIndex] = useState(-1);
   const [searching, setSearching] = useState(false);
   const [pendingTrainNo, setPendingTrainNo] = useState<number | null>(null);
+  const [mounted, setMounted] = useState(false);
+  const [dropdownPosition, setDropdownPosition] = useState<{
+    top: number;
+    left: number;
+    width: number;
+  } | null>(null);
 
   const isPage = variant === "page";
+  const isHero = variant === "hero";
+  const resolvedSubmitLabel = submitLabel ?? "View Schedule";
+  const suggestions = query.trim().length >= 2 ? results : [];
 
   const navigateToTrain = useCallback(
-    async (trainNo: number | string) => {
+    async (trainNo: number | string, train?: TrainListItem) => {
       const digits = String(trainNo).replace(/\D/g, "");
       if (!digits || loading) return;
       setError("");
       setLoading(true);
       setPendingTrainNo(Number(digits));
+      onSearch?.();
+
+      if (onSelectTrain) {
+        await onSelectTrain(Number(digits), train);
+        setLoading(false);
+        setPendingTrainNo(null);
+        return;
+      }
+
+      const live = hrefKind === "live";
+      if (train) {
+        router.push(live ? getLiveTrainStatusHref(train) : getTrainScheduleHref(train));
+        return;
+      }
 
       try {
         const res = await fetch(`/api/trains/lookup?no=${encodeURIComponent(digits)}`);
         if (res.ok) {
-          const { href } = (await res.json()) as { href: string };
-          router.push(href);
+          const data = (await res.json()) as {
+            href: string;
+            liveStatusHref?: string;
+          };
+          router.push(live ? data.liveStatusHref || `/live-train-status/${digits}` : data.href);
           return;
         }
       } catch {
         // fall through to number-only URL
       }
 
-      router.push(`/train-schedule/${digits}`);
+      router.push(live ? `/live-train-status/${digits}` : `/train-schedule/${digits}`);
     },
-    [router, loading],
+    [router, loading, onSelectTrain, onSearch, hrefKind],
   );
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   useEffect(() => {
     const q = query.trim();
     if (q.length < 2) {
       setResults([]);
       setSearching(false);
+      setOpen(false);
       return;
     }
 
@@ -68,12 +120,12 @@ export default function TrainSearch({ variant = "default" }: TrainSearchProps) {
         if (!res.ok) throw new Error("Search failed");
         const data = (await res.json()) as TrainListItem[];
         setResults(data);
-        setOpen(data.length > 0);
+        setOpen(true);
         setActiveIndex(-1);
       } catch (err) {
         if ((err as Error).name !== "AbortError") {
           setResults([]);
-          setOpen(false);
+          setOpen(true);
         }
       } finally {
         setSearching(false);
@@ -87,9 +139,38 @@ export default function TrainSearch({ variant = "default" }: TrainSearchProps) {
   }, [query]);
 
   useEffect(() => {
+    function updatePosition() {
+      if (!inputRef.current) return;
+      const rect = inputRef.current.getBoundingClientRect();
+      setDropdownPosition({
+        top: rect.bottom + 8,
+        left: rect.left,
+        width: rect.width,
+      });
+    }
+
+    if (!open) {
+      setDropdownPosition(null);
+      return;
+    }
+
+    updatePosition();
+    window.addEventListener("resize", updatePosition);
+    window.addEventListener("scroll", updatePosition, true);
+    return () => {
+      window.removeEventListener("resize", updatePosition);
+      window.removeEventListener("scroll", updatePosition, true);
+    };
+  }, [open]);
+
+  useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
       if (loading) return;
-      if (!containerRef.current?.contains(event.target as Node)) {
+      const target = event.target as Node;
+      if (
+        !containerRef.current?.contains(target) &&
+        !dropdownRef.current?.contains(target)
+      ) {
         setOpen(false);
         setActiveIndex(-1);
       }
@@ -109,21 +190,22 @@ export default function TrainSearch({ variant = "default" }: TrainSearchProps) {
 
     const digits = trimmed.replace(/\D/g, "");
     if (digits.length >= 4 && digits.length <= 5 && trimmed === digits) {
-      navigateToTrain(digits);
+      const match = suggestions.find((train) => String(train.train_no) === digits);
+      navigateToTrain(digits, match);
       return;
     }
 
-    if (activeIndex >= 0 && results[activeIndex]) {
-      navigateToTrain(results[activeIndex].train_no);
+    if (activeIndex >= 0 && suggestions[activeIndex]) {
+      navigateToTrain(suggestions[activeIndex].train_no, suggestions[activeIndex]);
       return;
     }
 
-    if (results.length === 1) {
-      navigateToTrain(results[0].train_no);
+    if (suggestions.length === 1) {
+      navigateToTrain(suggestions[0].train_no, suggestions[0]);
       return;
     }
 
-    if (results.length > 0) {
+    if (suggestions.length > 0) {
       setError("Select a train from the list");
       setOpen(true);
       return;
@@ -133,24 +215,24 @@ export default function TrainSearch({ variant = "default" }: TrainSearchProps) {
   }
 
   function handleSelect(train: TrainListItem) {
-    navigateToTrain(train.train_no);
+    navigateToTrain(train.train_no, train);
   }
 
   function handleKeyDown(e: React.KeyboardEvent<HTMLInputElement>) {
-    if (!open || results.length === 0) {
+    if (!open || suggestions.length === 0) {
       if (e.key === "Escape") setOpen(false);
       return;
     }
 
     if (e.key === "ArrowDown") {
       e.preventDefault();
-      setActiveIndex((prev) => (prev + 1) % results.length);
+      setActiveIndex((prev) => (prev + 1) % suggestions.length);
     } else if (e.key === "ArrowUp") {
       e.preventDefault();
-      setActiveIndex((prev) => (prev <= 0 ? results.length - 1 : prev - 1));
+      setActiveIndex((prev) => (prev <= 0 ? suggestions.length - 1 : prev - 1));
     } else if (e.key === "Enter" && activeIndex >= 0) {
       e.preventDefault();
-      handleSelect(results[activeIndex]);
+      handleSelect(suggestions[activeIndex]);
     } else if (e.key === "Escape") {
       setOpen(false);
       setActiveIndex(-1);
@@ -160,16 +242,20 @@ export default function TrainSearch({ variant = "default" }: TrainSearchProps) {
   return (
     <form onSubmit={handleSubmit} className="w-full">
       <label
-        htmlFor="train-search"
-        className={`block font-semibold text-gray-700 mb-2 ${isPage ? "text-xs uppercase tracking-wider text-gray-500" : "text-sm"}`}
+        htmlFor={inputId}
+        className={
+          isHero
+            ? "sr-only"
+            : `block font-semibold text-gray-700 mb-2 ${isPage ? "text-xs uppercase tracking-wider text-gray-500" : "text-sm"}`
+        }
       >
         {isPage ? "Search" : "Train number or name"}
       </label>
-      <div className={isPage ? "flex flex-col gap-3" : "flex flex-col sm:flex-row gap-3"}>
+      <div className={isPage ? "flex flex-col gap-3" : isHero ? "flex flex-col sm:flex-row gap-2" : "flex flex-col sm:flex-row gap-3"}>
         <div ref={containerRef} className={isPage ? "relative w-full" : "relative flex-1"}>
           <input
             ref={inputRef}
-            id="train-search"
+            id={inputId}
             type="search"
             autoComplete="off"
             role="combobox"
@@ -179,7 +265,9 @@ export default function TrainSearch({ variant = "default" }: TrainSearchProps) {
             aria-activedescendant={
               activeIndex >= 0 ? `${listboxId}-option-${activeIndex}` : undefined
             }
-            placeholder={isPage ? "e.g. 12951 or Rajdhani Express" : "Train number or name"}
+            placeholder={
+              isHero || isPage ? "e.g. 12951 or Rajdhani Express" : "Train number or name"
+            }
             value={query}
             disabled={loading}
             onChange={(e) => {
@@ -188,11 +276,13 @@ export default function TrainSearch({ variant = "default" }: TrainSearchProps) {
               if (e.target.value.trim().length >= 2) setOpen(true);
             }}
             onFocus={() => {
-              if (results.length > 0) setOpen(true);
+              if (query.trim().length >= 2) setOpen(true);
             }}
             onKeyDown={handleKeyDown}
             className={
-              isPage
+              isHero
+                ? "w-full rounded-full border border-gray-200 bg-gray-50 px-5 py-[0.95rem] text-[0.95rem] text-gray-900 placeholder:text-gray-400 outline-none focus:border-blue-400 focus:bg-white focus:ring-2 focus:ring-blue-600/20 transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
+                : isPage
                 ? "w-full rounded-xl border border-gray-200 bg-white px-5 py-4 text-lg text-gray-900 placeholder:text-gray-400 outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
                 : "w-full rounded-xl border border-gray-200 bg-white px-4 py-3 text-gray-900 placeholder:text-gray-400 outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
             }
@@ -204,68 +294,37 @@ export default function TrainSearch({ variant = "default" }: TrainSearchProps) {
             </div>
           )}
 
-          {open && results.length > 0 && (
-            <ul
-              id={listboxId}
-              role="listbox"
-              className="absolute z-30 mt-2 w-full max-h-72 overflow-y-auto rounded-xl border border-gray-200 bg-white shadow-lg py-1"
-            >
-              {results.map((train, index) => {
-                const isNavigating = loading && pendingTrainNo === train.train_no;
-
-                return (
-                  <li
-                    key={train.id}
-                    id={`${listboxId}-option-${index}`}
-                    role="option"
-                    aria-selected={index === activeIndex}
-                  >
-                    <button
-                      type="button"
-                      disabled={loading}
-                      onMouseDown={(e) => {
-                        e.preventDefault();
-                        handleSelect(train);
-                      }}
-                      className={`w-full px-4 py-3 text-left transition-colors disabled:cursor-wait ${
-                        isNavigating || index === activeIndex
-                          ? "bg-blue-50"
-                          : "hover:bg-gray-50"
-                      }`}
-                    >
-                      <div className="flex items-start justify-between gap-3">
-                        <div className="min-w-0 flex items-start gap-2">
-                          {isNavigating && (
-                            <Spinner className="w-4 h-4 text-blue-600 mt-0.5 shrink-0" />
-                          )}
-                          <div className="min-w-0">
-                            <p className="font-mono text-sm font-bold text-blue-600">
-                              {train.train_no}
-                            </p>
-                            <p className="text-sm font-medium text-gray-900 truncate">
-                              {titleCase(train.train_name)}
-                            </p>
-                          </div>
-                        </div>
-                        <p className="shrink-0 text-xs text-gray-500 pt-0.5">
-                          {train.source_code ?? "—"} → {train.destination_code ?? "—"}
-                        </p>
-                      </div>
-                    </button>
-                  </li>
-                );
-              })}
-            </ul>
-          )}
+          {mounted &&
+            open &&
+            dropdownPosition &&
+            (searching || query.trim().length >= 2) &&
+            createPortal(
+              <TrainSuggestions
+                listboxId={listboxId}
+                results={suggestions}
+                activeIndex={activeIndex}
+                query={query}
+                searching={searching}
+                loading={loading}
+                pendingTrainNo={pendingTrainNo}
+                disabled={loading}
+                position={dropdownPosition}
+                listRef={dropdownRef}
+                onSelect={handleSelect}
+              />,
+              document.body,
+            )}
         </div>
 
         <button
           type="submit"
           disabled={loading}
           className={
-            isPage
-              ? "inline-flex w-full items-center justify-center gap-2 rounded-xl bg-blue-600 hover:bg-blue-700 disabled:bg-blue-600 disabled:opacity-80 text-white font-semibold px-6 py-3.5 shadow-sm transition-colors disabled:cursor-not-allowed"
-              : "inline-flex items-center justify-center gap-2 rounded-xl bg-blue-600 hover:bg-blue-700 disabled:bg-blue-600 disabled:opacity-80 text-white font-semibold px-6 py-3 shadow-sm transition-colors whitespace-nowrap min-w-[9.5rem] disabled:cursor-not-allowed"
+            isHero
+              ? "inline-flex w-full sm:w-auto items-center justify-center gap-2 rounded-full bg-blue-600 hover:bg-blue-700 disabled:bg-blue-600 disabled:opacity-50 text-white font-medium px-6 py-[0.95rem] text-[0.95rem] transition-colors whitespace-nowrap disabled:cursor-not-allowed"
+              : isPage
+                ? "inline-flex w-full items-center justify-center gap-2 rounded-full bg-blue-600 hover:bg-blue-700 disabled:bg-blue-600 disabled:opacity-50 text-white font-medium px-6 py-3.5 transition-colors disabled:cursor-not-allowed"
+                : "inline-flex items-center justify-center gap-2 rounded-full bg-blue-600 hover:bg-blue-700 disabled:bg-blue-600 disabled:opacity-50 text-white font-medium px-6 py-3 whitespace-nowrap min-w-[9.5rem] transition-colors disabled:cursor-not-allowed"
           }
         >
           {loading ? (
@@ -273,10 +332,19 @@ export default function TrainSearch({ variant = "default" }: TrainSearchProps) {
               <Spinner className="w-4 h-4" />
               Loading…
             </>
+          ) : isHero ? (
+            <>
+              {resolvedSubmitLabel}
+              <ArrowIcon className="w-4 h-4" />
+            </>
           ) : (
             <>
-              <ScheduleIcon className="w-4 h-4" />
-              View Schedule
+              {submitLabel ? (
+                <LiveIcon className="w-4 h-4" />
+              ) : (
+                <ScheduleIcon className="w-4 h-4" />
+              )}
+              {resolvedSubmitLabel}
             </>
           )}
         </button>
@@ -290,11 +358,36 @@ export default function TrainSearch({ variant = "default" }: TrainSearchProps) {
   );
 }
 
+function ArrowIcon({ className }: { className?: string }) {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" className={className} aria-hidden="true">
+      <path
+        d="M5 12h14M13 6l6 6-6 6"
+        stroke="currentColor"
+        strokeWidth="2"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+    </svg>
+  );
+}
+
 function ScheduleIcon({ className }: { className?: string }) {
   return (
     <svg viewBox="0 0 24 24" fill="none" className={className} aria-hidden="true">
       <path
         d="M17 12h-5v5h5v-5zM16 1v2H8V1H6v2H5c-1.11 0-1.99.9-1.99 2L3 19c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2h-1V1h-2zm3 18H5V8h14v11z"
+        fill="currentColor"
+      />
+    </svg>
+  );
+}
+
+function LiveIcon({ className }: { className?: string }) {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" className={className} aria-hidden="true">
+      <path
+        d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5a2.5 2.5 0 110-5 2.5 2.5 0 010 5z"
         fill="currentColor"
       />
     </svg>

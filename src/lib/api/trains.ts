@@ -1,5 +1,5 @@
 import fs from "fs";
-import { getTrainApiUrl } from "@/lib/train-api-url";
+import { getTrainApiUrl, trainApiTimeout } from "@/lib/train-api-url";
 import {
   ensureTrainBuildCacheDir,
   resolveCacheFile,
@@ -147,6 +147,7 @@ async function fetchTrainFromApi(trainNo: string): Promise<Train | null | "retry
   try {
     const response = await fetch(url, {
       next: { revalidate: 86400 },
+      signal: trainApiTimeout(),
     });
 
     if (RETRYABLE_STATUS.has(response.status)) {
@@ -197,6 +198,7 @@ async function fetchTrainsBatchFromApi(
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ train_nos: trainNos }),
       cache: "no-store",
+      signal: trainApiTimeout(),
     });
 
     if (RETRYABLE_STATUS.has(response.status)) {
@@ -313,7 +315,10 @@ export async function fetchAllTrainNumbers(): Promise<string[]> {
   const url = `${getTrainApiUrl()}/trains/all`;
 
   try {
-    const response = await fetch(url, { cache: "no-store" });
+    const response = await fetch(url, {
+      cache: "no-store",
+      signal: trainApiTimeout(),
+    });
     if (!response.ok) return [];
 
     const data = (await response.json()) as

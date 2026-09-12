@@ -4,9 +4,13 @@ import Link from "next/link";
 import { useEffect, useState } from "react";
 import { createPortal } from "react-dom";
 import { mainNavLinks } from "@/components/nav-links";
-import { GOOGLE_PLAY_APP_URL } from "@/lib/google-play-href";
+import PlayStoreButton from "@/components/PlayStoreButton";
 
-export default function MobileNav() {
+type MobileNavProps = {
+  tone?: "light" | "dark";
+};
+
+export default function MobileNav({ tone = "dark" }: MobileNavProps) {
   const [open, setOpen] = useState(false);
   const [mounted, setMounted] = useState(false);
 
@@ -25,71 +29,78 @@ export default function MobileNav() {
     setOpen(false);
   }
 
-  const drawer = open && mounted
-    ? createPortal(
-        <>
-          <button
-            type="button"
-            aria-label="Close navigation menu"
-            className="fixed inset-0 z-[100] bg-black/50 md:hidden"
-            onClick={close}
-          />
+  const drawer =
+    open && mounted
+      ? createPortal(
+          <>
+            <button
+              type="button"
+              aria-label="Close navigation menu"
+              className="fixed inset-0 z-[100] bg-black/50 md:hidden"
+              onClick={close}
+            />
 
-          <aside
-            id="mobile-nav-drawer"
-            className="fixed top-0 left-0 z-[110] h-dvh w-72 max-w-[85vw] bg-white shadow-2xl border-r border-gray-200 flex flex-col md:hidden"
-            aria-hidden={false}
-          >
-            <div className="flex items-center justify-between h-16 px-4 border-b border-gray-100 shrink-0">
-              <span className="text-lg font-bold text-gray-900">Menu</span>
-              <button
-                type="button"
-                onClick={close}
-                className="inline-flex items-center justify-center w-10 h-10 rounded-lg text-gray-700 hover:bg-gray-100 transition-colors"
-                aria-label="Close navigation menu"
+            <aside
+              id="mobile-nav-drawer"
+              className="fixed top-0 left-0 z-[110] h-dvh w-72 max-w-[85vw] bg-white shadow-2xl flex flex-col md:hidden"
+              aria-hidden={false}
+            >
+              <div className="flex items-center justify-between h-16 px-4 border-b border-gray-100 shrink-0">
+                <span className="text-lg font-semibold text-gray-900">Menu</span>
+                <button
+                  type="button"
+                  onClick={close}
+                  className="inline-flex items-center justify-center w-10 h-10 rounded-lg text-gray-700 hover:bg-gray-100 transition-colors"
+                  aria-label="Close navigation menu"
+                >
+                  <CloseIcon className="w-5 h-5" />
+                </button>
+              </div>
+
+              <nav
+                className="flex-1 overflow-y-auto px-3 py-4"
+                aria-label="Mobile navigation"
               >
-                <CloseIcon className="w-5 h-5" />
-              </button>
-            </div>
+                <ul className="space-y-1">
+                  {mainNavLinks.map((link) => (
+                    <li key={link.href}>
+                      <Link
+                        href={link.href}
+                        onClick={close}
+                        className="block rounded-xl px-4 py-3 text-base font-medium text-gray-700 hover:bg-gray-50 hover:text-gray-900 transition-colors"
+                      >
+                        {link.label}
+                      </Link>
+                    </li>
+                  ))}
+                </ul>
+              </nav>
 
-            <nav className="flex-1 overflow-y-auto px-3 py-4" aria-label="Mobile navigation">
-              <ul className="space-y-1">
-                {mainNavLinks.map((link) => (
-                  <li key={link.href}>
-                    <Link
-                      href={link.href}
-                      onClick={close}
-                      className="block rounded-xl px-4 py-3 text-base font-medium text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition-colors"
-                    >
-                      {link.label}
-                    </Link>
-                  </li>
-                ))}
-              </ul>
-            </nav>
-
-            <div className="p-4 border-t border-gray-100 shrink-0">
-              <a
-                href={GOOGLE_PLAY_APP_URL}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="flex items-center justify-center w-full bg-blue-600 hover:bg-blue-700 text-white text-sm font-semibold px-4 py-3 rounded-xl transition-colors shadow-sm"
-              >
-                Download the App
-              </a>
-            </div>
-          </aside>
-        </>,
-        document.body,
-      )
-    : null;
+              <div className="p-4 border-t border-gray-100 shrink-0">
+                <PlayStoreButton
+                  placement="nav"
+                  medium="web"
+                  variant="primary"
+                  label="Download the App"
+                  className="w-full !px-4 !py-3 !text-sm"
+                />
+              </div>
+            </aside>
+          </>,
+          document.body,
+        )
+      : null;
 
   return (
     <>
       <button
         type="button"
         onClick={() => setOpen(true)}
-        className="md:hidden inline-flex items-center justify-center w-10 h-10 -ml-2 rounded-lg text-gray-700 hover:bg-gray-100 transition-colors"
+        className={`md:hidden inline-flex items-center justify-center w-10 h-10 -ml-1 rounded-lg transition-colors ${
+          tone === "light"
+            ? "text-white hover:bg-white/10"
+            : "text-gray-700 hover:bg-gray-100"
+        }`}
         aria-label="Open navigation menu"
         aria-expanded={open}
         aria-controls="mobile-nav-drawer"

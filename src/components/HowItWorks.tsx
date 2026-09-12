@@ -1,53 +1,59 @@
 const steps = [
   {
     step: "01",
-    title: "Search Your Train",
+    title: "Search your train",
     description:
-      "Enter the origin and destination stations or type the train number or name in the search box.",
+      "Enter a train number or name, a station-to-station route, or a 10-digit PNR.",
   },
   {
     step: "02",
-    title: "Pick Your Train",
+    title: "Pick your train",
     description:
-      "Choose from the list of trains on that route. See departure times, duration, and available classes.",
+      "See departure times, duration, and the full schedule on the web — instantly.",
   },
   {
     step: "03",
-    title: "Track in Real Time",
+    title: "Track in the app",
     description:
-      "Open the live status screen to see exactly where the train is, current delay, and upcoming stops.",
+      "Open Train Dekho on Android for live location, delays, PNR, and station alarms.",
   },
 ];
 
 export default function HowItWorks() {
   return (
-    <section className="py-20 sm:py-28 bg-gradient-to-br from-blue-700 to-sky-500">
+    <section
+      className="py-20 sm:py-24 bg-white"
+      aria-labelledby="how-it-works-heading"
+    >
       <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="text-center mb-14">
-          <span className="inline-block text-sky-200 text-sm font-semibold uppercase tracking-widest mb-3">
-            How It Works
-          </span>
-          <h2 className="text-3xl sm:text-4xl font-extrabold text-white tracking-tight">
-            Track Any Train in 3 Simple Steps
+        <div className="max-w-2xl mb-12">
+          <p className="text-[11px] font-medium uppercase tracking-[0.18em] text-gray-400 mb-3">
+            How it works
+          </p>
+          <h2
+            id="how-it-works-heading"
+            className="text-3xl sm:text-4xl font-semibold text-gray-900 tracking-tight"
+          >
+            Track any train in 3 steps
           </h2>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8 relative">
-          {/* connecting line */}
-          <div className="hidden md:block absolute top-8 left-1/6 right-1/6 h-0.5 bg-white/20" />
-
+        <ol className="grid grid-cols-1 md:grid-cols-3 gap-6">
           {steps.map((s) => (
-            <div key={s.step} className="relative text-center">
-              <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-white/15 border-2 border-white/30 text-white font-extrabold text-xl mb-5 backdrop-blur-sm">
+            <li
+              key={s.step}
+              className="rounded-3xl bg-gray-50 p-7 sm:p-8"
+            >
+              <span className="block font-mono text-sm font-medium text-gray-400 mb-4">
                 {s.step}
-              </div>
-              <h3 className="text-xl font-bold text-white mb-2">{s.title}</h3>
-              <p className="text-blue-100 text-base leading-relaxed">
-                {s.description}
-              </p>
-            </div>
+              </span>
+              <h3 className="text-xl font-semibold text-gray-900 mb-2">
+                {s.title}
+              </h3>
+              <p className="text-gray-500 leading-relaxed">{s.description}</p>
+            </li>
           ))}
-        </div>
+        </ol>
       </div>
     </section>
   );

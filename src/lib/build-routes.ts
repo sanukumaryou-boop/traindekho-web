@@ -4,6 +4,7 @@ import {
   getCachedTrainOriginDestinations,
 } from "@/lib/api/trains";
 import { getTrainNumbersFromFile } from "@/lib/build-trains";
+import { listTrains } from "@/lib/search-trains";
 import { buildRouteSearchSlug } from "@/lib/route-search-slug";
 import {
   ensureTrainBuildCacheDir,
@@ -132,28 +133,27 @@ export async function discoverRouteSlugsForBuild(): Promise<string[]> {
   return slugs;
 }
 
-export async function discoverRouteSlugsForSitemap(): Promise<string[]> {
+/** Sitemap route slugs from bundled trains.json — never hits the train API at build. */
+export function discoverRouteSlugsForSitemap(): string[] {
   const cached = readRouteSlugCache();
-  if (cached && !shouldRefreshTrainCache()) return cached;
+  if (cached && cached.length > 0) return cached;
 
-  // Train schedule discovery may still be writing caches in parallel.
-  for (let attempt = 0; attempt < 180; attempt++) {
-    await sleep(1000);
-
-    const fromDisk = readRouteSlugCache();
-    if (fromDisk) return fromDisk;
-
-    const fromTrains = getCachedTrainOriginDestinations();
-    if (fromTrains.length > 0) {
-      const slugs = routeSlugsFromOriginDestinations(fromTrains);
-      writeRouteSlugCache(slugs);
-      console.log(
-        `[search-route] Built ${slugs.length} routes from train cache for sitemap`,
-      );
-      return slugs;
-    }
-  }
-
-  // Last resort only — avoids hammering OD API during the train batch phase.
-  return discoverRouteSlugsForBuild();
+  const slugs = routeSlugsFromOriginDestinations(
+    listTrains().flatMap((train) => {
+      const source_code = train.source_code?.trim() ?? "";
+      const destination_code = train.destination_code?.trim() ?? "";
+      if (!source_code || !destination_code) return [];
+      return [
+        {
+          train_no: String(train.train_no),
+          source_code,
+          destination_code,
+        },
+      ];
+    }),
+  );
+  console.log(
+    `[search-route] Built ${slugs.length} sitemap routes from bundled train list`,
+  );
+  return slugs;
 }

@@ -6,6 +6,7 @@ import TrainSearch from "@/components/TrainSearch";
 import TrainScheduleActions from "@/components/train-schedule/TrainScheduleActions";
 import TrainScheduleFAQ from "@/components/train-schedule/TrainScheduleFAQ";
 import { getTrainScheduleHref } from "@/lib/train-schedule-href";
+import { POPULAR_TRAINS } from "@/lib/popular-trains";
 import {
   buildFaqPageJsonLd,
   TRAIN_SCHEDULE_INDEX_FAQ,
@@ -19,15 +20,6 @@ export const metadata: Metadata = {
     canonical: "https://traindekho.live/train-schedule",
   },
 };
-
-const POPULAR_TRAINS = [
-  { no: "12951", name: "Rajdhani Express", route: "NDLS → MMCT" },
-  { no: "12002", name: "Shatabdi Express", route: "NDLS → KOTA" },
-  { no: "12301", name: "Rajdhani Express", route: "NDLS → HWH" },
-  { no: "22439", name: "Vande Bharat", route: "NDLS → SHM" },
-  { no: "12627", name: "Karnataka Express", route: "NDLS → SBC" },
-  { no: "12952", name: "Rajdhani Express", route: "MMCT → NDLS" },
-];
 
 const jsonLd = {
   "@context": "https://schema.org",

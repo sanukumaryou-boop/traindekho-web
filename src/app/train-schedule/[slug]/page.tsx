@@ -14,7 +14,6 @@ import TrainScheduleActions from "@/components/train-schedule/TrainScheduleActio
 import TrainScheduleLiveStatusLink from "@/components/train-schedule/TrainScheduleLiveStatusLink";
 import TrainScheduleFAQ from "@/components/train-schedule/TrainScheduleFAQ";
 import { fetchTrainByNumber } from "@/lib/api/trains";
-import { discoverTrainSlugsForBuild } from "@/lib/build-trains";
 import {
   formatDuration,
   formatScheduleTime,
@@ -36,9 +35,10 @@ interface PageProps {
   params: Promise<{ slug: string }>;
 }
 
+// Pages stay in sitemap.xml; generate on first request (ISR) so deploys skip
+// fetching and pre-rendering thousands of train schedule pages.
 export async function generateStaticParams() {
-  const slugs = await discoverTrainSlugsForBuild();
-  return slugs.map((slug) => ({ slug }));
+  return [];
 }
 
 const getTrain = cache(async (slug: string): Promise<Train | null> => {

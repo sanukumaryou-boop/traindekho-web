@@ -10,6 +10,11 @@ function getTrains(): TrainListItem[] {
   return cachedTrains;
 }
 
+/** Full bundled train list used for sitemap URLs (no API). */
+export function listTrains(): TrainListItem[] {
+  return getTrains();
+}
+
 export function searchTrains(query: string, limit = 8): TrainListItem[] {
   const q = query.trim().toLowerCase();
   if (q.length < 2) return [];

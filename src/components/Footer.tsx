@@ -1,5 +1,6 @@
 import Image from "next/image";
 import Link from "next/link";
+import { playStoreUrl } from "@/lib/google-play-href";
 
 export default function Footer() {
   return (
@@ -16,7 +17,7 @@ export default function Footer() {
                 height={36}
                 className="rounded-lg"
               />
-              <span className="text-white font-bold text-lg">Train Dekho</span>
+              <span className="text-white font-semibold text-lg">Train Dekho</span>
             </Link>
             <p className="text-sm max-w-xs leading-relaxed">
               Real-time Indian Railways train tracking, live running status, and
@@ -30,6 +31,14 @@ export default function Footer() {
             <Link href="/live-train-status" className="hover:text-white transition-colors">Live Train Status</Link>
             <Link href="/search-route" className="hover:text-white transition-colors">Search Route</Link>
             <Link href="/#download" className="hover:text-white transition-colors">Download</Link>
+            <a
+              href={playStoreUrl({ campaign: "footer", medium: "web" })}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="hover:text-white transition-colors"
+            >
+              Google Play
+            </a>
             <Link href="/privacy" className="hover:text-white transition-colors">Privacy Policy</Link>
             <Link href="/terms" className="hover:text-white transition-colors">Terms of Use</Link>
             <Link href="/contact" className="hover:text-white transition-colors">Contact</Link>

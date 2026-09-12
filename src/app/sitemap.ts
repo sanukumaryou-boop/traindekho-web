@@ -68,7 +68,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       priority: 0.7,
     }));
   } catch {
-    // API unavailable during build — static pages still included
+    // Bundled train list unavailable — static pages still included
   }
 
   let routePages: MetadataRoute.Sitemap = [];
@@ -81,7 +81,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       priority: 0.7,
     }));
   } catch {
-    // API unavailable during build — static pages still included
+    // Bundled train list unavailable — static pages still included
   }
 
   return [...staticPages, ...trainPages, ...liveStatusPages, ...routePages];

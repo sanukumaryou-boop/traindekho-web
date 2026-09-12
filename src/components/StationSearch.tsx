@@ -4,6 +4,7 @@ import { useEffect, useId, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { titleCase } from "@/lib/format";
 import type { Station } from "@/lib/types/route-search";
+import StationSuggestions from "@/components/StationSuggestions";
 
 type StationSearchProps = {
   id: string;
@@ -12,6 +13,7 @@ type StationSearchProps = {
   value: Station | null;
   onChange: (station: Station | null) => void;
   disabled?: boolean;
+  variant?: "default" | "hero";
 };
 
 type DropdownPosition = {
@@ -27,10 +29,11 @@ export default function StationSearch({
   value,
   onChange,
   disabled = false,
+  variant = "default",
 }: StationSearchProps) {
   const listboxId = useId();
   const containerRef = useRef<HTMLDivElement>(null);
-  const dropdownRef = useRef<HTMLUListElement>(null);
+  const dropdownRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
 
   const [query, setQuery] = useState(value ? formatStationLabel(value) : "");
@@ -48,9 +51,7 @@ export default function StationSearch({
   }, []);
 
   useEffect(() => {
-    if (value) {
-      setQuery(formatStationLabel(value));
-    }
+    setQuery(value ? formatStationLabel(value) : "");
   }, [value]);
 
   useEffect(() => {
@@ -64,6 +65,7 @@ export default function StationSearch({
     if (q.length < 2) {
       setResults([]);
       setSearching(false);
+      setOpen(false);
       return;
     }
 
@@ -77,7 +79,7 @@ export default function StationSearch({
         if (!res.ok) throw new Error("Search failed");
         const data = (await res.json()) as Station[];
         setResults(data);
-        setOpen(data.length > 0);
+        setOpen(true);
         setActiveIndex(-1);
       } catch (err) {
         if ((err as Error).name !== "AbortError") {
@@ -106,7 +108,7 @@ export default function StationSearch({
       });
     }
 
-    if (!open || results.length === 0) {
+    if (!open) {
       setDropdownPosition(null);
       return;
     }
@@ -118,7 +120,7 @@ export default function StationSearch({
       window.removeEventListener("resize", updatePosition);
       window.removeEventListener("scroll", updatePosition, true);
     };
-  }, [open, results.length]);
+  }, [open]);
 
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
@@ -165,55 +167,29 @@ export default function StationSearch({
   }
 
   const dropdown =
-    mounted && open && results.length > 0 && dropdownPosition ? (
-      <ul
-        ref={dropdownRef}
-        id={listboxId}
-        role="listbox"
-        style={{
-          position: "fixed",
-          top: dropdownPosition.top,
-          left: dropdownPosition.left,
-          width: dropdownPosition.width,
-          zIndex: 60,
-        }}
-        className="max-h-72 overflow-y-auto rounded-xl border border-gray-200 bg-white shadow-lg py-1"
-      >
-        {results.map((station, index) => (
-          <li
-            key={station.id}
-            id={`${listboxId}-option-${index}`}
-            role="option"
-            aria-selected={index === activeIndex}
-          >
-            <button
-              type="button"
-              disabled={disabled}
-              onMouseDown={(e) => {
-                e.preventDefault();
-                handleSelect(station);
-              }}
-              className={`w-full px-4 py-3 text-left transition-colors disabled:cursor-not-allowed ${
-                index === activeIndex ? "bg-blue-50" : "hover:bg-gray-50"
-              }`}
-            >
-              <p className="font-mono text-sm font-bold text-blue-600">
-                {station.station_code}
-              </p>
-              <p className="text-sm font-medium text-gray-900 truncate">
-                {titleCase(station.station_name)}
-              </p>
-            </button>
-          </li>
-        ))}
-      </ul>
+    mounted && open && dropdownPosition && (searching || query.trim().length >= 2) ? (
+      <StationSuggestions
+        listboxId={listboxId}
+        results={results}
+        activeIndex={activeIndex}
+        query={query}
+        searching={searching}
+        disabled={disabled}
+        position={dropdownPosition}
+        listRef={dropdownRef}
+        onSelect={handleSelect}
+      />
     ) : null;
 
   return (
     <div ref={containerRef} className="relative w-full">
       <label
         htmlFor={id}
-        className="block text-xs font-semibold uppercase tracking-wider text-gray-500 mb-2"
+        className={
+          variant === "hero"
+            ? "sr-only"
+            : "block text-xs font-semibold uppercase tracking-wider text-gray-500 mb-2"
+        }
       >
         {label}
       </label>
@@ -241,11 +217,15 @@ export default function StationSearch({
           if (results.length > 0) setOpen(true);
         }}
         onKeyDown={handleKeyDown}
-        className="w-full rounded-xl border border-gray-200 bg-white px-5 py-4 text-lg text-gray-900 placeholder:text-gray-400 outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
+        className={
+          variant === "hero"
+            ? "w-full rounded-full border border-gray-200 bg-gray-50 px-5 py-[0.95rem] text-[0.95rem] text-gray-900 placeholder:text-gray-400 outline-none focus:border-blue-400 focus:bg-white focus:ring-2 focus:ring-blue-600/20 transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
+            : "w-full rounded-xl border border-gray-200 bg-white px-5 py-4 text-lg text-gray-900 placeholder:text-gray-400 outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
+        }
       />
 
       {searching && (
-        <div className="pointer-events-none absolute right-4 top-[calc(50%+0.75rem)] -translate-y-1/2">
+        <div className={`pointer-events-none absolute right-4 -translate-y-1/2 ${variant === "hero" ? "top-1/2" : "top-[calc(50%+0.75rem)]"}`}>
           <Spinner className="w-4 h-4 text-gray-400" />
         </div>
       )}

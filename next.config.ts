@@ -1,8 +1,15 @@
 import type { NextConfig } from "next";
+import { getTrainApiUrl } from "./src/lib/train-api-url";
 
 const nextConfig: NextConfig = {
   compress: true,
   poweredByHeader: false,
+  env: {
+    TRAIN_API_URL: getTrainApiUrl(),
+  },
+  images: {
+    localPatterns: [{ pathname: "/images/**" }],
+  },
   async headers() {
     return [
       {

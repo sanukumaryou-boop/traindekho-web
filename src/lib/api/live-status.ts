@@ -1,4 +1,4 @@
-import { getTrainApiUrl } from "@/lib/train-api-url";
+import { getTrainApiUrl, trainApiTimeout } from "@/lib/train-api-url";
 import type {
   DaysOfRun,
 } from "@/lib/types/train";
@@ -89,8 +89,23 @@ export async function fetchTrainLiveStatus(
   const url = `${getTrainApiUrl()}/trains/live-status?${params.toString()}`;
 
   try {
-    const response = await fetch(url, { cache: "no-store" });
-    const body = (await response.json()) as Record<string, unknown>;
+    const response = await fetch(url, {
+      cache: "no-store",
+      signal: trainApiTimeout(25000),
+    });
+    const text = await response.text();
+    let body: Record<string, unknown> = {};
+    if (text.trim()) {
+      try {
+        body = JSON.parse(text) as Record<string, unknown>;
+      } catch {
+        return {
+          ok: false,
+          status: 502,
+          message: "Live status service returned an unexpected response.",
+        };
+      }
+    }
 
     if (!response.ok) {
       const detail = body.detail;
@@ -102,11 +117,18 @@ export async function fetchTrainLiveStatus(
     }
 
     return { ok: true, data: parseLiveStatusResponse(body) };
-  } catch {
+  } catch (error) {
+    const timedOut =
+      error instanceof Error &&
+      (error.name === "TimeoutError" ||
+        error.name === "AbortError" ||
+        error.message.toLowerCase().includes("abort"));
     return {
       ok: false,
       status: 502,
-      message: "Could not reach the live status service. Please try again.",
+      message: timedOut
+        ? "Live status took too long. Please try again."
+        : "Could not reach the live status service. Please try again.",
     };
   }
 }
