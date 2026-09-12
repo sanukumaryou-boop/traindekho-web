@@ -1,7 +1,7 @@
 import Navbar from "@/components/Navbar";
 import Hero from "@/components/Hero";
 import Features from "@/components/Features";
-import Preview from "@/components/Preview";
+// import Preview from "@/components/Preview";
 import HowItWorks from "@/components/HowItWorks";
 import HomepageFAQ from "@/components/HomepageFAQ";
 import DownloadCTA from "@/components/DownloadCTA";
@@ -15,7 +15,7 @@ export default function HomeShell() {
       <main>
         <Hero />
         <Features />
-        <Preview />
+        {/* <Preview /> */}
         <HowItWorks />
         <HomepageFAQ />
         <DownloadCTA />
