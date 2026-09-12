@@ -25,7 +25,7 @@ export const metadata: Metadata = {
     template: "%s | Train Dekho",
   },
   description:
-    "Train Dekho lets you track live train status, get live status and PNR alerts, check PNR, book tickets, and share live running status for Indian Railways — free on Android.",
+    "Train Dekho lets you track live train status, get alternative train recommendations when booking, check PNR, and share live running status for Indian Railways — free on Android.",
   keywords: [
     "train running status",
     "live train status",
@@ -33,6 +33,7 @@ export const metadata: Metadata = {
     "PNR status",
     "train schedule",
     "pnr alerts",
+    "alternative trains",
     "ticket booking",
     "share live status",
     "live status alerts",

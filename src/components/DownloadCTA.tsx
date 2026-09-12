@@ -24,8 +24,8 @@ export default function DownloadCTA() {
           Download Train Dekho — it&apos;s free
         </h2>
         <p className="text-zinc-400 text-lg mb-10 max-w-xl mx-auto leading-relaxed">
-          Live running status, PNR, alerts, ticket booking, and sharing for
-          Indian Railways. No sign-up required.
+          Live status, alternative train recommendations, PNR, alerts, and
+          ticket booking for Indian Railways. No sign-up required.
         </p>
 
         <div className="flex flex-col sm:flex-row items-center justify-center gap-8">

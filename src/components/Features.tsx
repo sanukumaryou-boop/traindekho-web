@@ -1,3 +1,5 @@
+import PhoneFrame from "@/components/PhoneFrame";
+
 const features = [
   {
     icon: (
@@ -98,13 +100,56 @@ export default function Features() {
             Everything you need for the journey
           </h2>
           <p className="mt-4 text-gray-500 text-lg leading-relaxed">
-            Live status, PNR, alerts, ticket booking, and sharing — all in
-            Train Dekho on Android. Schedules and route search also work here
-            on the web.
+            Alternative train recommendations when you book, plus live status,
+            PNR, alerts, and sharing — all in Train Dekho on Android.
           </p>
         </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-px rounded-3xl overflow-hidden ring-1 ring-gray-200 bg-gray-200">
+        <div className="rounded-3xl bg-white ring-1 ring-gray-200 p-6 sm:p-8 lg:p-10 mb-px">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-12 items-center">
+            <div>
+              <span className="inline-flex items-center rounded-full bg-blue-50 text-blue-700 text-[11px] font-semibold uppercase tracking-wider px-2.5 py-1 mb-4">
+                Most used for booking
+              </span>
+              <h3 className="text-2xl sm:text-3xl font-semibold text-gray-900 tracking-tight mb-3">
+                Alternative train recommendations
+              </h3>
+              <p className="text-gray-500 text-base leading-relaxed mb-5">
+                If your train is waitlisted, RAC, or has already left, Train
+                Dekho shows other trains on the same route — with seat
+                availability and fare — so you can book the next best option.
+              </p>
+              <ul className="space-y-2.5 text-sm text-gray-600">
+                <li className="flex gap-2.5">
+                  <span className="mt-1.5 h-1.5 w-1.5 rounded-full bg-blue-600 shrink-0" />
+                  Direct trains and alternative routes between two stations
+                </li>
+                <li className="flex gap-2.5">
+                  <span className="mt-1.5 h-1.5 w-1.5 rounded-full bg-blue-600 shrink-0" />
+                  Suggested trains while checking availability and booking
+                </li>
+                <li className="flex gap-2.5">
+                  <span className="mt-1.5 h-1.5 w-1.5 rounded-full bg-blue-600 shrink-0" />
+                  Class-wise availability (SL, 3A, 2A, 1A) and Book Now
+                </li>
+              </ul>
+            </div>
+            <div className="flex justify-center gap-3 sm:gap-4">
+              <PhoneFrame
+                src="/images/screenshot-book-ticket.png"
+                alt="Train Dekho booking results with Direct and Alternative trains between New Delhi and Kanpur"
+                className="w-[42%] max-w-[180px]"
+              />
+              <PhoneFrame
+                src="/images/screenshot-alternatives.png"
+                alt="Suggested alternative trains with seat availability and Book Now"
+                className="w-[42%] max-w-[180px]"
+              />
+            </div>
+          </div>
+        </div>
+
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-px rounded-3xl overflow-hidden ring-1 ring-gray-200 bg-gray-200 mt-6">
           {features.map((f) => (
             <div key={f.title} className="bg-white p-7 sm:p-8">
               <div className="flex items-center justify-between mb-5">

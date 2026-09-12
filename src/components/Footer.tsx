@@ -20,8 +20,8 @@ export default function Footer() {
               <span className="text-white font-semibold text-lg">Train Dekho</span>
             </Link>
             <p className="text-sm max-w-xs leading-relaxed">
-            Real-time Indian Railways tracking — live status, PNR, alerts,
-            ticket booking, and sharing. Free on Android.
+            Real-time Indian Railways tracking — live status, alternative
+            trains, PNR, alerts, ticket booking, and sharing. Free on Android.
             </p>
           </div>
 

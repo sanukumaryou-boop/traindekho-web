@@ -17,9 +17,14 @@ export const HOMEPAGE_FAQ: FaqItem[] = [
       "Yes. Enter your 10-digit PNR in the app to see confirmation, coach, and berth. You can also start from the PNR tab on this website and continue in the app.",
   },
   {
+    question: "What are alternative train recommendations?",
+    answer:
+      "When you search trains between two stations, Train Dekho shows Direct trains and Alternative trains. While booking, if your train is waitlisted, RAC, or has already departed, the app also suggests other trains on the same route with seat availability and fare so you can book the next best option.",
+  },
+  {
     question: "Can I book train tickets in Train Dekho?",
     answer:
-      "Yes. In the app, search trains between stations, check class-wise seat availability, and book tickets.",
+      "Yes. In the app, search trains between stations, check class-wise seat availability, see suggested alternative trains, and book tickets.",
   },
   {
     question: "Can I share live train status?",

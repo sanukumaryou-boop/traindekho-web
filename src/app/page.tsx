@@ -6,7 +6,7 @@ import { buildFaqPageJsonLd } from "@/lib/train-schedule-faq";
 export const metadata: Metadata = {
   title: "Train Dekho – Live Train Status, PNR & Ticket Booking",
   description:
-    "Track live train status, get live status and PNR alerts, check PNR, book tickets, and share live running status for Indian Railways — free on Android.",
+    "Track live train status, get alternative train recommendations when you book, check PNR, and share live running status for Indian Railways — free on Android.",
 };
 
 const jsonLd = {
@@ -35,7 +35,7 @@ const jsonLd = {
       "@id": "https://traindekho.live/#app",
       name: "Train Dekho",
       description:
-        "Track any Indian Railways train in real time. Live status, live status alerts, PNR status, PNR alerts, ticket booking, and share live status.",
+        "Track any Indian Railways train in real time. Live status, alternative train recommendations, PNR, alerts, ticket booking, and share live status.",
       applicationCategory: "TravelApplication",
       operatingSystem: "Android",
       offers: {
@@ -44,10 +44,11 @@ const jsonLd = {
         priceCurrency: "INR",
       },
       screenshot: [
-        "https://traindekho.live/images/screenshot-live-tracking.png",
-        "https://traindekho.live/images/screenshot-home.png",
-        "https://traindekho.live/images/screenshot-route-search.png",
-        "https://traindekho.live/images/screenshot-multilang.png",
+        "https://traindekho.live/images/screenshot-search.png",
+        "https://traindekho.live/images/screenshot-route-live.png",
+        "https://traindekho.live/images/screenshot-live-status.png",
+        "https://traindekho.live/images/screenshot-book-ticket.png",
+        "https://traindekho.live/images/screenshot-alternatives.png",
       ],
     },
     {

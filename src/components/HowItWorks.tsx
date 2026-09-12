@@ -7,9 +7,9 @@ const steps = [
   },
   {
     step: "02",
-    title: "Track, check, or book",
+    title: "Track, book, or pick an alternative",
     description:
-      "See live status and delays, check PNR and berth details, or book tickets with seat availability.",
+      "See live status, book a ticket, or switch to alternative trains if yours is waitlisted, RAC, or has already left.",
   },
   {
     step: "03",
