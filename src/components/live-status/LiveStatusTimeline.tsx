@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { formatScheduleTime } from "@/lib/format";
 import {
   buildStationOrder,
@@ -8,13 +8,14 @@ import {
   formatPlatform,
   formatStopDistance,
   getActualTimeColor,
-  getIntermediateConnectorBlueFraction,
   getStationPhase,
-  isConnectorBelowPassed,
   type StationPhase,
 } from "@/lib/live-status-helpers";
 import type { IntermediateStation } from "@/lib/types/train";
 import type { LiveStatusScheduleStop } from "@/lib/types/live-status";
+
+const CURRENT_STATION_ELEMENT_ID = "live-status-current-station";
+const LIVE_PROGRESS_GREEN = "#049320";
 
 type LiveStatusTimelineProps = {
   schedule: LiveStatusScheduleStop[];
@@ -29,56 +30,71 @@ export default function LiveStatusTimeline({
   const segments = buildTimelineSegments(schedule);
   const lastHaltIndex = schedule.length - 1;
 
+  useEffect(() => {
+    if (!currentStationCode) return;
+
+    window.history.scrollRestoration = "manual";
+
+    function scrollToCurrentStation() {
+      const el = document.getElementById(CURRENT_STATION_ELEMENT_ID);
+      if (!el) return;
+
+      const scroller = el.closest("[data-live-status-route]");
+      if (scroller instanceof HTMLElement) {
+        const scrollerRect = scroller.getBoundingClientRect();
+        const elRect = el.getBoundingClientRect();
+        scroller.scrollTop +=
+          elRect.top -
+          scrollerRect.top -
+          scroller.clientHeight / 2 +
+          elRect.height / 2;
+        return;
+      }
+
+      el.scrollIntoView({ block: "center", behavior: "auto" });
+    }
+
+    const frame = requestAnimationFrame(scrollToCurrentStation);
+    const timeout = window.setTimeout(scrollToCurrentStation, 150);
+
+    return () => {
+      cancelAnimationFrame(frame);
+      window.clearTimeout(timeout);
+    };
+  }, [currentStationCode, schedule]);
+
   return (
-    <div className="rounded-2xl border border-gray-200 bg-white shadow-sm overflow-hidden">
-      <div className="px-3 sm:px-4 py-3 border-b border-gray-100 bg-gray-50/70">
-        <div className="grid grid-cols-[3.5rem_2rem_1fr] sm:grid-cols-[4rem_2.5rem_1fr] gap-x-2 text-[10px] font-bold uppercase tracking-wider text-gray-400">
-          <span />
-          <span />
-          <div className="grid grid-cols-[1fr_auto] gap-3 pr-1">
-            <span>Station</span>
-            <div className="grid grid-cols-2 gap-4 min-w-[8.5rem] text-right">
-              <span>Arrival</span>
-              <span>Departure</span>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <div className="px-3 sm:px-4 py-2">
-        {segments.map((segment, index) => {
-          if (segment.kind === "halt") {
-            const isLast = segment.haltIndex === lastHaltIndex;
-            const phase = getStationPhase(
-              segment.stop.stationCode,
-              currentStationCode,
-              stationOrder,
-            );
-
-            return (
-              <HaltRow
-                key={`halt-${segment.stop.stationCode}-${segment.haltIndex}`}
-                stop={segment.stop}
-                phase={phase}
-                stationOrder={stationOrder}
-                currentStationCode={currentStationCode}
-                isOrigin={segment.haltIndex === 0}
-                isDestination={isLast}
-                isLast={isLast}
-              />
-            );
-          }
+    <div>
+      {segments.map((segment, index) => {
+        if (segment.kind === "halt") {
+          const isLast = segment.haltIndex === lastHaltIndex;
+          const phase = getStationPhase(
+            segment.stop.stationCode,
+            currentStationCode,
+            stationOrder,
+          );
 
           return (
-            <IntermediateGroup
-              key={`inter-${segment.afterHaltIndex}-${segment.stops[0]?.stationCode ?? index}`}
-              stops={segment.stops}
-              currentStationCode={currentStationCode}
-              stationOrder={stationOrder}
+            <HaltRow
+              key={`halt-${segment.stop.stationCode}-${segment.haltIndex}`}
+              stop={segment.stop}
+              phase={phase}
+              isOrigin={segment.haltIndex === 0}
+              isDestination={isLast}
+              isLast={isLast}
             />
           );
-        })}
-      </div>
+        }
+
+        return (
+          <IntermediateGroup
+            key={`inter-${segment.afterHaltIndex}-${segment.stops[0]?.stationCode ?? index}`}
+            stops={segment.stops}
+            currentStationCode={currentStationCode}
+            stationOrder={stationOrder}
+          />
+        );
+      })}
     </div>
   );
 }
@@ -86,16 +102,12 @@ export default function LiveStatusTimeline({
 function HaltRow({
   stop,
   phase,
-  stationOrder,
-  currentStationCode,
   isOrigin,
   isDestination,
   isLast,
 }: {
   stop: LiveStatusScheduleStop;
   phase: StationPhase;
-  stationOrder: string[];
-  currentStationCode?: string | null;
   isOrigin: boolean;
   isDestination: boolean;
   isLast: boolean;
@@ -104,11 +116,6 @@ function HaltRow({
   const delay = Math.max(stop.delayArr ?? 0, stop.delayDep ?? 0);
   const isCurrent = phase === "current";
   const isPassed = phase === "passed";
-  const connectorBelowBlue = isConnectorBelowPassed(
-    stop.stationCode,
-    currentStationCode,
-    stationOrder,
-  );
 
   const scheduledArrival = isOrigin
     ? null
@@ -136,7 +143,7 @@ function HaltRow({
 
   return (
     <div className="grid grid-cols-[3.5rem_2rem_1fr] sm:grid-cols-[4rem_2.5rem_1fr] gap-x-2">
-      <div className="pt-4 text-[11px] sm:text-xs font-medium text-gray-400 tabular-nums text-right pr-1">
+      <div className="flex h-4 items-center justify-end pr-1 text-[11px] sm:text-xs font-medium text-gray-400 tabular-nums">
         {formatStopDistance(stop)}
       </div>
 
@@ -144,26 +151,21 @@ function HaltRow({
         <TimelineDot phase={phase} />
         {!isLast && (
           <TimelineConnector
-            blueFraction={connectorBelowBlue ? 1 : 0}
+            filledFraction={phase === "passed" ? 1 : 0}
             minHeight="3.5rem"
           />
         )}
       </div>
 
       <div
-        className={`py-3 border-b border-gray-100 last:border-b-0 ${
-          isCurrent
-            ? "rounded-xl bg-blue-50/60 -mx-1 px-2 sm:px-3"
-            : isPassed
-              ? "rounded-xl bg-blue-50/30 -mx-1 px-2 sm:px-3"
-              : ""
-        }`}
+        id={isCurrent ? CURRENT_STATION_ELEMENT_ID : undefined}
+        className="min-w-0 pb-3 scroll-mt-28"
       >
-        <div className="flex items-start justify-between gap-3">
+        <div className="flex h-4 items-center justify-between gap-2">
           <p
-            className={`font-bold leading-snug min-w-0 ${
+            className={`truncate text-sm font-bold leading-none min-w-0 ${
               isCurrent
-                ? "text-blue-700 text-base sm:text-lg"
+                ? "text-blue-700"
                 : phase === "passed"
                   ? "text-blue-800"
                   : "text-gray-900"
@@ -178,13 +180,14 @@ function HaltRow({
           )}
         </div>
 
-        <div className="mt-2 flex justify-end gap-6 sm:gap-10">
+        <div className="mt-1 flex items-start justify-between gap-3">
           <TimeColumn
             label="Arrival"
             scheduled={scheduledArrival}
             actual={actualArrival}
             delayed={!isOrigin && delay > 0}
             isPassed={isPassed}
+            align="left"
           />
           <TimeColumn
             label="Departure"
@@ -208,122 +211,130 @@ function IntermediateGroup({
   currentStationCode?: string | null;
   stationOrder: string[];
 }) {
-  const [expanded, setExpanded] = useState(false);
   const phases = stops.map((stop) =>
     getStationPhase(stop.stationCode, currentStationCode, stationOrder),
   );
-  const hasPassed = phases.some((phase) => phase === "passed");
   const hasCurrent = phases.includes("current");
-  const useBlueTheme = hasPassed || hasCurrent;
-  const connectorBlueFraction = getIntermediateConnectorBlueFraction(phases);
+  const hasPassed = phases.some((phase) => phase === "passed");
+  const [expanded, setExpanded] = useState(hasCurrent);
+  const wasCurrent = useRef(hasCurrent);
+  const groupLineFilled = hasPassed || hasCurrent;
+
+  useEffect(() => {
+    if (hasCurrent && !wasCurrent.current) {
+      setExpanded(true);
+    }
+    wasCurrent.current = hasCurrent;
+  }, [hasCurrent]);
 
   return (
-    <div className="grid grid-cols-[3.5rem_2rem_1fr] sm:grid-cols-[4rem_2.5rem_1fr] gap-x-2">
-      <div />
-      <div className="relative flex flex-col items-center">
-        <TimelineConnector
-          blueFraction={connectorBlueFraction}
-          minHeight="2rem"
-        />
-      </div>
+    <>
+      <div
+        id={!expanded && hasCurrent ? CURRENT_STATION_ELEMENT_ID : undefined}
+        className="grid grid-cols-[3.5rem_2rem_1fr] sm:grid-cols-[4rem_2.5rem_1fr] gap-x-2"
+      >
+        <div />
+        <div className="relative z-20 flex min-h-8 flex-col items-center justify-center overflow-visible">
+          <TimelineConnector
+            filledFraction={groupLineFilled ? 1 : 0}
+            minHeight="2rem"
+          />
+          {!expanded && hasCurrent ? (
+            <div className="pointer-events-none absolute top-1/2 left-1/2 z-20 -translate-x-1/2 -translate-y-1/2">
+              <TimelineDot phase="current" />
+            </div>
+          ) : null}
+        </div>
 
       <div className="py-1">
         <button
           type="button"
           onClick={() => setExpanded((value) => !value)}
-          className={`w-full flex items-center justify-between gap-2 rounded-lg border px-3 py-2 text-left transition-colors ${
-            useBlueTheme
-              ? hasCurrent
-                ? "bg-blue-50 hover:bg-blue-100/80 border-blue-200"
-                : "bg-blue-50/60 hover:bg-blue-100/70 border-blue-100"
-              : "bg-gray-50 hover:bg-gray-100 border-gray-100"
-          }`}
+          className="inline-flex w-full cursor-pointer items-center justify-center gap-1 py-1.5 text-blue-700"
         >
-          <span
-            className={`text-xs font-bold uppercase tracking-wide ${
-              useBlueTheme
-                ? hasCurrent
-                  ? "text-blue-700"
-                  : "text-blue-800"
-                : "text-gray-500"
-            }`}
-          >
+          <span className="text-xs font-semibold">
             {stops.length} {stops.length === 1 ? "Station" : "Stations"}
           </span>
           <ChevronIcon expanded={expanded} />
         </button>
-
-        {expanded && (
-          <div
-            className={`mt-1 rounded-lg border divide-y ${
-              useBlueTheme
-                ? "bg-blue-50/50 border-blue-100 divide-blue-100"
-                : "bg-gray-50/80 border-gray-100 divide-gray-100"
-            }`}
-          >
-            {stops.map((stop, index) => {
-              const phase = phases[index];
-              const isCurrent = phase === "current";
-              const isPassed = phase === "passed";
-              const scheduled = formatScheduleTime(stop.scheduledTime);
-
-              return (
-                <div
-                  key={stop.stationCode}
-                  className={`px-3 py-2.5 ${
-                    isCurrent
-                      ? "bg-blue-50/80"
-                      : isPassed
-                        ? "bg-blue-50/40"
-                        : ""
-                  }`}
-                >
-                  <div className="flex items-center justify-between gap-3">
-                    <div className="min-w-0">
-                      <p
-                        className={`text-sm font-semibold truncate ${
-                          isCurrent
-                            ? "text-blue-700"
-                            : isPassed
-                              ? "text-blue-800"
-                              : "text-gray-700"
-                        }`}
-                      >
-                        {stop.stationName}
-                      </p>
-                      <p
-                        className={`text-[11px] tabular-nums ${
-                          isPassed ? "text-blue-600/80" : "text-gray-400"
-                        }`}
-                      >
-                        {formatStopDistance(stop)}
-                      </p>
-                    </div>
-                    <div className="text-right shrink-0">
-                      <p className="text-xs tabular-nums text-gray-600">
-                        {scheduled}
-                      </p>
-                      {isPassed && scheduled !== "—" && (
-                        <p
-                          className={`text-xs tabular-nums font-semibold ${getActualTimeColor(
-                            scheduled,
-                            scheduled,
-                            false,
-                            true,
-                          )}`}
-                        >
-                          {scheduled}
-                        </p>
-                      )}
-                    </div>
-                  </div>
-                </div>
-              );
-            })}
-          </div>
-        )}
       </div>
     </div>
+
+    {expanded && (
+      <div className="rounded-xl bg-gray-100 overflow-visible">
+        {stops.map((stop, index) => {
+          const phase = phases[index]!;
+          const isCurrent = phase === "current";
+          const isPassed = phase === "passed";
+          const scheduled = formatScheduleTime(stop.scheduledTime);
+          const isLastIntermediate = index === stops.length - 1;
+
+          return (
+            <div
+              key={stop.stationCode}
+              role="button"
+              tabIndex={0}
+              onClick={() => setExpanded(false)}
+              onKeyDown={(event) => {
+                if (event.key === "Enter" || event.key === " ") {
+                  event.preventDefault();
+                  setExpanded(false);
+                }
+              }}
+              className="grid cursor-pointer grid-cols-[3.5rem_2rem_1fr] sm:grid-cols-[4rem_2.5rem_1fr] gap-x-2"
+            >
+              <div className="flex h-4 items-center justify-end pr-1 text-[11px] sm:text-xs font-medium text-gray-400 tabular-nums">
+                {formatStopDistance(stop)}
+              </div>
+
+              <div className="relative flex flex-col items-center">
+                <TimelineDot phase={phase} />
+                <TimelineConnector
+                  filledFraction={phase === "passed" ? 1 : 0}
+                  minHeight={isLastIntermediate ? "2rem" : "3.5rem"}
+                />
+              </div>
+
+              <div
+                id={isCurrent ? CURRENT_STATION_ELEMENT_ID : undefined}
+                className="min-w-0 pb-3 pr-3 scroll-mt-28"
+              >
+                <div className="flex h-4 items-center">
+                  <p
+                    className={`truncate text-sm font-bold leading-none min-w-0 ${
+                      isCurrent
+                        ? "text-blue-700"
+                        : isPassed
+                          ? "text-blue-800"
+                          : "text-gray-900"
+                    }`}
+                  >
+                    {stop.stationName}
+                  </p>
+                </div>
+
+                <div className="mt-1 flex items-start justify-between gap-3">
+                  <TimeColumn
+                    label="Arrival"
+                    scheduled={scheduled}
+                    actual={null}
+                    delayed={false}
+                    align="left"
+                  />
+                  <TimeColumn
+                    label="Departure"
+                    scheduled={scheduled}
+                    actual={null}
+                    delayed={false}
+                  />
+                </div>
+              </div>
+            </div>
+          );
+        })}
+      </div>
+    )}
+    </>
   );
 }
 
@@ -353,18 +364,20 @@ function TimeColumn({
   actual,
   delayed,
   isPassed = false,
+  align = "right",
 }: {
   label: string;
   scheduled: string | null;
   actual: string | null;
   delayed: boolean;
   isPassed?: boolean;
+  align?: "left" | "right";
 }) {
   const hasActual = Boolean(actual && actual !== "—");
   const showActual = hasActual && scheduled != null;
 
   return (
-    <div className="text-right min-w-[4rem]">
+    <div className={`min-w-[4rem] ${align === "left" ? "text-left" : "text-right"}`}>
       <p className="text-[10px] font-bold uppercase tracking-wide text-gray-400 mb-0.5">
         {label}
       </p>
@@ -392,13 +405,13 @@ function TimeColumn({
 }
 
 function TimelineConnector({
-  blueFraction,
+  filledFraction,
   minHeight,
 }: {
-  blueFraction: number;
+  filledFraction: number;
   minHeight: string;
 }) {
-  const clamped = Math.min(1, Math.max(0, blueFraction));
+  const clamped = Math.min(1, Math.max(0, filledFraction));
 
   if (clamped <= 0) {
     return (
@@ -412,8 +425,8 @@ function TimelineConnector({
   if (clamped >= 1) {
     return (
       <div
-        className="w-0.5 flex-1 bg-blue-300"
-        style={{ minHeight }}
+        className="w-0.5 flex-1"
+        style={{ minHeight, backgroundColor: LIVE_PROGRESS_GREEN }}
       />
     );
   }
@@ -424,8 +437,8 @@ function TimelineConnector({
       style={{ minHeight }}
     >
       <div
-        className="bg-blue-300"
-        style={{ flex: clamped }}
+        className="flex-1"
+        style={{ backgroundColor: LIVE_PROGRESS_GREEN, flex: clamped }}
       />
       <div
         className="bg-gray-200"
@@ -438,17 +451,27 @@ function TimelineConnector({
 function TimelineDot({ phase }: { phase: StationPhase }) {
   if (phase === "passed") {
     return (
-      <div className="z-10 flex h-5 w-5 items-center justify-center rounded-full bg-green-500 text-white shrink-0">
-        <CheckIcon className="h-3 w-3" />
+      <div
+        className="z-10 flex h-4 w-4 items-center justify-center rounded-full text-white shrink-0"
+        style={{ backgroundColor: LIVE_PROGRESS_GREEN }}
+      >
+        <CheckIcon className="h-2.5 w-2.5" />
       </div>
     );
   }
 
   if (phase === "current") {
     return (
-      <div className="z-10 flex h-6 w-6 items-center justify-center rounded-full bg-blue-600 ring-4 ring-blue-100 shrink-0">
-        <span className="h-2 w-2 rounded-full bg-white" />
-      </div>
+      <span className="relative z-20 flex h-5 w-5 shrink-0 items-center justify-center overflow-visible">
+        <span
+          className="absolute h-5 w-5 rounded-full opacity-70 animate-ping"
+          style={{ backgroundColor: LIVE_PROGRESS_GREEN }}
+        />
+        <span
+          className="relative h-3.5 w-3.5 rounded-full ring-2 ring-white"
+          style={{ backgroundColor: LIVE_PROGRESS_GREEN }}
+        />
+      </span>
     );
   }
 

@@ -1,12 +1,13 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { useEffect, useState, useTransition } from "react";
+import { useEffect, useId, useRef, useState, useTransition } from "react";
 import {
   formatLiveStatusApiDate,
   getQuickJourneyDateOptions,
   htmlDateToApiDate,
   apiDateToHtmlDate,
+  withSelectedJourneyDateOption,
 } from "@/lib/live-status-date";
 import { getLiveTrainStatusHrefWithDate } from "@/lib/train-schedule-href";
 
@@ -14,12 +15,14 @@ type LiveStatusSearchFormProps = {
   initialTrainNo?: string;
   initialDate?: string;
   compact?: boolean;
+  appearance?: "default" | "nav";
 };
 
 export default function LiveStatusSearchForm({
   initialTrainNo = "",
   initialDate = formatLiveStatusApiDate(),
   compact = false,
+  appearance = "default",
 }: LiveStatusSearchFormProps) {
   const router = useRouter();
   const [isPending, startTransition] = useTransition();
@@ -55,11 +58,13 @@ export default function LiveStatusSearchForm({
 
   if (compact && initialTrainNo) {
     return (
-      <LiveStatusDateOptions
+      <LiveStatusDateDropdown
         value={date}
         options={dateOptions}
+        selectedApiDate={initialDate}
         onSelect={selectDate}
         pending={isPending}
+        appearance={appearance}
       />
     );
   }
@@ -107,6 +112,127 @@ export default function LiveStatusSearchForm({
   );
 }
 
+function LiveStatusDateDropdown({
+  value,
+  options,
+  selectedApiDate,
+  onSelect,
+  pending,
+  appearance = "default",
+}: {
+  value: string;
+  options: ReturnType<typeof getQuickJourneyDateOptions>;
+  selectedApiDate?: string;
+  onSelect: (htmlDate: string, apiDate: string) => void;
+  pending?: boolean;
+  appearance?: "default" | "nav";
+}) {
+  const dateOptions = withSelectedJourneyDateOption(options, selectedApiDate);
+  const selected =
+    dateOptions.find((option) => option.htmlDate === value) ?? dateOptions[0];
+  const [open, setOpen] = useState(false);
+  const rootRef = useRef<HTMLDivElement>(null);
+  const listId = useId();
+
+  useEffect(() => {
+    if (!open) return;
+
+    function onPointerDown(event: MouseEvent) {
+      if (!rootRef.current?.contains(event.target as Node)) {
+        setOpen(false);
+      }
+    }
+
+    function onKeyDown(event: KeyboardEvent) {
+      if (event.key === "Escape") setOpen(false);
+    }
+
+    document.addEventListener("mousedown", onPointerDown);
+    document.addEventListener("keydown", onKeyDown);
+    return () => {
+      document.removeEventListener("mousedown", onPointerDown);
+      document.removeEventListener("keydown", onKeyDown);
+    };
+  }, [open]);
+
+  const isNav = appearance === "nav";
+
+  return (
+    <div ref={rootRef} className={`relative z-20 shrink-0 ${isNav ? "" : "mt-0.5"}`}>
+      <button
+        type="button"
+        aria-label="Journey date"
+        aria-haspopup="listbox"
+        aria-expanded={open}
+        aria-controls={listId}
+        disabled={pending}
+        onClick={() => setOpen((isOpen) => !isOpen)}
+        className={
+          isNav
+            ? "inline-flex min-h-11 cursor-pointer items-center gap-0.5 rounded-lg px-2.5 text-sm font-semibold text-blue-600 hover:bg-blue-50 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500/30 disabled:opacity-80"
+            : "inline-flex min-w-[7.75rem] cursor-pointer items-center justify-between gap-2 rounded-xl border border-gray-200 bg-white py-2 pl-3 pr-2.5 text-xs sm:text-sm font-semibold text-gray-800 shadow-sm hover:border-blue-200 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20 disabled:opacity-80"
+        }
+      >
+        <span>{selected?.label ?? "Today"}</span>
+        <ChevronDownIcon
+          className={`h-4 w-4 transition-transform ${
+            isNav ? "text-blue-500" : "text-gray-400"
+          } ${open ? "rotate-180" : ""}`}
+        />
+      </button>
+
+      {open && (
+        <div
+          id={listId}
+          role="listbox"
+          aria-label="Journey date"
+          className="absolute right-0 z-20 mt-1.5 w-44 overflow-hidden rounded-2xl bg-white p-1.5 shadow-[0_16px_50px_rgba(0,0,0,0.18)] ring-1 ring-black/5"
+        >
+          {dateOptions.map((option) => {
+            const isSelected = option.htmlDate === value;
+
+            return (
+              <button
+                key={option.apiDate}
+                type="button"
+                role="option"
+                aria-selected={isSelected}
+                onClick={() => {
+                  setOpen(false);
+                  if (!isSelected) {
+                    onSelect(option.htmlDate, option.apiDate);
+                  }
+                }}
+                className={`flex w-full cursor-pointer items-center justify-between gap-3 rounded-xl px-3 py-2 text-left transition-colors ${
+                  isSelected
+                    ? "bg-blue-50 text-blue-700"
+                    : "text-gray-800 hover:bg-gray-50"
+                }`}
+              >
+                <span className="min-w-0">
+                  <span className="block text-sm font-semibold leading-tight">
+                    {option.label}
+                  </span>
+                  {option.detail ? (
+                    <span
+                      className={`mt-0.5 block text-[11px] font-medium ${
+                        isSelected ? "text-blue-600/80" : "text-gray-400"
+                      }`}
+                    >
+                      {option.detail}
+                    </span>
+                  ) : null}
+                </span>
+                {isSelected ? <CheckIcon className="h-4 w-4 shrink-0" /> : null}
+              </button>
+            );
+          })}
+        </div>
+      )}
+    </div>
+  );
+}
+
 function LiveStatusDateOptions({
   value,
   options,
@@ -146,5 +272,33 @@ function LiveStatusDateOptions({
         );
       })}
     </div>
+  );
+}
+
+function ChevronDownIcon({ className }: { className?: string }) {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" className={className} aria-hidden="true">
+      <path
+        d="M6 9l6 6 6-6"
+        stroke="currentColor"
+        strokeWidth="2"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+    </svg>
+  );
+}
+
+function CheckIcon({ className }: { className?: string }) {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" className={className} aria-hidden="true">
+      <path
+        d="M5 13l4 4L19 7"
+        stroke="currentColor"
+        strokeWidth="2.5"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+    </svg>
   );
 }

@@ -7,14 +7,25 @@ import { useKeyboardOpen } from "@/hooks/useKeyboardOpen";
 
 const STORAGE_KEY = "traindekho-sticky-download-dismissed";
 
-export default function StickyDownloadBar() {
-  const [downloadOffscreen, setDownloadOffscreen] = useState(false);
+type StickyDownloadBarProps = {
+  forceVisible?: boolean;
+};
+
+export default function StickyDownloadBar({
+  forceVisible = false,
+}: StickyDownloadBarProps) {
+  const [downloadOffscreen, setDownloadOffscreen] = useState(forceVisible);
   const [dismissed, setDismissed] = useState(false);
   const keyboardOpen = useKeyboardOpen();
 
   useEffect(() => {
     if (sessionStorage.getItem(STORAGE_KEY) === "1") {
       setDismissed(true);
+      return;
+    }
+
+    if (forceVisible) {
+      setDownloadOffscreen(true);
       return;
     }
 
@@ -29,7 +40,7 @@ export default function StickyDownloadBar() {
     );
     observer.observe(download);
     return () => observer.disconnect();
-  }, []);
+  }, [forceVisible]);
 
   const visible = downloadOffscreen && !keyboardOpen && !dismissed;
 

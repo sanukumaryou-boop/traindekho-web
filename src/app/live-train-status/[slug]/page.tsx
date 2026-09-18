@@ -1,8 +1,8 @@
 import type { Metadata } from "next";
-import Link from "next/link";
 import { permanentRedirect } from "next/navigation";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
+import StickyDownloadBar from "@/components/StickyDownloadBar";
 import LiveStatusResults from "@/components/live-status/LiveStatusResults";
 import TrainSearch from "@/components/TrainSearch";
 import { fetchTrainLiveStatus } from "@/lib/api/live-status";
@@ -76,30 +76,21 @@ export default async function LiveTrainStatusSlugPage({
 
   return (
     <>
-      <Navbar />
-      <main className="pt-20 pb-16 min-h-screen bg-gray-50/50">
-        <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
-          <nav className="text-xs text-gray-500 mb-3" aria-label="Breadcrumb">
-            <ol className="flex flex-wrap items-center gap-1.5">
-              <li>
-                <Link href="/" className="hover:text-gray-900 transition-colors">
-                  Home
-                </Link>
-              </li>
-              <li aria-hidden="true">/</li>
-              <li>
-                <Link
-                  href="/live-train-status"
-                  className="hover:text-gray-900 transition-colors"
-                >
-                  Live Train Status
-                </Link>
-              </li>
-              <li aria-hidden="true">/</li>
-              <li className="text-gray-700 font-medium">{trainNo}</li>
-            </ol>
-          </nav>
-
+      <Navbar className={result.ok ? "hidden md:block" : undefined} />
+      <main
+        className={
+          result.ok
+            ? "pt-0 md:pt-16 h-dvh overflow-hidden bg-gray-50/50"
+            : "pt-4 md:pt-20 pb-16 min-h-screen bg-gray-50/50"
+        }
+      >
+        <div
+          className={
+            result.ok
+              ? "h-full flex flex-col md:max-w-3xl md:mx-auto md:px-6 lg:px-8"
+              : "max-w-3xl mx-auto px-4 sm:px-6 lg:px-8"
+          }
+        >
           {result.ok ? (
             <LiveStatusResults
               initialData={result.data}
@@ -127,7 +118,7 @@ export default async function LiveTrainStatusSlugPage({
           )}
         </div>
       </main>
-      <Footer />
+      {result.ok ? <StickyDownloadBar forceVisible /> : <Footer />}
     </>
   );
 }

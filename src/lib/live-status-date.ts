@@ -8,31 +8,92 @@ export function formatLiveStatusApiDate(date: Date = new Date()): string {
 
 export type QuickJourneyDateOption = {
   label: string;
+  detail: string;
   apiDate: string;
   htmlDate: string;
 };
 
-/** Today, yesterday, and the day before yesterday. */
+const SHORT_DATE_FORMATTER = new Intl.DateTimeFormat("en-IN", {
+  day: "numeric",
+  month: "short",
+});
+
+const WEEKDAY_FORMATTER = new Intl.DateTimeFormat("en-IN", {
+  weekday: "short",
+});
+
+function parseApiDate(apiDate: string): Date | null {
+  const [day, month, year] = apiDate.split("-").map(Number);
+  if (!day || !month || !year) return null;
+  return new Date(year, month - 1, day);
+}
+
+export function formatShortJourneyDate(date: Date): string {
+  return SHORT_DATE_FORMATTER.format(date);
+}
+
+export function formatShortJourneyDateFromApi(apiDate: string): string {
+  const date = parseApiDate(apiDate);
+  if (!date) return apiDate;
+  return formatShortJourneyDate(date);
+}
+
+function journeyDateFromOffset(base: Date, offset: number): Date {
+  const date = new Date(base);
+  date.setDate(date.getDate() + offset);
+  return date;
+}
+
+function toQuickJourneyDateOption(
+  date: Date,
+  label: string,
+  detail: string,
+): QuickJourneyDateOption {
+  const apiDate = formatLiveStatusApiDate(date);
+  return {
+    label,
+    detail,
+    apiDate,
+    htmlDate: apiDateToHtmlDate(apiDate),
+  };
+}
+
+/** Today, yesterday, and the previous 3 calendar dates. */
 export function getQuickJourneyDateOptions(
   baseDate: Date = new Date(),
 ): QuickJourneyDateOption[] {
   const base = new Date(baseDate);
   base.setHours(0, 0, 0, 0);
 
+  return [0, -1, -2, -3, -4].map((offset) => {
+    const date = journeyDateFromOffset(base, offset);
+    const shortDate = formatShortJourneyDate(date);
+    if (offset === 0) return toQuickJourneyDateOption(date, "Today", shortDate);
+    if (offset === -1) {
+      return toQuickJourneyDateOption(date, "Yesterday", shortDate);
+    }
+    return toQuickJourneyDateOption(date, shortDate, WEEKDAY_FORMATTER.format(date));
+  });
+}
+
+export function withSelectedJourneyDateOption(
+  options: QuickJourneyDateOption[],
+  apiDate?: string,
+): QuickJourneyDateOption[] {
+  if (!apiDate || !isValidApiDate(apiDate)) return options;
+  if (options.some((option) => option.apiDate === apiDate)) return options;
+
+  const date = parseApiDate(apiDate);
+
   return [
-    { offset: 0, label: "Today" },
-    { offset: -1, label: "Yesterday" },
-    { offset: -2, label: "Day before yesterday" },
-  ].map(({ offset, label }) => {
-    const date = new Date(base);
-    date.setDate(date.getDate() + offset);
-    const apiDate = formatLiveStatusApiDate(date);
-    return {
-      label,
+    ...options,
+    {
+      label: formatShortJourneyDateFromApi(apiDate),
+      detail: date ? WEEKDAY_FORMATTER.format(date) : "",
       apiDate,
       htmlDate: apiDateToHtmlDate(apiDate),
-    };
-  });
+    },
+  ];
 }
 
 /** Convert HTML date input value (YYYY-MM-DD) to DD-MM-YYYY. */

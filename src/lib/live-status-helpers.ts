@@ -23,15 +23,13 @@ export function parseDelayMinutes(value: unknown): number | null {
 
 export function formatTrainDelayMessage(delayMinutes: number): string {
   if (delayMinutes > 0) {
-    return `Train is delayed by ${delayMinutes} ${
-      delayMinutes === 1 ? "min" : "mins"
-    }`;
+    return `${delayMinutes} ${delayMinutes === 1 ? "min" : "mins"} late`;
   }
   if (delayMinutes < 0) {
     const early = Math.abs(delayMinutes);
-    return `Train is running ${early} ${early === 1 ? "min" : "mins"} early`;
+    return `${early} ${early === 1 ? "min" : "mins"} early`;
   }
-  return "Train is running on time";
+  return "On Time";
 }
 
 export function getTrainDelayMinutes(
@@ -77,9 +75,8 @@ export function formatRelativeJourneyDate(apiDate: string): string {
   );
   if (diffDays === 0) return "Today";
   if (diffDays === -1) return "Yesterday";
-  if (diffDays === -2) return "Day before yesterday";
   if (diffDays === 1) return "Tomorrow";
-  return apiDate;
+  return journey.toLocaleDateString("en-IN", { day: "numeric", month: "short" });
 }
 
 export function formatStopDistance(stop: {

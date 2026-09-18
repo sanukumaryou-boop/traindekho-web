@@ -1,52 +1,48 @@
 import {
   buildStatusBanner,
   findStationNameByCode,
-  formatRelativeJourneyDate,
   formatTrainDelayMessage,
   getTrainDelayMinutes,
 } from "@/lib/live-status-helpers";
-import { titleCase } from "@/lib/format";
 import type { TrainLiveStatusResponse } from "@/lib/types/live-status";
 
 type LiveStatusOverviewProps = {
   data: TrainLiveStatusResponse;
-  journeyDate: string;
 };
 
-export default function LiveStatusOverview({
-  data,
-  journeyDate,
-}: LiveStatusOverviewProps) {
+export default function LiveStatusOverview({ data }: LiveStatusOverviewProps) {
   const { live_train_status: live } = data;
   const stationName = findStationNameByCode(data.schedule, live.currentStation);
   const banner = buildStatusBanner(live.running_status, stationName);
   const delayMinutes = getTrainDelayMinutes(data);
+  const isLate = (delayMinutes ?? 0) > 0;
 
   return (
-    <div className="space-y-2">
-      <div className="rounded-2xl bg-sky-100/80 border border-sky-200/80 px-4 py-4 sm:px-5 sm:py-5 text-center">
-        <p className="text-lg sm:text-xl font-extrabold text-blue-700 tracking-tight">
+    <div
+      className={`rounded-2xl px-4 py-4 sm:px-5 sm:py-5 border ${
+        isLate
+          ? "bg-red-50 border-red-200"
+          : "bg-green-50 border-green-200"
+      }`}
+    >
+      <div className="flex items-center justify-between gap-3">
+        <p
+          className={`min-w-0 flex-1 text-left text-base sm:text-lg font-extrabold tracking-tight leading-snug ${
+            isLate ? "text-red-700" : "text-green-700"
+          }`}
+        >
           {banner}
         </p>
-
-        {delayMinutes != null && (
-          <p
-            className={`mt-2 text-sm font-semibold ${
-              delayMinutes > 0
-                ? "text-red-600"
-                : delayMinutes < 0
-                  ? "text-green-700"
-                  : "text-gray-600"
-            }`}
-          >
-            {formatTrainDelayMessage(delayMinutes)}
-          </p>
-        )}
+        <p
+          className={`shrink-0 text-right text-sm sm:text-base font-bold whitespace-nowrap ${
+            isLate ? "text-red-600" : "text-green-800"
+          }`}
+        >
+          {delayMinutes == null
+            ? "On Time"
+            : formatTrainDelayMessage(delayMinutes)}
+        </p>
       </div>
-
-      <p className="text-center text-xs text-gray-400">
-        Journey date: {formatRelativeJourneyDate(journeyDate)}
-      </p>
     </div>
   );
 }

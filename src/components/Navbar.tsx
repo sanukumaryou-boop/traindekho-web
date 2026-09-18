@@ -9,7 +9,7 @@ import PlayStoreButton from "@/components/PlayStoreButton";
 import { mainNavLinks } from "@/components/nav-links";
 import { useKeyboardOpen } from "@/hooks/useKeyboardOpen";
 
-export default function Navbar() {
+export default function Navbar({ className }: { className?: string }) {
   const pathname = usePathname();
   const isHome =
     pathname === "/" ||
@@ -39,7 +39,7 @@ export default function Navbar() {
     <header
       className={`fixed top-0 left-0 right-0 z-50 transition-colors duration-300 ${
         solid ? "bg-white/95 border-b border-gray-100 backdrop-blur-xl" : "bg-transparent"
-      }`}
+      } ${className ?? ""}`}
     >
       <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-16">

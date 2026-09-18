@@ -14,7 +14,7 @@ export default function LiveStatusRefreshButton({
       disabled={pending}
       aria-label="Refresh live status"
       aria-busy={pending}
-      className="fixed bottom-20 sm:bottom-6 right-4 sm:right-8 z-50 flex h-14 w-14 items-center justify-center rounded-full bg-blue-600 text-white shadow-lg shadow-blue-600/25 hover:bg-blue-700 active:scale-95 transition-all disabled:opacity-80 disabled:cursor-wait"
+      className="fixed bottom-28 sm:bottom-6 right-4 sm:right-8 z-50 flex h-14 w-14 items-center justify-center rounded-full bg-blue-600 text-white shadow-lg shadow-blue-600/25 hover:bg-blue-700 active:scale-95 transition-all disabled:opacity-80 disabled:cursor-wait"
     >
       <RefreshIcon
         className={`h-6 w-6 ${pending ? "animate-spin" : ""}`}

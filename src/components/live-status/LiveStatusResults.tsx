@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import LiveStatusOverview from "@/components/live-status/LiveStatusOverview";
 import LiveStatusRefreshButton from "@/components/live-status/LiveStatusRefreshButton";
@@ -21,6 +22,7 @@ export default function LiveStatusResults({
   trainNo,
   journeyDate,
 }: LiveStatusResultsProps) {
+  const router = useRouter();
   const [data, setData] = useState(initialData);
   const [refreshing, setRefreshing] = useState(false);
   const [refreshError, setRefreshError] = useState<string | null>(null);
@@ -29,6 +31,14 @@ export default function LiveStatusResults({
     setData(initialData);
     setRefreshError(null);
   }, [initialData]);
+
+  useEffect(() => {
+    const previousOverflow = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    return () => {
+      document.body.style.overflow = previousOverflow;
+    };
+  }, []);
 
   async function handleRefresh() {
     if (refreshing) return;
@@ -55,65 +65,101 @@ export default function LiveStatusResults({
     }
   }
 
+  function handleBack() {
+    if (typeof window !== "undefined" && window.history.length > 1) {
+      router.back();
+      return;
+    }
+    router.push("/live-train-status");
+  }
+
+  const trainName = titleCase(data.train_name);
+
   return (
-    <>
-      <header className="mb-4 pt-1">
-        <Link
-          href="/live-train-status"
-          className="inline-flex items-center gap-1 text-xs font-medium text-gray-500 hover:text-blue-600 mb-3"
-        >
-          <BackIcon className="h-4 w-4" />
-          Back
-        </Link>
+    <div className="flex min-h-0 flex-1 flex-col">
+      <div className="relative z-20 shrink-0 bg-gray-50/95 pb-3">
+        <header className="border-b border-gray-200/80 bg-white pt-[env(safe-area-inset-top)] md:border-0 md:bg-transparent md:pt-3">
+          <div className="flex items-center gap-1 md:gap-3 px-1 md:px-0 py-1.5 md:py-0 min-h-14 md:min-h-0">
+            <button
+              type="button"
+              onClick={handleBack}
+              aria-label="Go back"
+              className="md:hidden shrink-0 flex h-11 w-11 items-center justify-center rounded-full text-gray-900 hover:bg-gray-100"
+            >
+              <BackIcon className="h-6 w-6" />
+            </button>
 
-        <h1 className="text-xl sm:text-2xl font-extrabold text-gray-900 tracking-tight leading-tight">
-          <span className="font-mono text-blue-600">{data.train_no}</span>
-          <span className="text-gray-400 mx-2 font-normal">-</span>
-          {titleCase(data.train_name)}
-        </h1>
+            <h1 className="min-w-0 flex-1 flex items-center gap-2 md:hidden">
+              <span className="inline-flex shrink-0 items-center rounded-full bg-blue-600 px-2.5 py-0.5 font-mono text-xs font-bold text-white">
+                {data.train_no}
+              </span>
+              <span className="min-w-0 truncate text-[15px] font-bold tracking-tight text-gray-900">
+                {trainName}
+              </span>
+            </h1>
 
-        <div className="mt-3">
-          <LiveStatusSearchForm
-            initialTrainNo={trainNo}
-            initialDate={journeyDate}
-            compact
-          />
+            <h1 className="hidden md:flex min-w-0 flex-1 items-center gap-2 text-lg font-bold text-gray-900 tracking-tight leading-snug">
+              <span className="inline-flex shrink-0 items-center rounded-full bg-blue-600 px-2.5 py-0.5 font-mono text-sm font-bold text-white">
+                {data.train_no}
+              </span>
+              <span className="min-w-0 truncate">{trainName}</span>
+            </h1>
+
+            <div className="md:hidden">
+              <LiveStatusSearchForm
+                initialTrainNo={trainNo}
+                initialDate={journeyDate}
+                compact
+                appearance="nav"
+              />
+            </div>
+            <div className="hidden md:block">
+              <LiveStatusSearchForm
+                initialTrainNo={trainNo}
+                initialDate={journeyDate}
+                compact
+              />
+            </div>
+          </div>
+        </header>
+
+        {refreshError && (
+          <p className="mx-4 md:mx-0 mt-3 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
+            {refreshError}
+          </p>
+        )}
+
+        <div className={`mx-4 md:mx-0 mt-3 ${refreshing ? "opacity-60 pointer-events-none" : ""}`}>
+          <LiveStatusOverview data={data} />
         </div>
-      </header>
-
-      {refreshError && (
-        <p className="mb-4 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
-          {refreshError}
-        </p>
-      )}
-
-      <div className={`relative ${refreshing ? "opacity-60 pointer-events-none" : ""}`}>
-        <section className="mb-5">
-          <LiveStatusOverview data={data} journeyDate={journeyDate} />
-        </section>
-
-        <section className="mb-8">
-          <LiveStatusTimeline
-            schedule={data.schedule}
-            currentStationCode={data.live_train_status.currentStation}
-          />
-        </section>
       </div>
 
-      <div className="flex flex-wrap items-center justify-between gap-3 text-xs text-gray-500 mb-8">
-        <span>
-          {data.source_code} → {data.destination_code}
-        </span>
-        <Link
-          href={getTrainScheduleHref(data.train_no)}
-          className="font-semibold text-blue-600 hover:text-blue-700"
-        >
-          Full schedule →
-        </Link>
+      <div
+        data-live-status-route
+        className={`min-h-0 flex-1 overflow-y-auto overscroll-contain px-4 md:px-0 pb-36 md:pb-28 ${
+          refreshing ? "opacity-60 pointer-events-none" : ""
+        }`}
+      >
+        <LiveStatusTimeline
+          schedule={data.schedule}
+          currentStationCode={data.live_train_status.currentStation}
+        />
+
+        <div className="flex flex-wrap items-center justify-between gap-3 text-xs text-gray-500 mt-4 mb-2">
+          <span>
+            {data.source_code} → {data.destination_code}
+          </span>
+          <Link
+            href={getTrainScheduleHref(data.train_no)}
+            className="font-semibold text-blue-600 hover:text-blue-700"
+          >
+            Full schedule →
+          </Link>
+        </div>
       </div>
 
       <LiveStatusRefreshButton onRefresh={handleRefresh} pending={refreshing} />
-    </>
+    </div>
   );
 }
 
