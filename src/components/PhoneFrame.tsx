@@ -15,7 +15,7 @@ export default function PhoneFrame({
 }: PhoneFrameProps) {
   return (
     <div className={className}>
-      <div className="rounded-[2.2rem] overflow-hidden border-[5px] border-gray-200 bg-gray-900 shadow-xl">
+      <div className="rounded-[2.2rem] overflow-hidden border-[5px] border-blue-200 bg-blue-900 shadow-xl">
         <Image
           src={src}
           alt={alt}

@@ -22,35 +22,39 @@ const steps = [
 export default function HowItWorks() {
   return (
     <section
-      className="py-20 sm:py-24 bg-white"
+      className="py-20 sm:py-24 bg-blue-50"
       aria-labelledby="how-it-works-heading"
     >
       <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="max-w-2xl mb-12">
-          <p className="text-[11px] font-medium uppercase tracking-[0.18em] text-gray-400 mb-3">
+        <div className="max-w-2xl mb-12 sm:mb-14">
+          <p className="text-[11px] font-medium uppercase tracking-[0.22em] text-blue-500 mb-3">
             How it works
           </p>
           <h2
             id="how-it-works-heading"
-            className="text-3xl sm:text-4xl font-semibold text-gray-900 tracking-tight"
+            className="font-display text-3xl sm:text-5xl text-blue-900 tracking-tight"
           >
             From search to alerts in 3 steps
           </h2>
         </div>
 
-        <ol className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <ol className="relative grid grid-cols-1 md:grid-cols-3 gap-6 md:gap-8">
+          <div
+            aria-hidden="true"
+            className="hidden md:block absolute top-[2.15rem] left-[12%] right-[12%] h-px bg-blue-200"
+          />
           {steps.map((s) => (
             <li
               key={s.step}
-              className="rounded-3xl bg-gray-50 p-7 sm:p-8"
+              className="relative rounded-[1.5rem] bg-white ring-1 ring-blue-100 p-7 sm:p-8"
             >
-              <span className="block font-mono text-sm font-medium text-gray-400 mb-4">
+              <span className="relative z-10 mb-5 inline-flex h-10 w-10 items-center justify-center rounded-full bg-blue-900 font-mono text-xs text-sky-200">
                 {s.step}
               </span>
-              <h3 className="text-xl font-semibold text-gray-900 mb-2">
+              <h3 className="font-display text-2xl text-blue-900 mb-2">
                 {s.title}
               </h3>
-              <p className="text-gray-500 leading-relaxed">{s.description}</p>
+              <p className="text-gray-600 leading-relaxed">{s.description}</p>
             </li>
           ))}
         </ol>

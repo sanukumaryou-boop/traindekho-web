@@ -85,51 +85,52 @@ export default function Features() {
   return (
     <section
       id="features"
-      className="pt-24 pb-20 sm:pt-28 sm:pb-24 bg-gray-50"
+      className="pt-20 pb-16 sm:pt-28 sm:pb-24 bg-blue-50"
       aria-labelledby="features-heading"
     >
       <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="max-w-2xl mb-12">
-          <p className="text-[11px] font-medium uppercase tracking-[0.18em] text-gray-400 mb-3">
+        <div className="max-w-2xl mb-12 sm:mb-14">
+          <p className="text-[11px] font-medium uppercase tracking-[0.22em] text-blue-500 mb-3">
             App features
           </p>
           <h2
             id="features-heading"
-            className="text-3xl sm:text-4xl font-semibold text-gray-900 tracking-tight"
+            className="font-display text-3xl sm:text-5xl text-blue-900 tracking-tight"
           >
             Everything you need for the journey
           </h2>
-          <p className="mt-4 text-gray-500 text-lg leading-relaxed">
+          <p className="mt-4 text-gray-600 text-lg leading-relaxed">
             Alternative train recommendations when you book, plus live status,
             PNR, alerts, and sharing — all in Train Dekho on Android.
           </p>
         </div>
 
-        <div className="rounded-3xl bg-white ring-1 ring-gray-200 p-6 sm:p-8 lg:p-10 mb-px">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-12 items-center">
+        <div className="relative overflow-hidden rounded-[1.75rem] bg-blue-900 text-white p-6 sm:p-8 lg:p-10 mb-8">
+          <div className="hero-rail-grid pointer-events-none absolute inset-0 opacity-40" />
+          <div className="relative grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-12 items-center">
             <div>
-              <span className="inline-flex items-center rounded-full bg-blue-50 text-blue-700 text-[11px] font-semibold uppercase tracking-wider px-2.5 py-1 mb-4">
+              <span className="inline-flex items-center rounded-full border border-sky-300/30 bg-sky-400/10 text-sky-200 text-[11px] font-semibold uppercase tracking-wider px-2.5 py-1 mb-4">
                 Most used for booking
               </span>
-              <h3 className="text-2xl sm:text-3xl font-semibold text-gray-900 tracking-tight mb-3">
+              <h3 className="font-display text-2xl sm:text-4xl tracking-tight mb-3">
                 Alternative train recommendations
               </h3>
-              <p className="text-gray-500 text-base leading-relaxed mb-5">
+              <p className="text-white/65 text-base leading-relaxed mb-5">
                 If your train is waitlisted, RAC, or has already left, Train
                 Dekho shows other trains on the same route — with seat
                 availability and fare — so you can book the next best option.
               </p>
-              <ul className="space-y-2.5 text-sm text-gray-600">
+              <ul className="space-y-2.5 text-sm text-white/75">
                 <li className="flex gap-2.5">
-                  <span className="mt-1.5 h-1.5 w-1.5 rounded-full bg-blue-600 shrink-0" />
+                  <span className="mt-1.5 h-1.5 w-1.5 rounded-full bg-sky-400 shrink-0" />
                   Direct trains and alternative routes between two stations
                 </li>
                 <li className="flex gap-2.5">
-                  <span className="mt-1.5 h-1.5 w-1.5 rounded-full bg-blue-600 shrink-0" />
+                  <span className="mt-1.5 h-1.5 w-1.5 rounded-full bg-sky-400 shrink-0" />
                   Suggested trains while checking availability and booking
                 </li>
                 <li className="flex gap-2.5">
-                  <span className="mt-1.5 h-1.5 w-1.5 rounded-full bg-blue-600 shrink-0" />
+                  <span className="mt-1.5 h-1.5 w-1.5 rounded-full bg-sky-400 shrink-0" />
                   Class-wise availability (SL, 3A, 2A, 1A) and Book Now
                 </li>
               </ul>
@@ -149,21 +150,24 @@ export default function Features() {
           </div>
         </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-px rounded-3xl overflow-hidden ring-1 ring-gray-200 bg-gray-200 mt-6">
-          {features.map((f) => (
-            <div key={f.title} className="bg-white p-7 sm:p-8">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+          {features.map((f, index) => (
+            <div
+              key={f.title}
+              className="rounded-[1.5rem] bg-white ring-1 ring-blue-100 p-7 sm:p-8"
+            >
               <div className="flex items-center justify-between mb-5">
-                <div className="w-10 h-10 rounded-xl bg-gray-100 text-gray-700 flex items-center justify-center">
+                <div className="w-10 h-10 rounded-xl bg-blue-900 text-sky-200 flex items-center justify-center">
                   {f.icon}
                 </div>
-                <span className="text-[11px] font-medium uppercase tracking-wider text-gray-400">
-                  App
+                <span className="font-mono text-[11px] text-blue-400">
+                  {String(index + 1).padStart(2, "0")}
                 </span>
               </div>
-              <h3 className="text-lg font-semibold text-gray-900 mb-2">
+              <h3 className="text-lg font-semibold text-blue-900 mb-2">
                 {f.title}
               </h3>
-              <p className="text-gray-500 text-sm leading-relaxed">
+              <p className="text-gray-600 text-sm leading-relaxed">
                 {f.description}
               </p>
             </div>

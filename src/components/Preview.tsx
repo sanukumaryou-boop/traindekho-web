@@ -94,18 +94,19 @@ export default function Preview() {
   return (
     <section
       id="preview"
-      className="py-20 sm:py-24 bg-white"
+      className="relative overflow-hidden py-20 sm:py-24 bg-blue-900"
       aria-labelledby="preview-heading"
       onMouseEnter={() => handleHover(true)}
       onMouseLeave={() => handleHover(false)}
     >
-      <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
-        <p className="text-[11px] font-medium uppercase tracking-[0.18em] text-gray-400 mb-3">
+      <div className="hero-rail-grid pointer-events-none absolute inset-0 opacity-40" />
+      <div className="relative max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+        <p className="text-[11px] font-medium uppercase tracking-[0.22em] text-sky-300/80 mb-3">
           App preview
         </p>
         <h2
           id="preview-heading"
-          className="text-3xl sm:text-4xl font-semibold text-gray-900 tracking-tight mb-10 sm:mb-14 max-w-2xl"
+          className="font-display text-3xl sm:text-5xl text-white tracking-tight mb-10 sm:mb-14 max-w-2xl"
         >
           From search to booking, as it works in the app
         </h2>
@@ -125,29 +126,60 @@ export default function Preview() {
                     }`}
                     aria-hidden={!active}
                   >
-                    <h3 className="text-2xl sm:text-3xl font-semibold text-gray-900 tracking-tight mb-4">
+                    <p className="font-mono text-xs text-sky-300/90 mb-3">
+                      {String(i + 1).padStart(2, "0")} / {String(screens.length).padStart(2, "0")}
+                    </p>
+                    <h3 className="font-display text-2xl sm:text-4xl text-white tracking-tight mb-4">
                       {item.title}
                     </h3>
-                    <p className="text-gray-500 text-lg leading-relaxed mb-6">
+                    <p className="text-white/65 text-lg leading-relaxed mb-6">
                       {item.description}
                     </p>
                     <ul className="space-y-2.5">
                       {item.points.map((point, pointIndex) => (
                         <li
                           key={point}
-                          className={`flex gap-2.5 text-sm text-gray-600 transition-all duration-500 ease-out motion-reduce:transition-none motion-reduce:transform-none ${
+                          className={`flex gap-2.5 text-sm text-white/75 transition-all duration-500 ease-out motion-reduce:transition-none motion-reduce:transform-none ${
                             active ? "opacity-100 translate-x-0" : "opacity-0 -translate-x-2"
                           }`}
                           style={{
                             transitionDelay: active ? `${180 + pointIndex * 90}ms` : "0ms",
                           }}
                         >
-                          <span className="mt-1.5 h-1.5 w-1.5 rounded-full bg-blue-600 shrink-0" />
+                          <span className="mt-1.5 h-1.5 w-1.5 rounded-full bg-sky-400 shrink-0" />
                           {point}
                         </li>
                       ))}
                     </ul>
                   </div>
+                );
+              })}
+            </div>
+            <div
+              role="tablist"
+              aria-label="App screens"
+              className="mt-8 flex flex-wrap gap-2"
+            >
+              {screens.map((item, i) => {
+                const active = i === index;
+                return (
+                  <button
+                    key={item.src}
+                    type="button"
+                    role="tab"
+                    aria-selected={active}
+                    onClick={() => {
+                      deadlineRef.current = 0;
+                      setIndex(i);
+                    }}
+                    className={`rounded-full px-3 py-1.5 text-xs transition-colors ${
+                      active
+                        ? "bg-sky-300 text-blue-900"
+                        : "border border-white/15 text-white/70 hover:bg-white/10"
+                    }`}
+                  >
+                    {item.title}
+                  </button>
                 );
               })}
             </div>

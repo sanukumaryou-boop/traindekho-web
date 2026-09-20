@@ -183,11 +183,8 @@ function writeRouteSlugCacheFromTrains(): void {
   );
 }
 
-/** Sitemap slugs from bundled trains.json — never hits the train API at build. */
+/** Sitemap slugs from bundled trains.json — never hits the train API or build cache. */
 export function discoverTrainSlugsForSitemap(): string[] {
-  const cached = readSlugCache();
-  if (cached && cached.length > 0) return cached;
-
   const slugs: string[] = [];
   for (const train of listTrains()) {
     const name = train.train_name?.trim();

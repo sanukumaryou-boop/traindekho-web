@@ -19,7 +19,7 @@ export default function HeroActionButton({
     <button
       type={type}
       disabled={disabled || loading}
-      className={`inline-flex w-full sm:w-auto shrink-0 items-center justify-center gap-2 rounded-full bg-zinc-900 hover:bg-zinc-800 disabled:bg-zinc-900 disabled:opacity-50 text-white font-medium px-6 py-[0.95rem] text-[0.95rem] transition-colors whitespace-nowrap disabled:cursor-not-allowed ${className}`}
+      className={`inline-flex w-full sm:w-auto shrink-0 items-center justify-center gap-2 rounded-full bg-blue-800 hover:bg-blue-700 disabled:bg-blue-800 disabled:opacity-50 text-white font-medium px-6 py-[0.95rem] text-[0.95rem] transition-colors whitespace-nowrap disabled:cursor-not-allowed ${className}`}
       {...props}
     >
       {loading ? (

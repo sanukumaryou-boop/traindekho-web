@@ -5,10 +5,14 @@
   --brand-blue-dark: #004a9f;
   --brand-blue-light: #1a73d7;
   --brand-sky: #2a8ae0;
+  --ink: #002e61;
+  --paper: #e8f1fb;
+  --signal: #2a8ae0;
 }
 
 @theme inline {
   --font-sans: var(--font-plus-jakarta);
+  --font-display: var(--font-newsreader), ui-serif, Georgia, serif;
 
   --color-blue-50: #e8f1fb;
   --color-blue-100: #d1e3f7;
@@ -27,6 +31,7 @@
   --color-sky-500: #2a8ae0;
 
   --animate-live-pulse: live-status-pulse 0.9s ease-out infinite;
+  --animate-board-scan: board-scan 3.2s ease-in-out infinite;
 }
 
 html {
@@ -43,6 +48,24 @@ html {
     transform: scale(2.2);
     opacity: 0;
   }
+}
+
+@keyframes board-scan {
+  0%,
+  100% {
+    opacity: 0.35;
+  }
+  50% {
+    opacity: 0.85;
+  }
+}
+
+.hero-rail-grid {
+  background-image: radial-gradient(
+    rgba(42, 138, 224, 0.22) 1px,
+    transparent 1px
+  );
+  background-size: 22px 22px;
 }
 
 body {

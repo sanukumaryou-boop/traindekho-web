@@ -133,11 +133,8 @@ export async function discoverRouteSlugsForBuild(): Promise<string[]> {
   return slugs;
 }
 
-/** Sitemap route slugs from bundled trains.json — never hits the train API at build. */
+/** Sitemap route slugs from bundled trains.json — never hits the train API or build cache. */
 export function discoverRouteSlugsForSitemap(): string[] {
-  const cached = readRouteSlugCache();
-  if (cached && cached.length > 0) return cached;
-
   const slugs = routeSlugsFromOriginDestinations(
     listTrains().flatMap((train) => {
       const source_code = train.source_code?.trim() ?? "";

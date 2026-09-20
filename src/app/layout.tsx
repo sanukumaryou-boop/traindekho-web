@@ -1,5 +1,5 @@
 import type { Metadata, Viewport } from "next";
-import { Plus_Jakarta_Sans } from "next/font/google";
+import { Newsreader, Plus_Jakarta_Sans } from "next/font/google";
 
 import { FirebaseAnalytics } from "@/components/FirebaseAnalytics";
 
@@ -10,6 +10,14 @@ const plusJakartaSans = Plus_Jakarta_Sans({
   subsets: ["latin"],
   display: "swap",
   weight: ["400", "500", "600", "700", "800"],
+});
+
+const newsreader = Newsreader({
+  variable: "--font-newsreader",
+  subsets: ["latin"],
+  display: "swap",
+  weight: ["400", "500", "600", "700"],
+  style: ["normal", "italic"],
 });
 
 export const viewport: Viewport = {
@@ -90,7 +98,10 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en-IN" className={`${plusJakartaSans.variable} h-full`}>
+    <html
+      lang="en-IN"
+      className={`${plusJakartaSans.variable} ${newsreader.variable} h-full`}
+    >
       <body className="min-h-full flex flex-col antialiased">
         <FirebaseAnalytics />
         {children}

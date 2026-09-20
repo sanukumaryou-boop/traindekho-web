@@ -4,10 +4,9 @@ import { playStoreUrl } from "@/lib/google-play-href";
 
 export default function Footer() {
   return (
-    <footer className="bg-gray-900 text-gray-400">
+    <footer className="bg-blue-900 text-white/55">
       <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
         <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-8">
-          {/* Brand */}
           <div>
             <Link href="/" className="flex items-center gap-2.5 mb-3">
               <Image
@@ -17,11 +16,11 @@ export default function Footer() {
                 height={36}
                 className="rounded-lg"
               />
-              <span className="text-white font-semibold text-lg">Train Dekho</span>
+              <span className="font-display text-white text-xl">Train Dekho</span>
             </Link>
             <p className="text-sm max-w-xs leading-relaxed">
-            Real-time Indian Railways tracking — live status, alternative
-            trains, PNR, alerts, ticket booking, and sharing. Free on Android.
+              Real-time Indian Railways tracking — live status, alternative
+              trains, PNR, alerts, ticket booking, and sharing. Free on Android.
             </p>
           </div>
 
@@ -45,11 +44,11 @@ export default function Footer() {
           </nav>
         </div>
 
-        <div className="mt-10 pt-8 border-t border-gray-800 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs">
+        <div className="mt-10 pt-8 border-t border-white/10 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs">
           <p>© {new Date().getFullYear()} Train Dekho. All rights reserved.</p>
           <p>
             Data sourced from{" "}
-            <span className="text-gray-300">Indian Railways / NTES</span>.
+            <span className="text-white/80">Indian Railways / NTES</span>.
             For informational use only.
           </p>
         </div>

@@ -53,7 +53,7 @@ export default function StickyDownloadBar({
 
   return (
     <div className="md:hidden fixed bottom-0 inset-x-0 z-40 pb-[env(safe-area-inset-bottom)]">
-      <div className="mx-3 mb-3 flex items-center gap-3 rounded-2xl bg-gray-900 text-white shadow-2xl px-3 py-3">
+      <div className="mx-3 mb-3 flex items-center gap-3 rounded-2xl bg-blue-900 text-white shadow-2xl ring-1 ring-white/10 px-3 py-3">
         <p className="flex-1 text-sm font-semibold leading-snug">
           Live tracking is in the app — status, PNR, alerts & booking
         </p>

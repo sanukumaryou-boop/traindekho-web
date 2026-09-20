@@ -57,7 +57,7 @@ export default function Navbar({ className }: { className?: string }) {
               <span
                 className={`text-base font-semibold tracking-tight truncate ${
                   solid ? "text-gray-900" : "text-white"
-                }`}
+                } font-display`}
               >
                 Train Dekho
               </span>

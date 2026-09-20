@@ -1,9 +1,13 @@
+import path from "node:path";
 import type { NextConfig } from "next";
 import { getTrainApiUrl } from "./src/lib/train-api-url";
 
 const nextConfig: NextConfig = {
   compress: true,
   poweredByHeader: false,
+  turbopack: {
+    root: path.join(__dirname),
+  },
   env: {
     TRAIN_API_URL: getTrainApiUrl(),
   },

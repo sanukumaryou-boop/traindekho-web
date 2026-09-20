@@ -47,11 +47,16 @@ export default function HomepageSearch() {
   }
 
   return (
-    <div className="w-full min-w-0 text-left bg-white rounded-2xl sm:rounded-3xl shadow-[0_24px_80px_rgba(0,0,0,0.28)] ring-1 ring-black/5 overflow-hidden">
+    <div className="w-full min-w-0 text-left bg-white rounded-2xl sm:rounded-3xl shadow-[0_24px_80px_rgba(0,46,97,0.35)] ring-1 ring-blue-900/10 overflow-hidden">
+      <div className="flex items-center justify-between gap-3 bg-blue-800 px-4 sm:px-5 py-2.5 text-[10px] sm:text-[11px] font-medium uppercase tracking-[0.2em] text-white/85">
+        <span>Train Dekho</span>
+        <span className="hidden sm:inline text-sky-200">Journey search</span>
+        <span>India</span>
+      </div>
       <div
         role="tablist"
         aria-label="Search type"
-        className="grid grid-cols-4 border-b border-gray-100"
+        className="grid grid-cols-4 border-b border-blue-100"
       >
         {TABS.map((item) => {
           const selected = tab === item.id;
@@ -65,8 +70,8 @@ export default function HomepageSearch() {
               onClick={() => setGate(null)}
               className={`flex min-w-0 flex-col sm:flex-row items-center justify-center gap-1 sm:gap-2 px-1 py-3 sm:px-4 sm:py-3.5 text-[11px] sm:text-sm font-medium transition-colors ${
                 selected
-                  ? "bg-blue-50 text-blue-700 shadow-[inset_0_-2px_0_0_#2563eb]"
-                  : "text-gray-500 hover:bg-gray-50 hover:text-gray-800"
+                  ? "bg-blue-50 text-blue-800 shadow-[inset_0_-2px_0_0_#0058be]"
+                  : "text-gray-500 hover:bg-blue-50/70 hover:text-gray-800"
               }`}
             >
               {item.icon}
