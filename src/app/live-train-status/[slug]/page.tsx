@@ -17,6 +17,12 @@ import {
   getLiveTrainStatusHref,
   getLiveTrainStatusHrefWithDate,
 } from "@/lib/train-schedule-href";
+import {
+  buildLiveTrainStatusFaq,
+  buildLiveTrainStatusFaqFromListItem,
+} from "@/lib/live-status-faq";
+import { buildFaqPageJsonLd } from "@/lib/train-schedule-faq";
+import TrainScheduleFAQ from "@/components/train-schedule/TrainScheduleFAQ";
 
 export const dynamic = "force-dynamic";
 export const maxDuration = 30;
@@ -73,9 +79,28 @@ export default async function LiveTrainStatusSlugPage({
   }
 
   const result = await fetchTrainLiveStatus(trainNo, journeyDate);
+  const local = findTrainByNumber(trainNo);
+  const faqItems = result.ok
+    ? buildLiveTrainStatusFaq(result.data)
+    : local
+      ? buildLiveTrainStatusFaqFromListItem(local)
+      : [];
+  const jsonLd =
+    faqItems.length > 0
+      ? {
+          "@context": "https://schema.org",
+          "@graph": [buildFaqPageJsonLd(faqItems)],
+        }
+      : null;
 
   return (
     <>
+      {jsonLd ? (
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+        />
+      ) : null}
       <Navbar className={result.ok ? "hidden md:block" : undefined} />
       <main
         className={
@@ -96,25 +121,33 @@ export default async function LiveTrainStatusSlugPage({
               initialData={result.data}
               trainNo={trainNo}
               journeyDate={journeyDate}
+              faqItems={faqItems}
             />
           ) : (
-            <section className="bg-white rounded-2xl border border-gray-200/80 shadow-sm p-5 sm:p-6">
-              <h1 className="text-xl sm:text-2xl font-semibold text-gray-900 tracking-tight mb-3">
-                Live status for {trainNo}
-              </h1>
-              <p
-                className="mb-5 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700"
-                role="alert"
-              >
-                {result.message}
-              </p>
-              <TrainSearch
-                variant="page"
-                hrefKind="live"
-                submitLabel="Track Live"
-                inputId="live-status-retry"
-              />
-            </section>
+            <>
+              <section className="bg-white rounded-2xl border border-gray-200/80 shadow-sm p-5 sm:p-6">
+                <h1 className="text-xl sm:text-2xl font-semibold text-gray-900 tracking-tight mb-3">
+                  Live status for {trainNo}
+                </h1>
+                <p
+                  className="mb-5 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700"
+                  role="alert"
+                >
+                  {result.message}
+                </p>
+                <TrainSearch
+                  variant="page"
+                  hrefKind="live"
+                  submitLabel="Track Live"
+                  inputId="live-status-retry"
+                />
+              </section>
+              {faqItems.length > 0 ? (
+                <section className="mt-8">
+                  <TrainScheduleFAQ items={faqItems} />
+                </section>
+              ) : null}
+            </>
           )}
         </div>
       </main>

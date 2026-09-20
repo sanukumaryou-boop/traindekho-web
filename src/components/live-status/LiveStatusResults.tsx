@@ -7,20 +7,24 @@ import LiveStatusOverview from "@/components/live-status/LiveStatusOverview";
 import LiveStatusRefreshButton from "@/components/live-status/LiveStatusRefreshButton";
 import LiveStatusSearchForm from "@/components/live-status/LiveStatusSearchForm";
 import LiveStatusTimeline from "@/components/live-status/LiveStatusTimeline";
+import TrainScheduleFAQ from "@/components/train-schedule/TrainScheduleFAQ";
 import { titleCase } from "@/lib/format";
 import { getTrainScheduleHref } from "@/lib/train-schedule-href";
+import type { FaqItem } from "@/lib/train-schedule-faq";
 import type { LiveStatusFetchResult, TrainLiveStatusResponse } from "@/lib/types/live-status";
 
 type LiveStatusResultsProps = {
   initialData: TrainLiveStatusResponse;
   trainNo: string;
   journeyDate: string;
+  faqItems?: FaqItem[];
 };
 
 export default function LiveStatusResults({
   initialData,
   trainNo,
   journeyDate,
+  faqItems = [],
 }: LiveStatusResultsProps) {
   const router = useRouter();
   const [data, setData] = useState(initialData);
@@ -156,6 +160,12 @@ export default function LiveStatusResults({
             Full schedule →
           </Link>
         </div>
+
+        {faqItems.length > 0 ? (
+          <div className="mt-6 mb-2">
+            <TrainScheduleFAQ items={faqItems} />
+          </div>
+        ) : null}
       </div>
 
       <LiveStatusRefreshButton onRefresh={handleRefresh} pending={refreshing} />

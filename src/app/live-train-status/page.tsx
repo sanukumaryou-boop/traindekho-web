@@ -3,6 +3,9 @@ import Link from "next/link";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import TrainSearch from "@/components/TrainSearch";
+import TrainScheduleFAQ from "@/components/train-schedule/TrainScheduleFAQ";
+import { LIVE_TRAIN_STATUS_INDEX_FAQ } from "@/lib/live-status-faq";
+import { buildFaqPageJsonLd } from "@/lib/train-schedule-faq";
 
 export const metadata: Metadata = {
   title: "Live Train Status",
@@ -13,9 +16,18 @@ export const metadata: Metadata = {
   },
 };
 
+const jsonLd = {
+  "@context": "https://schema.org",
+  "@graph": [buildFaqPageJsonLd(LIVE_TRAIN_STATUS_INDEX_FAQ)],
+};
+
 export default function LiveTrainStatusPage() {
   return (
     <>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+      />
       <Navbar />
       <main className="pt-20 pb-16 min-h-screen bg-gray-50/50">
         <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -42,6 +54,10 @@ export default function LiveTrainStatusPage() {
               submitLabel="Track Live"
               inputId="live-status-search"
             />
+          </section>
+
+          <section className="mt-8">
+            <TrainScheduleFAQ items={LIVE_TRAIN_STATUS_INDEX_FAQ} />
           </section>
         </div>
       </main>
