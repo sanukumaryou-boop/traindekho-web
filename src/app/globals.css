@@ -73,3 +73,26 @@ body {
   background: #ffffff;
   color: #111827;
 }
+
+.docs-canvas {
+  background:
+    radial-gradient(720px 360px at 0% 0%, rgba(26, 115, 215, 0.22), transparent 62%),
+    radial-gradient(640px 320px at 100% 8%, rgba(42, 138, 224, 0.16), transparent 58%),
+    linear-gradient(180deg, #eef5fc 0%, #ffffff 48%);
+}
+
+.glass {
+  background: rgba(255, 255, 255, 0.58);
+  backdrop-filter: blur(18px);
+  -webkit-backdrop-filter: blur(18px);
+  border: 1px solid rgba(255, 255, 255, 0.72);
+  box-shadow: 0 12px 40px rgba(0, 46, 97, 0.08);
+}
+
+.glass-dark {
+  background: rgba(8, 22, 46, 0.86);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  box-shadow: 0 16px 40px rgba(0, 20, 48, 0.18);
+}

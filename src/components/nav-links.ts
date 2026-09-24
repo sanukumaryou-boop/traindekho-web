@@ -7,4 +7,5 @@ export const mainNavLinks: NavLink[] = [
   { href: "/", label: "Find trains" },
   { href: "/live", label: "Track Live" },
   { href: "/schedule", label: "Schedule" },
+  { href: "/developers", label: "API" },
 ];

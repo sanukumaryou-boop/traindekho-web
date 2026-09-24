@@ -40,6 +40,7 @@ export default function Footer() {
             </a>
             <Link href="/privacy" className="hover:text-white transition-colors">Privacy Policy</Link>
             <Link href="/terms" className="hover:text-white transition-colors">Terms of Use</Link>
+            <Link href="/developers" className="hover:text-white transition-colors">API</Link>
             <Link href="/contact" className="hover:text-white transition-colors">Contact</Link>
           </nav>
         </div>

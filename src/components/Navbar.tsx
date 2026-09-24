@@ -3,14 +3,18 @@
 import { useEffect, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import MobileNav from "@/components/MobileNav";
 import PlayStoreButton from "@/components/PlayStoreButton";
+import ProfileMenu from "@/components/developers/ProfileMenu";
 import { mainNavLinks } from "@/components/nav-links";
 import { useKeyboardOpen } from "@/hooks/useKeyboardOpen";
+import type { Account } from "@/lib/developers/public-api";
 
 export default function Navbar({ className }: { className?: string }) {
   const pathname = usePathname();
+  const router = useRouter();
+  const [account, setAccount] = useState<Account | null>(null);
   const isHome =
     pathname === "/" ||
     pathname === "/live" ||
@@ -18,6 +22,33 @@ export default function Navbar({ className }: { className?: string }) {
     pathname === "/schedule";
   const [scrolled, setScrolled] = useState(false);
   const keyboardOpen = useKeyboardOpen();
+
+  useEffect(() => {
+    let cancelled = false;
+    fetch("/api/developers/session")
+      .then(async (response) => {
+        if (cancelled) return;
+        if (!response.ok) {
+          setAccount(null);
+          return;
+        }
+        const body = (await response.json()) as { account?: Account };
+        setAccount(body.account ?? null);
+      })
+      .catch(() => {
+        if (!cancelled) setAccount(null);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [pathname]);
+
+  async function logout() {
+    await fetch("/api/developers/logout", { method: "POST" });
+    setAccount(null);
+    router.push("/developers");
+    router.refresh();
+  }
 
   useEffect(() => {
     if (!isHome) return;
@@ -44,7 +75,7 @@ export default function Navbar({ className }: { className?: string }) {
       <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-16">
           <div className="flex items-center gap-3 min-w-0">
-            <MobileNav tone={solid ? "dark" : "light"} />
+            <MobileNav tone={solid ? "dark" : "light"} account={account} onLogout={logout} />
             <Link href="/" className="flex items-center gap-2.5 min-w-0">
               <Image
                 src="/images/logo.png"
@@ -102,12 +133,16 @@ export default function Navbar({ className }: { className?: string }) {
             </nav>
           </div>
 
-          <PlayStoreButton
-            placement="nav"
-            medium="web"
-            variant={solid ? "ghostDark" : "ghost"}
-            label="Get the app"
-          />
+          {account ? (
+            <ProfileMenu account={account} solid={solid} onLogout={logout} />
+          ) : (
+            <PlayStoreButton
+              placement="nav"
+              medium="web"
+              variant={solid ? "ghostDark" : "ghost"}
+              label="Get the app"
+            />
+          )}
         </div>
       </div>
     </header>
