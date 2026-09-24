@@ -21,7 +21,8 @@ export function parseRouteSearchSlug(
     .toUpperCase();
 
   if (!from || !to || from === to) return null;
-  if (!/^[A-Z0-9]{2,6}$/.test(from) || !/^[A-Z0-9]{2,6}$/.test(to)) {
+  // IR codes can be 1 char (e.g. R = Raipur). Reject only empty/too-long.
+  if (!/^[A-Z0-9]{1,6}$/.test(from) || !/^[A-Z0-9]{1,6}$/.test(to)) {
     return null;
   }
 

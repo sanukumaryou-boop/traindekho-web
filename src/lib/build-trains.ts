@@ -23,7 +23,7 @@ import trainTejasExpressNumbers from "@/lib/train_tejas.json";
 import trainGareebrathNumbers from "@/lib/train_gareebrath.json";
 import { listTrains } from "@/lib/search-trains";
 
-const STATION_CODE_PATTERN = /^[A-Z0-9]{2,6}$/;
+const STATION_CODE_PATTERN = /^[A-Z0-9]{1,6}$/;
 
 function sleep(ms: number): Promise<void> {
   return new Promise((resolve) => setTimeout(resolve, ms));
