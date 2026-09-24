@@ -162,7 +162,18 @@ export default async function TrainSchedulePage({ params }: PageProps) {
 
   const train = await getTrain(slug);
 
-  if (!train) notFound();
+  if (!train) {
+    const trainNo = parseTrainNumberFromSlug(slug);
+    // Train is in the bundled catalog but the API miss/timeout would otherwise
+    // ISR-cache a 404 for `revalidate` (24h). Fail the request instead so the
+    // next hit retries against a live API.
+    if (findTrainByNumber(trainNo)) {
+      throw new Error(
+        `Train schedule temporarily unavailable for ${trainNo}`,
+      );
+    }
+    notFound();
+  }
 
   const canonicalSlug = buildTrainSlug(train);
   if (slug !== canonicalSlug) {

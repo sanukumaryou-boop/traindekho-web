@@ -145,17 +145,16 @@ async function fetchTrainFromApi(trainNo: string): Promise<Train | null | "retry
   const url = `${getTrainApiUrl()}/trains?q=${encodeURIComponent(trainNo)}`;
 
   try {
+    // Cache hits only — empty/miss responses must not be stored for a full day,
+    // or a transient empty result (new train / API blip) becomes a sticky 404.
     const response = await fetch(url, {
-      next: { revalidate: 86400 },
+      next: { revalidate: 86400, tags: [`train-${trainNo}`] },
       signal: trainApiTimeout(),
     });
 
-    if (RETRYABLE_STATUS.has(response.status)) {
+    if (RETRYABLE_STATUS.has(response.status) || !response.ok) {
+      // Upstream errors are transient — do not map them to a cached notFound().
       return "retry";
-    }
-
-    if (!response.ok) {
-      return null;
     }
 
     const data = (await response.json()) as TrainApiRecord[];
@@ -307,8 +306,11 @@ export async function fetchTrainByNumber(
     }
   }
 
-  console.error(`[train-api] ${trainNo} failed after ${maxRetries} retries`);
-  return null;
+  // Throw (don't return null) so schedule pages don't ISR-cache a 404 for a
+  // train that likely exists but couldn't be loaded this request.
+  throw new Error(
+    `[train-api] ${trainNo} failed after ${maxRetries} retries`,
+  );
 }
 
 export async function fetchAllTrainNumbers(): Promise<string[]> {
