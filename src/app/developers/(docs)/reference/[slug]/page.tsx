@@ -1,6 +1,5 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
-import DocsFrame from "@/components/developers/DocsFrame";
 import EndpointDoc from "@/components/developers/EndpointDoc";
 import { apiEndpoints, endpointBySlug } from "@/lib/developers/catalog";
 
@@ -25,9 +24,5 @@ export default async function EndpointPage({ params }: PageProps) {
   const endpoint = endpointBySlug(slug);
   if (!endpoint) notFound();
 
-  return (
-    <DocsFrame>
-      <EndpointDoc endpoint={endpoint} />
-    </DocsFrame>
-  );
+  return <EndpointDoc endpoint={endpoint} />;
 }

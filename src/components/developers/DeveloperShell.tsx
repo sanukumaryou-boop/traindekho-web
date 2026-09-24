@@ -8,9 +8,9 @@ export default function DeveloperShell({
 }) {
   return (
     <>
-      <Navbar />
+      <Navbar containerClassName="max-w-7xl" />
       <main className="docs-canvas pt-16 pb-20">{children}</main>
-      <Footer />
+      <Footer containerClassName="max-w-7xl" />
     </>
   );
 }

@@ -2,10 +2,10 @@ import Image from "next/image";
 import Link from "next/link";
 import { playStoreUrl } from "@/lib/google-play-href";
 
-export default function Footer() {
+export default function Footer({ containerClassName = "max-w-6xl" }: { containerClassName?: string }) {
   return (
     <footer className="bg-blue-900 text-white/55">
-      <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+      <div className={`${containerClassName} mx-auto px-4 sm:px-6 lg:px-8 py-12`}>
         <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-8">
           <div>
             <Link href="/" className="flex items-center gap-2.5 mb-3">

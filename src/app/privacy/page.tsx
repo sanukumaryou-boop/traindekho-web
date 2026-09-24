@@ -34,8 +34,8 @@ export default function PrivacyPage() {
           <h2 className="text-xl font-bold text-gray-900 mt-6">Contact</h2>
           <p>
             For any privacy concerns, please contact us at{" "}
-            <a href="mailto:privacy@traindekho.app" className="text-blue-600 hover:underline">
-              privacy@traindekho.app
+            <a href="mailto:ankit@traindekho.live" className="text-blue-600 hover:underline">
+              ankit@traindekho.live
             </a>
             .
           </p>

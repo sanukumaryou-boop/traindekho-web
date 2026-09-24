@@ -5,15 +5,12 @@ import { useEffect, useState } from "react";
 import { createPortal } from "react-dom";
 import { mainNavLinks } from "@/components/nav-links";
 import PlayStoreButton from "@/components/PlayStoreButton";
-import type { Account } from "@/lib/developers/public-api";
 
 type MobileNavProps = {
   tone?: "light" | "dark";
-  account?: Account | null;
-  onLogout?: () => void;
 };
 
-export default function MobileNav({ tone = "dark", account = null, onLogout }: MobileNavProps) {
+export default function MobileNav({ tone = "dark" }: MobileNavProps) {
   const [open, setOpen] = useState(false);
   const [mounted, setMounted] = useState(false);
 
@@ -80,40 +77,13 @@ export default function MobileNav({ tone = "dark", account = null, onLogout }: M
               </nav>
 
               <div className="p-4 border-t border-gray-100 shrink-0">
-                {account ? (
-                  <div className="rounded-2xl border border-gray-100 p-3">
-                    <p className="font-semibold text-gray-900">{account.name}</p>
-                    <p className="mt-1 text-sm text-gray-500">{account.plan.name} plan</p>
-                    <Link
-                      href="/developers/keys"
-                      onClick={close}
-                      className="mt-3 block text-sm font-medium text-blue-700"
-                    >
-                      API keys
-                    </Link>
-                    <Link href="/developers/usage" onClick={close} className="mt-2 block text-sm font-medium text-blue-700">
-                      Usage
-                    </Link>
-                    <button
-                      type="button"
-                      onClick={() => {
-                        close();
-                        onLogout?.();
-                      }}
-                      className="mt-3 w-full rounded-full border border-gray-200 px-4 py-2 text-sm font-medium text-gray-700"
-                    >
-                      Log out
-                    </button>
-                  </div>
-                ) : (
-                  <PlayStoreButton
-                    placement="nav"
-                    medium="web"
-                    variant="primary"
-                    label="Download the App"
-                    className="w-full !px-4 !py-3 !text-sm"
-                  />
-                )}
+                <PlayStoreButton
+                  placement="nav"
+                  medium="web"
+                  variant="primary"
+                  label="Download the App"
+                  className="w-full !px-4 !py-3 !text-sm"
+                />
               </div>
             </aside>
           </>,

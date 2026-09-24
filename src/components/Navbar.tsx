@@ -6,15 +6,19 @@ import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import MobileNav from "@/components/MobileNav";
 import PlayStoreButton from "@/components/PlayStoreButton";
-import ProfileMenu from "@/components/developers/ProfileMenu";
 import { mainNavLinks } from "@/components/nav-links";
 import { useKeyboardOpen } from "@/hooks/useKeyboardOpen";
-import type { Account } from "@/lib/developers/public-api";
 
-export default function Navbar({ className }: { className?: string }) {
+export default function Navbar({
+  className,
+  containerClassName = "max-w-6xl",
+}: {
+  className?: string;
+  containerClassName?: string;
+}) {
   const pathname = usePathname();
   const router = useRouter();
-  const [account, setAccount] = useState<Account | null>(null);
+  const [signedIn, setSignedIn] = useState<boolean | null>(null);
   const isHome =
     pathname === "/" ||
     pathname === "/live" ||
@@ -26,17 +30,11 @@ export default function Navbar({ className }: { className?: string }) {
   useEffect(() => {
     let cancelled = false;
     fetch("/api/developers/session")
-      .then(async (response) => {
-        if (cancelled) return;
-        if (!response.ok) {
-          setAccount(null);
-          return;
-        }
-        const body = (await response.json()) as { account?: Account };
-        setAccount(body.account ?? null);
+      .then((response) => {
+        if (!cancelled) setSignedIn(response.ok);
       })
       .catch(() => {
-        if (!cancelled) setAccount(null);
+        if (!cancelled) setSignedIn(false);
       });
     return () => {
       cancelled = true;
@@ -45,7 +43,7 @@ export default function Navbar({ className }: { className?: string }) {
 
   async function logout() {
     await fetch("/api/developers/logout", { method: "POST" });
-    setAccount(null);
+    setSignedIn(false);
     router.push("/developers");
     router.refresh();
   }
@@ -72,10 +70,10 @@ export default function Navbar({ className }: { className?: string }) {
         solid ? "bg-white/95 border-b border-gray-100 backdrop-blur-xl" : "bg-transparent"
       } ${className ?? ""}`}
     >
-      <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div className={`${containerClassName} mx-auto px-4 sm:px-6 lg:px-8`}>
         <div className="flex items-center justify-between h-16">
           <div className="flex items-center gap-3 min-w-0">
-            <MobileNav tone={solid ? "dark" : "light"} account={account} onLogout={logout} />
+            <MobileNav tone={solid ? "dark" : "light"} />
             <Link href="/" className="flex items-center gap-2.5 min-w-0">
               <Image
                 src="/images/logo.png"
@@ -133,8 +131,20 @@ export default function Navbar({ className }: { className?: string }) {
             </nav>
           </div>
 
-          {account ? (
-            <ProfileMenu account={account} solid={solid} onLogout={logout} />
+          {signedIn === null ? (
+            <span className="inline-flex h-9 w-24 shrink-0" aria-hidden="true" />
+          ) : signedIn ? (
+            <button
+              type="button"
+              onClick={logout}
+              className={`inline-flex shrink-0 items-center rounded-full px-4 py-2 text-sm font-semibold transition-colors ${
+                solid
+                  ? "bg-gray-900 text-white hover:bg-gray-700"
+                  : "bg-white text-gray-900 hover:bg-white/90"
+              }`}
+            >
+              Log out
+            </button>
           ) : (
             <PlayStoreButton
               placement="nav"

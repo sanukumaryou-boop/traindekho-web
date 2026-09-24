@@ -58,12 +58,6 @@ export default function KeysPanel({
     setCopied(true);
   }
 
-  async function logout() {
-    await fetch("/api/developers/logout", { method: "POST" });
-    router.push("/developers/login");
-    router.refresh();
-  }
-
   return (
     <div>
       <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4">
@@ -76,19 +70,14 @@ export default function KeysPanel({
             {limitLabel(account.plan.requests_per_minute, "requests / minute")}
           </p>
         </div>
-        <div className="flex gap-2">
-          <button
-            type="button"
-            onClick={createKey}
-            disabled={pending}
-            className="rounded-lg bg-blue-600 px-4 py-2.5 text-sm font-semibold text-white hover:bg-blue-700 disabled:opacity-60"
-          >
-            {pending ? "Creating" : "Create API key"}
-          </button>
-          <button type="button" onClick={logout} className="rounded-lg border border-gray-200 px-4 py-2.5 text-sm text-gray-700">
-            Log out
-          </button>
-        </div>
+        <button
+          type="button"
+          onClick={createKey}
+          disabled={pending}
+          className="rounded-lg bg-blue-600 px-4 py-2.5 text-sm font-semibold text-white hover:bg-blue-700 disabled:opacity-60"
+        >
+          {pending ? "Creating" : "Create API key"}
+        </button>
       </div>
 
       {error ? <p className="mt-4 text-sm text-red-600">{error}</p> : null}

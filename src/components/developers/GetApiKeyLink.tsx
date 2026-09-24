@@ -9,9 +9,10 @@ export default async function GetApiKeyLink({
 }) {
   const jar = await cookies();
   const signedIn = Boolean(jar.get(ACCESS_COOKIE)?.value || jar.get(REFRESH_COOKIE)?.value);
+  if (signedIn) return null;
   return (
     <Link
-      href={signedIn ? "/developers/keys" : "/developers/login"}
+      href="/developers/login"
       className={`inline-flex items-center justify-center rounded-lg bg-blue-600 px-4 py-2.5 text-sm font-semibold text-white hover:bg-blue-700 ${className}`}
     >
       Get API key

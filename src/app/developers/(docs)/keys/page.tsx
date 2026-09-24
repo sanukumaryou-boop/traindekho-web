@@ -1,7 +1,6 @@
 import type { Metadata } from "next";
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
-import DocsFrame from "@/components/developers/DocsFrame";
 import KeysPanel from "@/components/developers/KeysPanel";
 import {
   ACCESS_COOKIE,
@@ -27,11 +26,7 @@ export default async function KeysPage() {
   try {
     const account = await getAccount(access);
     const credentials = await listCredentials(access);
-    return (
-      <DocsFrame>
-        <KeysPanel account={account} credentials={credentials} />
-      </DocsFrame>
-    );
+    return <KeysPanel account={account} credentials={credentials} />;
   } catch (error) {
     if (error instanceof PublicApiError && error.status === 401) {
       redirect(refresh ? "/api/developers/continue?next=/developers/keys" : "/developers/login");

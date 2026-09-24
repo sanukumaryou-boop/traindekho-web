@@ -1,5 +1,8 @@
+import CodeBlock from "@/components/developers/CodeBlock";
+import CopyButton from "@/components/developers/CopyButton";
 import GetApiKeyLink from "@/components/developers/GetApiKeyLink";
-import { API_BASE_URL, curlExample, type ApiEndpoint } from "@/lib/developers/catalog";
+import { curlExample, type ApiEndpoint } from "@/lib/developers/catalog";
+import { methodBadgeClass } from "@/lib/developers/method";
 import { responseExamples } from "@/lib/developers/responses";
 
 function statusTone(status: number) {
@@ -10,21 +13,27 @@ function statusTone(status: number) {
 
 export default function EndpointDoc({ endpoint }: { endpoint: ApiEndpoint }) {
   const responses = responseExamples(endpoint.success, endpoint.errorStatuses);
+  const curl = curlExample(endpoint);
 
   return (
     <article>
       <div className="flex flex-wrap items-center gap-3">
-        <span className="rounded-md bg-blue-600 px-2 py-1 text-xs font-bold tracking-wide text-white">{endpoint.method}</span>
-        <h1 className="font-mono text-xl text-gray-900 sm:text-2xl">{endpoint.path}</h1>
+        <span className={`rounded-md bg-white/80 px-2 py-1 text-xs font-bold tracking-wide ring-1 ring-black/5 ${methodBadgeClass(endpoint.method)}`}>
+          {endpoint.method}
+        </span>
+        <h1 className="min-w-0 font-mono text-xl text-gray-900 sm:text-2xl">{endpoint.path}</h1>
+        <GetApiKeyLink className="ml-auto shrink-0 !bg-black hover:!bg-gray-800" />
       </div>
       <p className="mt-4 max-w-2xl text-gray-600 leading-relaxed">{endpoint.description}</p>
 
       <section className="mt-10">
         <h2 className="text-lg font-bold text-gray-900">Request</h2>
-        <p className="mt-2 text-sm text-gray-500">
-          Base URL <span className="font-mono text-gray-800">{API_BASE_URL}</span>. Send{" "}
-          <span className="font-mono text-gray-800">X-API-Key</span>.
-        </p>
+        <div className="glass-dark relative mt-4 rounded-3xl">
+          <CopyButton text={curl} />
+          <pre className="overflow-x-auto rounded-3xl p-4 pr-12 font-mono text-sm leading-relaxed text-slate-200">
+            <CodeBlock code={curl} language="curl" />
+          </pre>
+        </div>
         <div className="glass mt-4 overflow-hidden rounded-3xl">
           <table className="w-full text-left text-sm">
             <thead className="bg-white/40 text-xs uppercase tracking-wide text-gray-500">
@@ -47,9 +56,6 @@ export default function EndpointDoc({ endpoint }: { endpoint: ApiEndpoint }) {
             </tbody>
           </table>
         </div>
-        <pre className="glass-dark mt-4 overflow-x-auto rounded-3xl p-4 text-sm leading-relaxed text-gray-100">
-          <code>{curlExample(endpoint)}</code>
-        </pre>
       </section>
 
       <section className="mt-10">
@@ -61,17 +67,13 @@ export default function EndpointDoc({ endpoint }: { endpoint: ApiEndpoint }) {
                 <span className={`rounded-md px-2 py-1 text-xs font-bold ${statusTone(response.status)}`}>{response.status}</span>
                 <p className="text-sm text-gray-600">{response.description}</p>
               </div>
-              <pre className="overflow-x-auto bg-[rgba(8,22,46,0.88)] p-4 text-sm leading-relaxed text-gray-100">
-                <code>{response.example}</code>
+              <pre className="overflow-x-auto bg-[rgba(8,22,46,0.88)] p-4 font-mono text-sm leading-relaxed text-slate-200">
+                <CodeBlock code={response.example} language="json" />
               </pre>
             </div>
           ))}
         </div>
       </section>
-
-      <div className="mt-10">
-        <GetApiKeyLink />
-      </div>
     </article>
   );
 }

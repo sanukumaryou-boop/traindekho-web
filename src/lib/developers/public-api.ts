@@ -116,6 +116,33 @@ export async function getUsage(accessToken: string) {
   });
 }
 
+export type RequestLogItem = {
+  request_id: string;
+  method: string;
+  path: string;
+  query_string: string;
+  status_code: number;
+  latency_ms: number;
+  created_at: string;
+};
+
+export type RequestLogPage = {
+  logs: RequestLogItem[];
+  page: number;
+  page_size: number;
+  total: number;
+};
+
+export async function listLogs(accessToken: string, page = 1, pageSize = 20) {
+  const params = new URLSearchParams({
+    page: String(page),
+    page_size: String(pageSize),
+  });
+  return publicApi<RequestLogPage>(`/account/logs?${params}`, {
+    headers: { Authorization: `Bearer ${accessToken}` },
+  });
+}
+
 export async function getAccount(accessToken: string) {
   return publicApi<Account>("/account", {
     headers: { Authorization: `Bearer ${accessToken}` },
