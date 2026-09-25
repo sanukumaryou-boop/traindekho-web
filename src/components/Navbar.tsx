@@ -5,7 +5,6 @@ import Image from "next/image";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import MobileNav from "@/components/MobileNav";
-import PlayStoreButton from "@/components/PlayStoreButton";
 import { mainNavLinks } from "@/components/nav-links";
 import { useKeyboardOpen } from "@/hooks/useKeyboardOpen";
 
@@ -146,12 +145,16 @@ export default function Navbar({
               Log out
             </button>
           ) : (
-            <PlayStoreButton
-              placement="nav"
-              medium="web"
-              variant={solid ? "ghostDark" : "ghost"}
-              label="Get the app"
-            />
+            <Link
+              href="/developers/login"
+              className={`inline-flex shrink-0 items-center rounded-full px-4 py-2 text-sm font-semibold transition-colors ${
+                solid
+                  ? "bg-gray-900 text-white hover:bg-gray-700"
+                  : "bg-white text-gray-900 hover:bg-white/90"
+              }`}
+            >
+              Log in
+            </Link>
           )}
         </div>
       </div>

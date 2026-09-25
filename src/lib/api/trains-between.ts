@@ -1,7 +1,11 @@
-import { getTrainApiUrl, trainApiTimeout } from "@/lib/train-api-url";
+import { formatDuration } from "@/lib/format";
+import { publicDataHeaders, publicDataUrl } from "@/lib/public-data-api";
+import { findStationByCode } from "@/lib/search-stations";
+import { trainApiTimeout } from "@/lib/train-api-url";
 import type {
   AlternativeRouteTrain,
   DirectRouteTrain,
+  RouteStationInfo,
   RouteTrainApiRecord,
   TrainsBetweenApiResponse,
   TrainsBetweenResult,
@@ -94,14 +98,119 @@ function parseAlternativeTrain(
   };
 }
 
+type PublicStationRef = { code?: string; name?: string };
+
+type PublicRouteTrain = {
+  train_no?: string | number;
+  name?: string;
+  type?: string;
+  departure_time?: string | null;
+  arrival_time?: string | null;
+  duration_minutes?: number;
+  distance_km?: number;
+  day_offset?: number;
+  days_of_run?: DaysOfRun;
+  classes?: string[];
+  stops_between?: number;
+};
+
+type PublicRouteResponse = {
+  direct_trains?: PublicRouteTrain[];
+  alternatives?: {
+    board?: PublicStationRef;
+    alight?: PublicStationRef;
+    trains?: PublicRouteTrain[];
+  }[];
+};
+
+function stationRef(code: string, fallbackName?: string): RouteStationInfo {
+  const known = findStationByCode(code);
+  return {
+    station_code: code,
+    station_name: fallbackName?.trim() || known?.station_name || code,
+    distance: 0,
+    day_count: 0,
+  };
+}
+
+function mapPublicRouteTrain(
+  record: PublicRouteTrain,
+  board: RouteStationInfo,
+  alight: RouteStationInfo,
+): RouteTrainApiRecord {
+  const duration = Number(record.duration_minutes ?? 0);
+  const distance = Number(record.distance_km ?? 0);
+  return {
+    train_no: Number(record.train_no ?? 0),
+    train_name: String(record.name ?? ""),
+    train_type: String(record.type ?? ""),
+    source: board.station_name,
+    destination: alight.station_name,
+    source_code: board.station_code,
+    destination_code: alight.station_code,
+    days_of_run: record.days_of_run ?? EMPTY_DAYS,
+    classes: record.classes ?? [],
+    total_duration: duration,
+    total_distance: String(distance),
+    total_number_of_stops: Number(record.stops_between ?? 0),
+    stops_between_stations: Number(record.stops_between ?? 0),
+    distance_between_stations: distance,
+    scheduled_travel_time: formatDuration(duration),
+    from_station: {
+      ...board,
+      scheduled_departure_time: record.departure_time ?? undefined,
+      day_count: 0,
+      distance: 0,
+    },
+    to_station: {
+      ...alight,
+      scheduled_arrival_time: record.arrival_time ?? undefined,
+      day_count: Number(record.day_offset ?? 0),
+      distance,
+    },
+  };
+}
+
+function mapPublicRoutes(
+  data: PublicRouteResponse,
+  from: string,
+  to: string,
+): TrainsBetweenResult {
+  const fromStation = stationRef(from);
+  const toStation = stationRef(to);
+  const direct_trains = (data.direct_trains ?? [])
+    .map((record) => parseDirectTrain(mapPublicRouteTrain(record, fromStation, toStation)))
+    .filter((train): train is DirectRouteTrain => train !== null);
+
+  const alternative_trains = (data.alternatives ?? []).flatMap((group) => {
+    const boardCode = String(group.board?.code ?? from).trim().toUpperCase();
+    const alightCode = String(group.alight?.code ?? to).trim().toUpperCase();
+    const board = stationRef(boardCode, group.board?.name);
+    const alight = stationRef(alightCode, group.alight?.name);
+    return (group.trains ?? [])
+      .map((record) => {
+        const mapped = mapPublicRouteTrain(record, board, alight);
+        if (boardCode !== from) mapped.alternative_from_station = mapped.from_station;
+        if (alightCode !== to) mapped.alternative_to_station = mapped.to_station;
+        return parseAlternativeTrain(mapped);
+      })
+      .filter((train): train is AlternativeRouteTrain => train !== null);
+  });
+
+  return { direct_trains, alternative_trains };
+}
+
 async function fetchTrainsBetweenOnce(
   from: string,
   to: string,
 ): Promise<TrainsBetweenResult | null | "retry"> {
-  const url = `${getTrainApiUrl()}/trains/between?from=${encodeURIComponent(from)}&to=${encodeURIComponent(to)}`;
+  const url = publicDataUrl(
+    `/routes/trains?from=${encodeURIComponent(from)}&to=${encodeURIComponent(to)}`,
+  );
 
   try {
     const response = await fetch(url, {
+      headers: publicDataHeaders(),
       next: { revalidate: 3600 },
       signal: trainApiTimeout(),
     });
@@ -114,16 +223,20 @@ async function fetchTrainsBetweenOnce(
       return null;
     }
 
-    const data = (await response.json()) as TrainsBetweenApiResponse;
-    if (!data || !Array.isArray(data.direct_trains) || !Array.isArray(data.alternative_trains)) {
+    const data = (await response.json()) as PublicRouteResponse & TrainsBetweenApiResponse;
+    if (Array.isArray(data.alternatives)) {
+      return mapPublicRoutes(data, from, to);
+    }
+    const legacy = data as TrainsBetweenApiResponse;
+    if (!legacy || !Array.isArray(legacy.direct_trains) || !Array.isArray(legacy.alternative_trains)) {
       return null;
     }
 
-    const direct_trains = data.direct_trains
+    const direct_trains = legacy.direct_trains
       .map((record) => parseDirectTrain(record))
       .filter((train): train is DirectRouteTrain => train !== null);
 
-    const alternative_trains = data.alternative_trains
+    const alternative_trains = legacy.alternative_trains
       .map((record) => parseAlternativeTrain(record))
       .filter((train): train is AlternativeRouteTrain => train !== null);
 
