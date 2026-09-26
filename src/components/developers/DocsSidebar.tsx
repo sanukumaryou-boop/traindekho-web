@@ -1,5 +1,6 @@
 "use client";
 
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { apiEndpoints, apiGroups } from "@/lib/developers/catalog";
@@ -31,13 +32,30 @@ function groupLabel(label: string, first = false) {
 
 export default function DocsSidebar() {
   const pathname = usePathname();
+  const [signedIn, setSignedIn] = useState(false);
+
+  useEffect(() => {
+    let cancelled = false;
+    fetch("/api/developers/session")
+      .then((response) => {
+        if (!cancelled) setSignedIn(response.ok);
+      })
+      .catch(() => {
+        if (!cancelled) setSignedIn(false);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [pathname]);
+
+  const links = signedIn ? accountLinks : accountLinks.filter((link) => link.href === "/developers");
 
   return (
     <nav aria-label="API reference" className="text-sm">
       <div>
         {groupLabel("Account", true)}
         <ul className="space-y-1">
-          {accountLinks.map((link) => {
+          {links.map((link) => {
             const active = pathname === link.href;
             return (
               <li key={link.href}>
