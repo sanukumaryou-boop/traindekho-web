@@ -81,9 +81,23 @@ export async function publicApi<T>(path: string, init: RequestInit = {}): Promis
 }
 
 export async function signupAccount(input: { name: string; email: string; password: string }) {
-  return publicApi<TokenPair & { account: Account }>("/account/signup", {
+  return publicApi<{ email: string }>("/account/signup", {
     method: "POST",
     body: JSON.stringify(input),
+  });
+}
+
+export async function verifyDeveloperEmail(token: string) {
+  return publicApi<{ verified: boolean }>("/account/verify-email", {
+    method: "POST",
+    body: JSON.stringify({ token }),
+  });
+}
+
+export async function resendDeveloperVerification(email: string) {
+  return publicApi<{ ok: boolean }>("/account/resend-verification", {
+    method: "POST",
+    body: JSON.stringify({ email }),
   });
 }
 

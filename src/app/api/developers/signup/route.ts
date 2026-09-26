@@ -1,14 +1,17 @@
 import { PublicApiError, signupAccount } from "@/lib/developers/public-api";
-import { writeSession } from "@/lib/developers/session";
 
 export async function POST(request: Request) {
   const body = (await request.json().catch(() => null)) as {
     name?: string;
     email?: string;
     password?: string;
+    confirmPassword?: string;
   } | null;
-  if (!body?.name || !body.email || !body.password) {
+  if (!body?.name || !body.email || !body.password || !body.confirmPassword) {
     return Response.json({ error: "Request is invalid." }, { status: 400 });
+  }
+  if (body.password !== body.confirmPassword) {
+    return Response.json({ error: "Passwords do not match." }, { status: 400 });
   }
   try {
     const created = await signupAccount({
@@ -16,8 +19,7 @@ export async function POST(request: Request) {
       email: body.email,
       password: body.password,
     });
-    await writeSession(created.access_token, created.refresh_token, created.expires_in);
-    return Response.json({ ok: true });
+    return Response.json({ ok: true, email: created.email });
   } catch (error) {
     if (error instanceof PublicApiError) {
       return Response.json({ error: error.message }, { status: error.status });
