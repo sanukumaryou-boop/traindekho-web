@@ -107,7 +107,7 @@ export default function AuthForm({ mode }: AuthFormProps) {
             required
             value={name}
             onChange={(event) => setName(event.target.value)}
-            className="mt-1 w-full rounded-xl border border-white/80 bg-white/70 px-3 py-2 text-gray-900 backdrop-blur-sm"
+            className="mt-1 block w-full rounded-xl border border-blue-200 bg-white px-3 py-2.5 text-gray-900 shadow-sm outline-none focus:border-blue-600 focus:ring-2 focus:ring-blue-600/20"
             autoComplete="name"
           />
         </label>
@@ -119,7 +119,7 @@ export default function AuthForm({ mode }: AuthFormProps) {
           type="email"
           value={email}
           onChange={(event) => setEmail(event.target.value)}
-          className="mt-1 w-full rounded-xl border border-white/80 bg-white/70 px-3 py-2 text-gray-900 backdrop-blur-sm"
+          className="mt-1 block w-full rounded-xl border border-blue-200 bg-white px-3 py-2.5 text-gray-900 shadow-sm outline-none focus:border-blue-600 focus:ring-2 focus:ring-blue-600/20"
           autoComplete="email"
         />
       </label>
@@ -131,7 +131,7 @@ export default function AuthForm({ mode }: AuthFormProps) {
           minLength={isSignup ? 8 : 1}
           value={password}
           onChange={(event) => setPassword(event.target.value)}
-          className="mt-1 w-full rounded-xl border border-white/80 bg-white/70 px-3 py-2 text-gray-900 backdrop-blur-sm"
+          className="mt-1 block w-full rounded-xl border border-blue-200 bg-white px-3 py-2.5 text-gray-900 shadow-sm outline-none focus:border-blue-600 focus:ring-2 focus:ring-blue-600/20"
           autoComplete={isSignup ? "new-password" : "current-password"}
         />
       </label>
@@ -144,7 +144,7 @@ export default function AuthForm({ mode }: AuthFormProps) {
             minLength={8}
             value={confirmPassword}
             onChange={(event) => setConfirmPassword(event.target.value)}
-            className="mt-1 w-full rounded-xl border border-white/80 bg-white/70 px-3 py-2 text-gray-900 backdrop-blur-sm"
+            className="mt-1 block w-full rounded-xl border border-blue-200 bg-white px-3 py-2.5 text-gray-900 shadow-sm outline-none focus:border-blue-600 focus:ring-2 focus:ring-blue-600/20"
             autoComplete="new-password"
           />
         </label>

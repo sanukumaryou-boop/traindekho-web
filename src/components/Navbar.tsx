@@ -60,6 +60,7 @@ export default function Navbar({
   }, [isHome]);
 
   const solid = !isHome || scrolled;
+  const onDevelopers = pathname === "/developers" || pathname.startsWith("/developers/");
 
   if (keyboardOpen) return null;
 
@@ -131,8 +132,8 @@ export default function Navbar({
           </div>
 
           {signedIn === null ? (
-            <span className="inline-flex h-9 w-24 shrink-0" aria-hidden="true" />
-          ) : signedIn ? (
+            <span className="inline-flex h-9 w-36 shrink-0" aria-hidden="true" />
+          ) : signedIn && onDevelopers ? (
             <button
               type="button"
               onClick={logout}
@@ -144,6 +145,17 @@ export default function Navbar({
             >
               Log out
             </button>
+          ) : signedIn ? (
+            <Link
+              href="/developers"
+              className={`inline-flex shrink-0 items-center rounded-full px-4 py-2 text-sm font-semibold transition-colors ${
+                solid
+                  ? "bg-gray-900 text-white hover:bg-gray-700"
+                  : "bg-white text-gray-900 hover:bg-white/90"
+              }`}
+            >
+              Login for API
+            </Link>
           ) : (
             <Link
               href="/developers/login"
@@ -153,7 +165,7 @@ export default function Navbar({
                   : "bg-white text-gray-900 hover:bg-white/90"
               }`}
             >
-              Log in
+              Login for API
             </Link>
           )}
         </div>

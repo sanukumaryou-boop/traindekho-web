@@ -2,18 +2,13 @@ import type { Metadata } from "next";
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 import GetApiKeyLink from "@/components/developers/GetApiKeyLink";
-import { DEVELOPER_PLAN } from "@/lib/developers/catalog";
+import { API_PLANS, planIncluded } from "@/lib/developers/catalog";
 import { ACCESS_COOKIE, PublicApiError, REFRESH_COOKIE, getAccount } from "@/lib/developers/public-api";
 
 export const metadata = {
   title: "Train API",
-  description: "Start on the free Train Dekho plan. The Developer plan is ₹499.",
+  description: "Free, Basic, Startup, and Enterprise plans for the Train Dekho API.",
 } satisfies Metadata;
-
-const metrics = [DEVELOPER_PLAN.daily, DEVELOPER_PLAN.monthly, DEVELOPER_PLAN.perMinute].map((limit) => {
-  const [value, unit] = limit.split(" requests");
-  return { value, unit: `requests${unit}` };
-});
 
 export default async function DevelopersPage() {
   const jar = await cookies();
@@ -24,9 +19,12 @@ export default async function DevelopersPage() {
   }
 
   let planCode: string | null = null;
+  let planName: string | null = null;
   if (access) {
     try {
-      planCode = (await getAccount(access)).plan.code;
+      const account = await getAccount(access);
+      planCode = account.plan.code;
+      planName = account.plan.name;
     } catch (error) {
       if (error instanceof PublicApiError && error.status === 401 && refresh) {
         redirect("/api/developers/continue?next=/developers");
@@ -36,68 +34,94 @@ export default async function DevelopersPage() {
   }
 
   const signedIn = planCode !== null;
-  const onFree = planCode === "free";
-  const onDeveloper = planCode === "developer";
+  const paidPlan = planCode === "basic" || planCode === "startup" || planCode === "growth";
+  const selectedCode = signedIn ? (paidPlan ? planCode : "free") : null;
+  const selectedName = API_PLANS.find((plan) => plan.code === selectedCode)?.name ?? planName;
+  const visiblePlans = API_PLANS.filter((plan) => plan.code !== "growth");
 
   return (
     <article>
       <p className="text-sm font-semibold tracking-wide text-blue-600">{signedIn ? "Account" : "Get started"}</p>
       <h1 className="mt-2 text-4xl font-extrabold tracking-tight text-gray-900">Plans</h1>
       <p className="mt-3 max-w-xl text-base leading-relaxed text-gray-600">
-        {onDeveloper
-          ? "You are on the Developer plan."
-          : onFree
-            ? "You are on the Free plan. The Developer plan is ₹499, and checkout stays off until payments are connected."
-            : "Start on the Free plan. The Developer plan is ₹499, and checkout stays off until payments are connected."}
+        {signedIn ? `You are on the ${selectedName} plan.` : "New accounts start on the Free plan."}
       </p>
 
-      <section className="mt-8 grid items-stretch gap-4 md:grid-cols-2">
-        <div className={`flex flex-col rounded-[28px] border bg-white/45 p-6 ${onFree ? "border-blue-600 ring-2 ring-blue-600" : "border-white/80"}`}>
-          <span className={`w-fit rounded-full px-2.5 py-1 text-[11px] font-semibold uppercase tracking-[0.14em] text-white ${onFree ? "bg-blue-600" : "bg-gray-900"}`}>
-            {onFree ? "Current" : "Free"}
-          </span>
-          <h2 className="mt-4 text-3xl font-bold tracking-tight text-gray-900">Free Plan</h2>
-          <p className="mt-3 text-4xl font-extrabold tracking-tight text-gray-900">₹0</p>
-          <ul className="mt-6 flex-1 space-y-2 text-sm text-gray-600">
-            <li>Read the API reference</li>
-            <li>Create an account</li>
-          </ul>
-          {signedIn ? (
-            onFree ? <p className="mt-6 text-sm font-semibold text-blue-700">Current plan</p> : null
-          ) : (
-            <div className="mt-6">
-              <GetApiKeyLink className="rounded-xl bg-gray-900 px-5 hover:bg-gray-700" />
-            </div>
-          )}
-        </div>
-
-        <div className={`glass relative flex flex-col overflow-hidden rounded-[28px] p-6 ${onDeveloper ? "ring-2 ring-blue-600" : ""}`}>
-          <div className="pointer-events-none absolute -right-10 -top-12 h-36 w-36 rounded-full bg-blue-500/20 blur-2xl" />
-          <span className="relative w-fit rounded-full bg-blue-600 px-2.5 py-1 text-[11px] font-semibold uppercase tracking-[0.14em] text-white">
-            {onDeveloper ? "Current" : "₹499"}
-          </span>
-          <h2 className="relative mt-4 text-3xl font-bold tracking-tight text-gray-900">{DEVELOPER_PLAN.name}</h2>
-          <p className="relative mt-3 text-4xl font-extrabold tracking-tight text-gray-900">
-            ₹499
-          </p>
-          <dl className="relative mt-6 grid flex-1 grid-cols-1 gap-3">
-            {metrics.map((metric) => (
-              <div key={metric.unit} className="flex items-baseline justify-between gap-3 rounded-2xl bg-white/75 px-3 py-3 ring-1 ring-white">
-                <dt className="text-lg font-bold tracking-tight text-gray-900">{metric.value}</dt>
-                <dd className="text-xs text-gray-500">{metric.unit}</dd>
+      <section className="mt-8 grid grid-cols-4 items-stretch gap-4">
+        {visiblePlans.map((plan) => {
+          const current = plan.code === selectedCode;
+          const included = planIncluded(plan);
+          return (
+            <article
+              key={plan.code}
+              className={`relative flex min-w-0 flex-col overflow-hidden rounded-[1.75rem] border bg-white p-5 shadow-[0_18px_40px_rgba(0,46,97,0.08)] ${
+                current ? "border-blue-600 ring-2 ring-blue-600/30" : "border-blue-100"
+              }`}
+            >
+              <div className="pointer-events-none absolute -right-8 -top-12 h-28 w-28 rounded-full bg-blue-500/15 blur-2xl" />
+              <div className="relative flex items-center justify-between gap-2">
+                <h2 className="text-[11px] font-semibold uppercase tracking-[0.16em] text-blue-700">{plan.name}</h2>
+                {current ? (
+                  <span className="shrink-0 rounded-full bg-blue-600 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-white">
+                    Current
+                  </span>
+                ) : null}
               </div>
-            ))}
-          </dl>
-          <button
-            type="button"
-            disabled
-            className={`relative mt-6 inline-flex cursor-not-allowed items-center justify-center rounded-xl px-4 py-2.5 text-sm font-semibold ${
-              onDeveloper ? "bg-blue-50 text-blue-700" : "bg-gray-200 text-gray-500"
-            }`}
-          >
-            {onDeveloper ? "Current plan" : "Upgrade"}
-          </button>
-        </div>
+              <p className="relative mt-3 text-[2rem] font-extrabold leading-none tracking-tight text-gray-950">
+                {plan.price ?? "Let’s talk"}
+              </p>
+              <ul className="relative mt-5 flex flex-1 flex-col gap-2.5">
+                {included.map((item) => (
+                  <li key={item} className="flex items-start gap-2 text-[13px] leading-snug text-gray-700">
+                    <span className="mt-0.5 flex h-4 w-4 shrink-0 items-center justify-center rounded-full bg-emerald-500 text-white">
+                      <svg viewBox="0 0 12 12" className="h-2.5 w-2.5" aria-hidden="true">
+                        <path d="M2.2 6.2 4.8 8.8 9.8 3.2" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
+                      </svg>
+                    </span>
+                    {plan.contact && item === "Limits set for your traffic" ? (
+                      <span>
+                        Limits set for your traffic.{" "}
+                        <a href={`mailto:${plan.contact}`} className="font-semibold text-blue-700 hover:underline">
+                          {plan.contact}
+                        </a>
+                      </span>
+                    ) : (
+                      <span className={item.includes("requests /") ? "font-bold text-gray-950" : undefined}>{item}</span>
+                    )}
+                  </li>
+                ))}
+              </ul>
+              {current ? (
+                <p className="relative mt-4 flex h-10 items-center justify-center rounded-full bg-blue-600 text-sm font-semibold text-white">
+                  Current plan
+                </p>
+              ) : plan.contact ? (
+                <a
+                  href={`mailto:${plan.contact}`}
+                  className="relative mt-4 flex h-10 items-center justify-center rounded-full bg-blue-600 text-sm font-semibold text-white hover:bg-blue-700"
+                >
+                  Contact
+                </a>
+              ) : plan.code === "free" && !signedIn ? (
+                <div className="relative mt-4">
+                  <GetApiKeyLink className="h-10 w-full !rounded-full" />
+                </div>
+              ) : plan.code === "free" ? (
+                <p className="relative mt-4 flex h-10 items-center justify-center rounded-full bg-blue-50 text-sm font-semibold text-blue-700">
+                  Included
+                </p>
+              ) : (
+                <button
+                  type="button"
+                  disabled
+                  className="relative mt-4 flex h-10 w-full cursor-not-allowed items-center justify-center rounded-full bg-gray-100 text-sm font-semibold text-gray-400"
+                >
+                  Upgrade
+                </button>
+              )}
+            </article>
+          );
+        })}
       </section>
     </article>
   );

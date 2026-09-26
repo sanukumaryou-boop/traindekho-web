@@ -24,9 +24,9 @@ export default async function KeysPage() {
   }
 
   try {
-    const account = await getAccount(access);
+    await getAccount(access);
     const credentials = await listCredentials(access);
-    return <KeysPanel account={account} credentials={credentials} />;
+    return <KeysPanel credentials={credentials} />;
   } catch (error) {
     if (error instanceof PublicApiError && error.status === 401) {
       redirect(refresh ? "/api/developers/continue?next=/developers/keys" : "/developers/login");

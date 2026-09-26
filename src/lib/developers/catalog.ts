@@ -22,12 +22,47 @@ export type ApiEndpoint = {
 
 export const API_BASE_URL = "https://api.traindekho.live/v1";
 
-export const DEVELOPER_PLAN = {
-  name: "Developer",
-  daily: "1,000 requests / day",
-  monthly: "20,000 requests / month",
-  perMinute: "60 requests / minute",
+export type PublicPlan = {
+  code: string;
+  name: string;
+  price: string | null;
+  daily: number | null;
+  monthly: number | null;
+  perMinute: number | null;
+  contact: string | null;
 };
+
+export const API_PLANS: PublicPlan[] = [
+  { code: "free", name: "Free", price: "₹0", daily: 100, monthly: 1000, perMinute: 10, contact: null },
+  { code: "basic", name: "Basic", price: "₹499", daily: 2000, monthly: 20000, perMinute: 30, contact: null },
+  { code: "startup", name: "Startup", price: "₹1,999", daily: 5000, monthly: 100000, perMinute: 60, contact: null },
+  { code: "growth", name: "Growth", price: "₹4,999", daily: 10000, monthly: 300000, perMinute: 180, contact: null },
+  { code: "custom", name: "Enterprise", price: null, daily: null, monthly: null, perMinute: null, contact: "ankit@traindekho.live" },
+];
+
+const planCount = new Intl.NumberFormat("en-IN");
+
+export function formatPlanCount(value: number) {
+  return planCount.format(value);
+}
+
+const sharedPlanFeatures = [
+  "Train search and train details",
+  "Live status, delay, and next station",
+  "Schedules, platforms, and running days",
+  "Nearby stations and trains at a station",
+  "Direct trains between two stations",
+];
+
+export function planIncluded(plan: PublicPlan) {
+  return [
+    ...sharedPlanFeatures,
+    plan.daily === null ? null : `${formatPlanCount(plan.daily)} requests / day`,
+    plan.monthly === null ? null : `${formatPlanCount(plan.monthly)} requests / month`,
+    plan.perMinute === null ? null : `${formatPlanCount(plan.perMinute)} requests / minute`,
+    plan.contact ? "Limits set for your traffic" : null,
+  ].filter((item): item is string => item !== null);
+}
 
 const withNotFound = [...standardErrors.slice(0, 3), 404, ...standardErrors.slice(3)];
 
